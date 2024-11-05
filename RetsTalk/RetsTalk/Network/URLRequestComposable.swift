@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol URLRequestComposable {
+protocol URLRequestComposable<Path> {
     associatedtype Path: CustomStringConvertible
     
     var scheme: String { get }
@@ -25,6 +25,8 @@ protocol URLRequestComposable {
     func configureData(_ data: Encodable) -> Self
     func configureQuery(_ query: Encodable) -> Self
 }
+
+// MARK: - Default implementation
 
 extension URLRequestComposable {
     private func configure(_ configure: (inout Self) -> Void) -> Self {

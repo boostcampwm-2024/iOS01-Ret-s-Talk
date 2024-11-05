@@ -13,6 +13,8 @@ protocol NetworkRequestable {
     func request(with urlRequestComposer: any URLRequestComposable) async throws -> (Data, URLResponse)
 }
 
+// MARK: - Default implementation
+
 extension NetworkRequestable {
     func request(with urlRequestComposer: any URLRequestComposable) async throws -> (Data, URLResponse) {
         var request = URLRequest(url: try url(with: urlRequestComposer))
@@ -33,7 +35,6 @@ extension NetworkRequestable {
         urlComponents.scheme = urlRequestComposer.scheme
         urlComponents.host = urlRequestComposer.host
         urlComponents.path = urlRequestComposer.path.description
-        
         guard let url = urlComponents.url else { throw NetworkError.invalidURL }
         
         return url
