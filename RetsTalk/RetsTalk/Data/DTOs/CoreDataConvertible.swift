@@ -9,5 +9,6 @@ import CoreData
 
 protocol CoreDataConvertible {
     associatedtype Entity: NSManagedObject
+
     func toEntity(context: NSManagedObjectContext) -> Entity
 }
