@@ -14,7 +14,7 @@ final class CoreDataStorage {
     
     // MARK: Core data stack
 
-    private lazy var persistentContainer: NSPersistentContainer = {
+    lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "RetsTalk")
         container.loadPersistentStores(completionHandler: { (_, error) in
             if let error = error as NSError? {

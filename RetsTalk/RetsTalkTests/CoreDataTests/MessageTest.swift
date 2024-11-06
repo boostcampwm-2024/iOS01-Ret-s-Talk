@@ -1,16 +1,15 @@
 //
-//  CoreDataTest.swift
-//  RetsTalkTests
+//  MessageTest.swift
+//  RetsTalk
 //
-//  Created by KimMinSeok on 11/5/24.
+//  Created by KimMinSeok on 11/6/24.
 //
 
 import XCTest
 import CoreData
 @testable import RetsTalk
 
-final class CoreDataTest: XCTestCase {
-
+final class MessageDataTest: XCTestCase {
     var context: NSManagedObjectContext!
     
     let testMessage = [MessageDTO(isUser: true, content: "오늘 무엇을 하셨나요"),
@@ -20,30 +19,30 @@ final class CoreDataTest: XCTestCase {
     override func setUpWithError() throws {
         context = CoreDataStorage.shared.context
     }
-
+    
     override func tearDownWithError() throws {
-        let fetchRequest = MessageEntity.fetchRequest()
-        let items = try? context.fetch(fetchRequest)
-            for item in items ?? [] {
-                context.delete(item)
-            }
-            try? context.save()
+        let messageFetchRequest = MessageEntity.fetchRequest()
+        let messageItems = try? context.fetch(messageFetchRequest)
+        
+        for item in messageItems ?? [] {
+            context.delete(item)
+        }
+        
+        try? context.save()
     }
     
-    func test_Save_기능이_정상적으로_동작하는지_확인() {
+    func test_Message_Save_기능이_정상적으로_동작하는지_확인() {
         XCTAssertNoThrow(try CoreDataManager.addAndSave(with: testMessage[0]))
-
+        
         let coreDataMessage = try? context.fetch(MessageEntity.fetchRequest()).first
-
+        
         XCTAssertEqual(coreDataMessage?.content, "오늘 무엇을 하셨나요")
     }
     
-    func test_Save_여러가지_메세지를_저장하는지() {
+    func test_Message_Save_여러가지_메세지를_저장하는지() {
         XCTAssertNoThrow(try testMessage.forEach {
             try CoreDataManager.addAndSave(with: $0)
         })
-
-        let context = CoreDataStorage.shared.context
         
         let coreDataMessage = try? context.fetch(MessageEntity.fetchRequest())
         
