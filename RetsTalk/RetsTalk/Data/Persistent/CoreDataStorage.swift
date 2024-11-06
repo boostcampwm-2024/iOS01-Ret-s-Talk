@@ -13,7 +13,8 @@ final class CoreDataStorage {
     var context: NSManagedObjectContext { persistentContainer.viewContext }
     
     // MARK: Core data stack
-    lazy var persistentContainer: NSPersistentContainer = {
+
+    private lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "RetsTalk")
         container.loadPersistentStores(completionHandler: { (_, error) in
             if let error = error as NSError? {
@@ -26,6 +27,7 @@ final class CoreDataStorage {
     private init() { }
     
     // MARK: Core data saving support
+
     func saveContext() throws {
         if context.hasChanges {
             try context.save()
