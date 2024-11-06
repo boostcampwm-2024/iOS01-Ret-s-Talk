@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23507" systemVersion="24B83" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23231" systemVersion="24A348" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="MessageEntity" representedClassName=".MessageEntity" syncable="YES" codeGenerationType="category">
         <attribute name="content" optional="YES" attributeType="String"/>
         <attribute name="isUser" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
-        <relationship name="retrospect" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RetrospectEntity" inverseName="chat" inverseEntity="RetrospectEntity"/>
+        <relationship name="retrospect" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="RetrospectEntity" inverseName="chat" inverseEntity="RetrospectEntity"/>
     </entity>
     <entity name="RetrospectEntity" representedClassName=".RetrospectEntity" syncable="YES" codeGenerationType="category">
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="isBookmarked" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isFinished" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="summary" optional="YES" attributeType="String"/>
-        <relationship name="chat" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MessageEntity" inverseName="retrospect" inverseEntity="MessageEntity"/>
+        <relationship name="chat" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MessageEntity" inverseName="retrospect" inverseEntity="MessageEntity"/>
     </entity>
 </model>
