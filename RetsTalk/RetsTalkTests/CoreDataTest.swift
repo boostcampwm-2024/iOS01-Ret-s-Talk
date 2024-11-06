@@ -22,7 +22,7 @@ final class CoreDataTest: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        let fetchRequest = Message.fetchRequest()
+        let fetchRequest = MessageEntity.fetchRequest()
         let items = try? context.fetch(fetchRequest)
             for item in items ?? [] {
                 context.delete(item)
@@ -31,22 +31,22 @@ final class CoreDataTest: XCTestCase {
     }
     
     func test_Save_기능이_정상적으로_동작하는지_확인() {
-        let message = Message.addAndSave(with: testMessage[0])
-        
-        let coreDataMessage = try? context.fetch(Message.fetchRequest()).first
-        
+        XCTAssertNoThrow(try CoreDataManager.addAndSave(with: testMessage[0]))
+
+        let coreDataMessage = try? context.fetch(MessageEntity.fetchRequest()).first
+
         XCTAssertEqual(coreDataMessage?.content, "오늘 무엇을 하셨나요")
     }
     
     func test_Save_여러가지_메세지를_저장하는지() {
-        testMessage.forEach { messageDTO in
-            Message.addAndSave(with: messageDTO)
-        }
+        XCTAssertNoThrow(try testMessage.forEach {
+            try CoreDataManager.addAndSave(with: $0)
+        })
+
         let context = CoreDataStorage.shared.context
         
-        let coreDataMessage = try? context.fetch(Message.fetchRequest())
+        let coreDataMessage = try? context.fetch(MessageEntity.fetchRequest())
         
         XCTAssertEqual(coreDataMessage?.count, testMessage.count)
     }
-
 }
