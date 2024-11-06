@@ -2,23 +2,21 @@
 //  Message+CoreDataClass.swift
 //  RetsTalk
 //
-//  Created by KimMinSeok on 11/5/24.
+//  Created by MoonGoon on 11/6/24.
 //
 //
-
 import Foundation
 import CoreData
 
-public class Message: NSManagedObject {
-    
+public class MessageEntity: NSManagedObject {
     @discardableResult
-    static func addAndSave(with object: MessageDTO) -> Result<Message, Error> {
+    static func addAndSave(with object: MessageDTO) -> Result<MessageEntity, Error> {
         do {
             let context = CoreDataStorage.shared.context
-            let message = Message(context: context)
+            let message = MessageEntity(context: context)
             message.content = object.content
             message.isUser = object.isUser
-            
+
             try CoreDataStorage.shared.saveContext()
             return .success(message)
         } catch {
