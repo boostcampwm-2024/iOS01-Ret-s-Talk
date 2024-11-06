@@ -10,6 +10,4 @@ import Foundation
 import CoreData
 
 @objc(Retrospect)
-public class Retrospect: NSManagedObject {
-
-}
+public class Retrospect: NSManagedObject { }

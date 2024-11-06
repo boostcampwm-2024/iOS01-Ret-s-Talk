@@ -8,12 +8,11 @@
 import CoreData
 
 final class CoreDataStorage {
-    
     static let shared = CoreDataStorage()
     
-    var context : NSManagedObjectContext { persistentContainer.viewContext }
+    var context: NSManagedObjectContext { persistentContainer.viewContext }
     
-    // MARK: - Core Data stack
+    // MARK: Core data stack
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "RetsTalk")
         container.loadPersistentStores(completionHandler: { (_, error) in
@@ -26,12 +25,10 @@ final class CoreDataStorage {
 
     private init() { }
     
-    // MARK: - Core Data Saving support
+    // MARK: Core data saving support
     func saveContext() throws {
         if context.hasChanges {
             try context.save()
         }
     }
-    
 }
-

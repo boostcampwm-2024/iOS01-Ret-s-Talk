@@ -24,6 +24,5 @@ public class Message: NSManagedObject {
         } catch {
             return .failure(error)
         }
-        
     }
 }
