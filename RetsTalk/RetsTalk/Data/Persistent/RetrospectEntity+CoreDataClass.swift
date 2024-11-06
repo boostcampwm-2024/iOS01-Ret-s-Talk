@@ -9,5 +9,4 @@
 import Foundation
 import CoreData
 
-@objc(RetrospectEntity)
 public class RetrospectEntity: NSManagedObject { }
