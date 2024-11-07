@@ -30,10 +30,19 @@ final class CoreDataRetrospectStorage {
     }
     
     func removeAll() throws {
-        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = RetrospectEntity.fetchRequest()
-        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-
-        try coreDataStorage.context.execute(deleteRequest)
+        let fetchRequest: NSFetchRequest<RetrospectEntity> = RetrospectEntity.fetchRequest()
+        let retrospectEntities = try coreDataStorage.context.fetch(fetchRequest)
+        
+        // FIXME: 회고와 관련된 채팅 삭제 기능 고치기
+        for retrospect in retrospectEntities {
+            if let chats = retrospect.chat as? Set<MessageEntity> {
+                for chat in chats {
+                    coreDataStorage.context.delete(chat)
+                }
+            }
+            coreDataStorage.context.delete(retrospect)
+        }
+        
         try coreDataStorage.saveContext()
     }
 }

@@ -6,13 +6,14 @@
 //
 
 import XCTest
+@testable import RetsTalk
 
 final class CoreDataTest: XCTestCase {
     let coreDataRetrospectStorage = CoreDataRetrospectStorage()
     
     let testMessage = [Message(role: .assistant, content: "오늘 무엇을 하셨나요", createdAt: Date()),
-                       Message(role: .user, content: "공부했어요", createdAt: Date()),
-                       Message(role: .assistant, content: "잘하셨네요!", createdAt: Date())]
+                       Message(role: .user, content: "공부했어요", createdAt: Date() + 1),
+                       Message(role: .assistant, content: "잘하셨네요!", createdAt: Date() + 2)]
     
     lazy var testRetrosepct = [Retrospect(summary: "오늘 힘들었어요",
                                              isFinished: false,

@@ -26,7 +26,7 @@ public class RetrospectEntity: NSManagedObject {
     func toDomain() throws -> Retrospect {
         let fetchRequest: NSFetchRequest<MessageEntity> = MessageEntity.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "retrospect == %@", self)
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: true)]
         
         var fetchedChat: [MessageEntity] = try CoreDataStorage.shared.context.fetch(fetchRequest)
         
