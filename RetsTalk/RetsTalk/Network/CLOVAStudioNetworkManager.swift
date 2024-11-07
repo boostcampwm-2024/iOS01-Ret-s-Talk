@@ -1,5 +1,5 @@
 //
-//  ClovaStudioNetworkManager.swift
+//  CLOVAStudioNetworkManager.swift
 //  RetsTalk
 //
 //  Created on 11/6/24.
@@ -7,14 +7,14 @@
 
 import Foundation
 
-final class ClovaStudioNetworkManager: NetworkRequestable {
+final class CLOVAStudioNetworkManager: NetworkRequestable {
     let urlSession: URLSession
     
     init(urlSession: URLSession) {
         self.urlSession = urlSession
     }
     
-    func verify(data: Data, response: URLResponse) throws {
+    func verifyStatus(from data: Data, and response: URLResponse) throws {
         guard let httpURLResponse = response as? HTTPURLResponse else { throw NetworkError.badResponse }
         
         let responseStatus = Status(statusCode: httpURLResponse.statusCode)
@@ -34,7 +34,7 @@ final class ClovaStudioNetworkManager: NetworkRequestable {
 
 // MARK: - Status
 
-fileprivate extension ClovaStudioNetworkManager {
+fileprivate extension CLOVAStudioNetworkManager {
     enum Status: Int, CustomStringConvertible {
         case success = 200
         case noContent = 204

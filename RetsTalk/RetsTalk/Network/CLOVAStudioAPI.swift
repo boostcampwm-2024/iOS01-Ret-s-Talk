@@ -1,11 +1,11 @@
 //
-//  ClovaStudioAPI.swift
+//  CLOVAStudioAPI.swift
 //  RetsTalk
 //
 //  Created on 11/6/24.
 //
 
-struct ClovaStudioAPI: URLRequestComposable {
+struct CLOVAStudioAPI: URLRequestComposable {
     static let scheme = "https"
     static let host = "clovastudio.stream.ntruss.com"
     
@@ -24,7 +24,7 @@ struct ClovaStudioAPI: URLRequestComposable {
 
 // MARK: - Path
 
-extension ClovaStudioAPI {
+extension CLOVAStudioAPI {
     enum Path: CustomStringConvertible {
         case chatbot
         

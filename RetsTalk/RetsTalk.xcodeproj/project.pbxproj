@@ -45,7 +45,7 @@
 		D59E35E42CD9F389001B6D5A /* Exceptions for "RetsTalk" folder in "NetworkTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Network/ClovaStudioAPI.swift,
+				Network/CLOVAStudioAPI.swift,
 				Network/HTTPMethod.swift,
 				Network/NetworkRequestable.swift,
 				Network/URLRequestComposable.swift,
