@@ -24,24 +24,24 @@ final class MockServerTests: XCTestCase {
         MockURLProtocol.requestHandler = nil
         super.tearDown()
     }
-    
  
+    private func fetchResponse(for request: URLRequest) throws -> (HTTPURLResponse, Data) {
+        let url = try XCTUnwrap(request.url)
+        let response = try XCTUnwrap(
+            HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
+        )
+        return (response, Data())
+    }
+    
     func test_URLRequest생성결과_URL이_기댓값과_동일() async throws {
         // given
-        let expectedURL = URL(string: "https://api.example.com")!
+        let expectedURL = try XCTUnwrap(URL(string: "https://aip.example.com"))
         
         // when
         MockURLProtocol.requestHandler = { request in
             //then
             XCTAssertEqual(request.url, expectedURL)
-            
-            guard let response = HTTPURLResponse(
-                url: expectedURL, statusCode: 200, httpVersion: nil, headerFields: nil
-            )
-            else {
-                throw XCTSkip("URLResponse is nil")
-            }
-            return (response, Data())
+            return try self.fetchResponse(for: request)
         }
         
         // 네트워크 요청부분, 구현체 필요
@@ -56,20 +56,12 @@ final class MockServerTests: XCTestCase {
         MockURLProtocol.requestHandler = { request in
             // then
             XCTAssertEqual(request.httpMethod, expectedMethod)
-            
-            guard let url = request.url else {
-                throw XCTSkip("URL is nil")
-            }
-            guard let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil) else {
-                throw XCTSkip("URLResponse is nil")
-            }
-            return (response, Data())
+            return try self.fetchResponse(for: request)
         }
         
         // 네트워크 요청부분, 구현체 필요
         // try await fetcher?.request(with: <#T##any URLRequestComposable#>)
     }
-    
     
     func test_URLRequest생성결과_Header가_기댓값과_동일() async throws {
         // given
@@ -77,18 +69,11 @@ final class MockServerTests: XCTestCase {
         
         // when
         MockURLProtocol.requestHandler = { request in
-            // then
             for (key, value) in expectedHeaders {
+                //then
                 XCTAssertEqual(request.value(forHTTPHeaderField: key), value, "\(key) 헤더가 기댓값과 다름")
             }
-            
-            guard let url = request.url else {
-                throw XCTSkip("URL is nil")
-            }
-            guard let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil) else {
-                throw XCTSkip("URLResponse is nil")
-            }
-            return (response, Data())
+            return try self.fetchResponse(for: request)
         }
         
         // 네트워크 요청부분, 구현체 필요
