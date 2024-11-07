@@ -18,7 +18,7 @@ protocol NetworkRequestable {
 
 extension NetworkRequestable {
     func request(with urlRequestComposer: any URLRequestComposable) async throws -> Data {
-        var urlRequest = try urlRequest(with: urlRequestComposer)
+        let urlRequest = try urlRequest(with: urlRequestComposer)
         let (data, response) = try await urlSession.data(for: urlRequest)
         try verifyStatus(from: data, and: response)
         return data
