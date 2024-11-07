@@ -45,6 +45,7 @@
 		D59E35E42CD9F389001B6D5A /* Exceptions for "RetsTalk" folder in "NetworkTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Network/ClovaStudioAPI.swift,
 				Network/HTTPMethod.swift,
 				Network/NetworkRequestable.swift,
 				Network/URLRequestComposable.swift,
@@ -159,6 +160,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				D531801E2CDB6F750047F564 /* PBXTargetDependency */,
 				21759C562CD8AE0F0033EA52 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -182,6 +184,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				D53180202CDB6F7C0047F564 /* PBXTargetDependency */,
 				D59E35DF2CD9F13A001B6D5A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -300,6 +303,14 @@
 			isa = PBXTargetDependency;
 			productRef = 21759C7A2CD8B5A90033EA52 /* SwiftLintBuildToolPlugin */;
 		};
+		D531801E2CDB6F750047F564 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = D531801D2CDB6F750047F564 /* SwiftLintBuildToolPlugin */;
+		};
+		D53180202CDB6F7C0047F564 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = D531801F2CDB6F7C0047F564 /* SwiftLintBuildToolPlugin */;
+		};
 		D59E35DF2CD9F13A001B6D5A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 21759C3A2CD8AE0D0033EA52 /* RetsTalk */;
@@ -337,7 +348,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -371,7 +382,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -508,7 +519,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = kr.codesquad.boostcamp9.RetsTalkTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RetsTalk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RetsTalk";
 			};
@@ -527,7 +538,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = kr.codesquad.boostcamp9.RetsTalkTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RetsTalk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RetsTalk";
 			};
@@ -546,7 +557,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = kr.codesquad.boostcamp9.NetworkTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RetsTalk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RetsTalk";
 			};
@@ -565,7 +576,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = kr.codesquad.boostcamp9.NetworkTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RetsTalk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RetsTalk";
 			};
@@ -625,6 +636,16 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		21759C7A2CD8B5A90033EA52 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 21759C772CD8B50F0033EA52 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+		D531801D2CDB6F750047F564 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 21759C772CD8B50F0033EA52 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+		D531801F2CDB6F7C0047F564 /* SwiftLintBuildToolPlugin */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 21759C772CD8B50F0033EA52 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
 			productName = "plugin:SwiftLintBuildToolPlugin";
