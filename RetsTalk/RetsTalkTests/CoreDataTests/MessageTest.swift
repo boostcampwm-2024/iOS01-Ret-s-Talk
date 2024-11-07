@@ -6,46 +6,37 @@
 //
 
 import XCTest
-import CoreData
 @testable import RetsTalk
 
 final class MessageDataTest: XCTestCase {
-    var context: NSManagedObjectContext!
+    let coreDataMessageStorage = CoreDataMessageStorage()
     
-    let testMessage = [MessageDTO(isUser: true, content: "오늘 무엇을 하셨나요"),
-                       MessageDTO(isUser: false, content: "공부했어요"),
-                       MessageDTO(isUser: true, content: "잘하셨네요!")]
+    let testMessage = [Message(role: .assistant, content: "오늘 무엇을 하셨나요", createdAt: Date()),
+                       Message(role: .user, content: "공부했어요", createdAt: Date()),
+                       Message(role: .assistant, content: "잘하셨네요!", createdAt: Date())]
     
     override func setUpWithError() throws {
-        context = CoreDataStorage.shared.context
     }
     
     override func tearDownWithError() throws {
-        let messageFetchRequest = MessageEntity.fetchRequest()
-        let messageItems = try? context.fetch(messageFetchRequest)
-        
-        for item in messageItems ?? [] {
-            context.delete(item)
-        }
-        
-        try? context.save()
+        try coreDataMessageStorage.removeAll()
     }
     
-    func test_Message_Save_기능이_정상적으로_동작하는지_확인() {
-        XCTAssertNoThrow(try CoreDataManager.addAndSave(with: testMessage[0]))
+    func test_Save_하나의_메세지가_CoreData에_저장되는지() throws {
+        try coreDataMessageStorage.save(testMessage[0])
         
-        let coreDataMessage = try? context.fetch(MessageEntity.fetchRequest()).first
+        let coreDataMessage = try coreDataMessageStorage.fetchAll().first
         
         XCTAssertEqual(coreDataMessage?.content, "오늘 무엇을 하셨나요")
     }
     
-    func test_Message_Save_여러가지_메세지를_저장하는지() {
-        XCTAssertNoThrow(try testMessage.forEach {
-            try CoreDataManager.addAndSave(with: $0)
-        })
+    func test_Save_여러가지_메세지를_저장하는지() throws {
+        try testMessage.forEach { message in
+            try coreDataMessageStorage.save(message)
+        }
         
-        let coreDataMessage = try? context.fetch(MessageEntity.fetchRequest())
+        let coreDataMessage = try coreDataMessageStorage.fetchAll()
         
-        XCTAssertEqual(coreDataMessage?.count, testMessage.count)
+        XCTAssertEqual(coreDataMessage.count, testMessage.count)
     }
 }

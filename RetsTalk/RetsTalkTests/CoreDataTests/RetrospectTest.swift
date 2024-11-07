@@ -6,65 +6,65 @@
 //
 
 import XCTest
-import CoreData
-@testable import RetsTalk
 
 final class CoreDataTest: XCTestCase {
-    var context: NSManagedObjectContext!
+    let coreDataRetrospectStorage = CoreDataRetrospectStorage()
     
-    let testMessage = [MessageDTO(isUser: true, content: "오늘 무엇을 하셨나요"),
-                       MessageDTO(isUser: false, content: "공부했어요"),
-                       MessageDTO(isUser: true, content: "잘하셨네요!")]
+    let testMessage = [Message(role: .assistant, content: "오늘 무엇을 하셨나요", createdAt: Date()),
+                       Message(role: .user, content: "공부했어요", createdAt: Date()),
+                       Message(role: .assistant, content: "잘하셨네요!", createdAt: Date())]
     
-    lazy var testRetrosepct = [RetrospectDTO(summary: "오늘 힘들었어요",
+    lazy var testRetrosepct = [Retrospect(summary: "오늘 힘들었어요",
                                              isFinished: false,
                                              isBookmarked: false,
                                              createdAt: Date(),
                                              chat: []),
-                               RetrospectDTO(summary: "오늘 재밌었어요",
+                               Retrospect(summary: "오늘 재밌었어요",
                                              isFinished: false,
                                              isBookmarked: false,
                                              createdAt: Date(),
                                              chat:testMessage)]
     
     override func setUpWithError() throws {
-        context = CoreDataStorage.shared.context
     }
     
     override func tearDownWithError() throws {
-        let retrospectFetchRequest = RetrospectEntity.fetchRequest()
-        let retrospectItems = try? context.fetch(retrospectFetchRequest)
-        
-        for item in retrospectItems ?? [] {
-            context.delete(item)
-        }
-        
-        try? context.save()
+        try coreDataRetrospectStorage.removeAll()
     }
     
-    func test_Retrospect_Save_기능이_정상적으로_똥작하는지_확인() {
-        XCTAssertNoThrow(try CoreDataManager.addAndSave(with: testRetrosepct[0]))
+    func test_Save_회고가_CoreData에_저장되는지() throws {
+        try coreDataRetrospectStorage.save(testRetrosepct[0])
         
-        let coreDataRetrospect = try? context.fetch(RetrospectEntity.fetchRequest()).first
+        let coreDataRetrospect = try coreDataRetrospectStorage.fetchAll().first
         
         XCTAssertEqual(coreDataRetrospect?.summary, "오늘 힘들었어요")
     }
     
-    func test_Retrospect_Save_여러가지_회고를_저장하는지() {
-        XCTAssertNoThrow(try testRetrosepct.forEach {
-            try CoreDataManager.addAndSave(with: $0)
-        })
+    func test_Save_여러가지_회고를_저장하는지() throws {
+        try testRetrosepct.forEach { retrospect in
+            try coreDataRetrospectStorage.save(retrospect)
+        }
         
-        let coreDataRetrospect = try? context.fetch(RetrospectEntity.fetchRequest())
+        let coreDataRetrospect = try coreDataRetrospectStorage.fetchAll()
         
-        XCTAssertEqual(coreDataRetrospect?.count, testRetrosepct.count)
+        XCTAssertEqual(coreDataRetrospect.count, testRetrosepct.count)
     }
     
-    func test_Retrospect_Save_회고가_메세지를_잘_가지고_있는지() {
-        XCTAssertNoThrow(try CoreDataManager.addAndSave(with: testRetrosepct[1]))
+    func test_Save_회고가_메세지를_잘_가지고_있는지() throws {
+        try coreDataRetrospectStorage.save(testRetrosepct[1])
         
-        let coreDataRetrospect = try? context.fetch(RetrospectEntity.fetchRequest()).first
+        let coreDataRetrospect = try coreDataRetrospectStorage.fetchAll().first
         
-        XCTAssertEqual(coreDataRetrospect?.chat?.count, testRetrosepct[1].chat.count)
+        XCTAssertEqual(coreDataRetrospect?.chat.count, testRetrosepct[1].chat.count)
+    }
+    
+    func test_회고의_채팅_순서가_알맞게_저장_되는지() throws {
+        try coreDataRetrospectStorage.save(testRetrosepct[1])
+        
+        let coreDataRetrospect = try coreDataRetrospectStorage.fetchAll().first
+        
+        coreDataRetrospect?.chat.enumerated().forEach{ index, message in
+            XCTAssertEqual(message.content, testMessage[index].content)
+        }
     }
 }
