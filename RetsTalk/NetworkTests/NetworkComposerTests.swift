@@ -8,19 +8,21 @@
 import XCTest
 
 final class NetworkComposerTests: XCTestCase {
-    private var composer: (any URLRequestComposable<String>)?
+    private var composer: (any URLRequestComposable<CLOVAStudioAPI.Path>)?
     
     // MARK: Set up
     
     override func setUp() {
-        // composer = 구현
+        super.setUp()
+        
+        composer = CLOVAStudioAPI(path: .chatbot)
     }
     
     // MARK: Test
     
     func test_경로_합성_결과값이_기대값과_같은지() throws {
         let composer = try XCTUnwrap(composer)
-        let expectedPath = "/test"
+        let expectedPath = CLOVAStudioAPI.Path.chatbot
         
         let composed = composer.configurePath(expectedPath)
         
