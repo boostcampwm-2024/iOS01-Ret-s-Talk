@@ -15,10 +15,13 @@ public class MessageEntity: NSManagedObject {
         self.init(context: context)
         isUser = (domain.role == .user)
         content = domain.content
+        createdAt = domain.createdAt
     }
 
     // CoreData Entity -> Domain
     func toDomain() -> Message {
-        Message(role: isUser ? .user : .assistant, content: content ?? "")
+        Message(role: isUser ? .user : .assistant,
+                content: content ?? "",
+                createdAt: createdAt ?? Date())
     }
 }

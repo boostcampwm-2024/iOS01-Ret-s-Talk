@@ -15,4 +15,5 @@ enum Role {
 struct Message {
     let role: Role
     let content: String
+    let createdAt: Date
 }
