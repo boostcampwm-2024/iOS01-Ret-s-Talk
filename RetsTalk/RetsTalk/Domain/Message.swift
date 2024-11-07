@@ -7,13 +7,13 @@
 
 import Foundation
 
-enum Role {
-    case user
-    case assistant
-}
-
 struct Message {
     let role: Role
     let content: String
     let createdAt: Date
+    
+    enum Role {
+        case user
+        case assistant
+    }
 }

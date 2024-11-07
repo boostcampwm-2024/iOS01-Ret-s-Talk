@@ -28,9 +28,9 @@ public class RetrospectEntity: NSManagedObject {
         fetchRequest.predicate = NSPredicate(format: "retrospect == %@", self)
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: true)]
         
-        var fetchedChat: [MessageEntity] = try CoreDataStorage.shared.context.fetch(fetchRequest)
+        let fetchedChat: [MessageEntity] = try CoreDataStorage.shared.context.fetch(fetchRequest)
         
-        let resultChat = fetchedChat.map{ $0.toDomain() }
+        let resultChat = fetchedChat.map { $0.toDomain() }
         
         return Retrospect(
             summary: summary,
