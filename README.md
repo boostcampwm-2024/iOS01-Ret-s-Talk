@@ -5,20 +5,7 @@
 > 번거로운 회고, 저희가 도와줄게요. </br>
 > 대화 형식으로 회고하는 회고 서비스 앱 "**레츠톡**"
 
-<table>
-<tr>
-    <td align="center"><img src="https://github.com/user-attachments/assets/ec4cd9f3-c820-4ccf-a464-0657fd7cb340" width="250"/></td>
-    <td align="leading"><blockquote>회고를 작성해야 하는데, 어떻게 시작해야 할지 항상 고민이 많았다면 😭 </br></br> 레츠톡에서 대화처럼 기록해봐요! 🤩</blockquote></td>
-</tr>
-<tr>
-    <td align="leading"><blockquote>회고를 빠르게 찾을 수 있도록 요약해서 보여드립니다! 🤓</blockquote></td>
-    <td align="center"><img src="https://github.com/user-attachments/assets/b0d17968-78bc-4d71-9edc-431877a0c02f" width="250"/></td>
-</tr>
-<tr>
-    <td align="center"><img src="https://github.com/user-attachments/assets/10e7ba9e-4563-4057-8665-fb0ff4e0f056" width="250"/></td>
-    <td align="leading"><blockquote>나의 1시간이 널리 퍼져 1만 시간이 될수도? 😮 </br></br> 회고를 공유할 수 있어요 ! </blockquote></td>
-</tr>
-</table>
+<img src="https://github.com/user-attachments/assets/b186ce0b-4c87-48d6-9ff0-8cfc180575dc"/>
 
 ## 🖐️ 다섯줄 소개
 
