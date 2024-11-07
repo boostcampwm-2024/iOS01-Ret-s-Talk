@@ -10,8 +10,8 @@ import Foundation
 protocol URLRequestComposable<Path> {
     associatedtype Path: CustomStringConvertible
     
-    var scheme: String { get }
-    var host: String { get }
+    static var scheme: String { get }
+    static var host: String { get }
     
     var path: Path { get set }
     var method: HTTPMethod { get set }
