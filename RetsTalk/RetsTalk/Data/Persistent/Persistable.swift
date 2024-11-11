@@ -8,9 +8,9 @@
 import CoreData
 
 protocol Persistable {
-    func add<Entity: NSManagedObject>(entity: Entity) async throws -> Entity
+    func add<Entity: NSManagedObject>(entityProvider: (NSManagedObjectContext) -> Entity) async throws -> Entity
+    func fetch<Entity: NSManagedObject>(by request: NSFetchRequest<Entity>) throws -> [NSManagedObject]
     func update<Entity: NSManagedObject>(entity: Entity, updateHandler: (Entity) -> Void) throws -> Entity
-    func fetch<Entity: NSManagedObject>(by request: NSFetchRequest<Entity>) -> [NSManagedObject]
     func delete<Entity: NSManagedObject>(entity: Entity) throws
     func delete<Entity: NSManagedObject>(by request: NSFetchRequest<Entity>) throws
 }
