@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct UserTableViewCell: View {
+struct UserMessageCell: View {
     var body: some View {
         Text("Assistant")
     }
