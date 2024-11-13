@@ -14,8 +14,8 @@ final class ChattingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        chattingTableViewSetUp()
         messageInputViewSetUp()
+        chattingTableViewSetUp()
     }
     
     private func chattingTableViewSetUp() {
