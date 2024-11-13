@@ -39,5 +39,8 @@ final class ChatView: UIView {
             chattingTableView.leadingAnchor.constraint(equalTo: leadingAnchor),
             chattingTableView.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
+        
+        chattingTableView.separatorStyle = .none
+        chattingTableView.backgroundColor = UIColor.appColor(.strokeRetrospect)
     }
 }
