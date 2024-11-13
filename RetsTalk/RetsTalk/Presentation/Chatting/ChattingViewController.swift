@@ -44,7 +44,6 @@ final class ChattingViewController: UIViewController {
             messageInputView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             messageInputView.leftAnchor.constraint(equalTo: view.leftAnchor),
             messageInputView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            
         ])
     }
 }

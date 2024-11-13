@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AssistantTableViewCell:View {
+struct AssistantTableViewCell: View {
     var body: some View {
         Text("Assistant")
     }
