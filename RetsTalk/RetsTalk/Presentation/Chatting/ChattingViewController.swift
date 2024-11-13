@@ -6,28 +6,20 @@
 //
 
 import UIKit
+import SwiftUI
 
 final class ChattingViewController: UIViewController {
-    
     private let chatView = ChatView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        chatViewSetUp()
+        chatView.chattingTableView.delegate = self
+        chatView.chattingTableView.dataSource = self
     }
     
-    private func chatViewSetUp() {
-        view.addSubview(chatView)
-        chatView.setUp()
-        chatView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            chatView.topAnchor.constraint(equalTo: view.topAnchor),
-            chatView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            chatView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            chatView.rightAnchor.constraint(equalTo: view.rightAnchor),
-        ])
+    override func loadView() {
+        self.view = chatView
     }
     
 }

@@ -8,51 +8,36 @@
 import UIKit
 
 final class ChatView: UIView {
-    private let chattingTableView = UITableView()
-    private let messageInputView = MessageInputView()
+    let chattingTableView = UITableView()
+    let messageInputView = MessageInputView()
     
-    func setUp() {
-        messageInputViewSetUp()
-        chattingTableViewSetUp()
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setUpLayout()
     }
     
-    private func messageInputViewSetUp() {
-        self.addSubview(messageInputView)
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setUpLayout()
+    }
+    
+    private func setUpLayout() {
+        addSubview(messageInputView)
+        addSubview(chattingTableView)
         
         messageInputView.translatesAutoresizingMaskIntoConstraints = false
-        messageInputView.backgroundColor = .blue
-
+        chattingTableView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             messageInputView.heightAnchor.constraint(equalToConstant: 54),
-            messageInputView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-            messageInputView.leftAnchor.constraint(equalTo: self.leftAnchor),
-            messageInputView.rightAnchor.constraint(equalTo: self.rightAnchor),
-        ])
-    }
-    
-    private func chattingTableViewSetUp() {
-        self.addSubview(chattingTableView)
-        
-        chattingTableView.delegate = self
-        chattingTableView.dataSource = self
-        chattingTableView.translatesAutoresizingMaskIntoConstraints = false
-        chattingTableView.separatorStyle = .none
-        
-        NSLayoutConstraint.activate([
-            chattingTableView.topAnchor.constraint(equalTo: self.topAnchor),
+            messageInputView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            messageInputView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            messageInputView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            
+            chattingTableView.topAnchor.constraint(equalTo: topAnchor),
             chattingTableView.bottomAnchor.constraint(equalTo: messageInputView.topAnchor),
-            chattingTableView.leftAnchor.constraint(equalTo: self.leftAnchor),
-            chattingTableView.rightAnchor.constraint(equalTo: self.rightAnchor),
+            chattingTableView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            chattingTableView.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
-    }
-}
-
-extension ChatView: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return UITableViewCell()
     }
 }
