@@ -59,7 +59,7 @@ extension ChatView: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-// MARK: - extension: MessageInputViewDelegate
+// MARK: - MessageInputViewDelegate conformance
 
 extension ChatView: MessageInputViewDelegate {
     func updateMessageInputViewHeight(to height: CGFloat) {
