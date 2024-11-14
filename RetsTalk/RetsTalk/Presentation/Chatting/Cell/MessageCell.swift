@@ -12,26 +12,25 @@ struct MessageCell: View {
     let isUser: Bool
     
     var body: some View {
-        HStack {
-            Text(message)
-                .padding()
-                .font(.system(size: 14))
-                .background(isUser ? Color.appColor(.blueberry) : Color.appColor(.backgroundRetrospect))
-                .foregroundColor(isUser ? .white : Color.appColor(.blueberry))
-                .cornerRadius(10)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(
-                            isUser ? Color.appColor(.blueberry): Color.appColor(.strokeRetrospect),
-                            lineWidth: 1
-                        )
-                )
-                .frame(
-                    maxWidth: .infinity,
-                    alignment: isUser ? .trailing : .leading
-                )
-                .padding(isUser ? .leading : .trailing, 60)
-        }
+        Text(message)
+            .font(.system(size: 14))
+            .padding(.vertical, 8)
+            .padding(.horizontal, 8)
+            .background(isUser ? Color.appColor(.blueberry) : Color.appColor(.backgroundRetrospect))
+            .foregroundColor(isUser ? .white : Color.appColor(.blueberry))
+            .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(
+                        isUser ? Color.appColor(.blueberry): Color.appColor(.strokeRetrospect),
+                        lineWidth: 1
+                    )
+            )
+            .frame(
+                maxWidth: .infinity,
+                alignment: isUser ? .trailing : .leading
+            )
+            .padding(isUser ? .leading : .trailing, 80)
     }
 }
 
