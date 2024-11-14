@@ -15,7 +15,7 @@ final class CoreDataPersistableTests: XCTestCase {
 
     // MARK: Test
 
-    func test_add결과_예상과_동일() async throws {
+    func test_add결과_예상과_동일() throws {
         // given
         let content: String = "Hello"
 
@@ -43,7 +43,7 @@ final class CoreDataPersistableTests: XCTestCase {
         XCTAssertEqual(fetchedMessages.count, repeatingNumber)
     }
 
-    func test_update를_통해_엔티티_수정() async throws {
+    func test_update를_통해_엔티티_수정() throws {
         // given
         let entity = try addDummyEntity(content: "Hello")
         guard let entity else {
