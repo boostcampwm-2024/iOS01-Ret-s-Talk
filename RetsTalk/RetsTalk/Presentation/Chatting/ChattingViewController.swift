@@ -11,10 +11,11 @@ import SwiftUI
 final class ChattingViewController: UIViewController {
     private let chatView = ChatView()
     
-    private let messages: [Message] = Array(
-        repeating: Message(role: .user, content: "안녕하세요", createdAt: Date()),
-        count: 20
-    )
+    private let messages: [Message] = [
+        Message(role: .assistant, content: "오늘 하루는 어떠셨나요?", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+    ]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -62,7 +63,8 @@ extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = messages[indexPath.row]
         
-        let cell = UITableViewCell()
+        let cell = tableView.dequeueReusableCell(withIdentifier: "MessageCell", for: indexPath)
+        
         cell.contentConfiguration = UIHostingConfiguration {
             MessageCell(message: message.content, isUser: message.role == .user)
         }

@@ -74,6 +74,7 @@ final class ChatView: UIView {
         chattingTableView.separatorStyle = .none
         chattingTableView.backgroundColor = UIColor.appColor(.backgroundMain)
         chattingTableView.allowsSelection = false
+        chattingTableView.register(UITableViewCell.self, forCellReuseIdentifier: "MessageCell")
     }
     
     func scrollToBottom() {
