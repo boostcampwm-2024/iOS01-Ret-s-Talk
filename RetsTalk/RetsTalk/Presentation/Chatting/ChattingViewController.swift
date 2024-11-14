@@ -11,33 +11,18 @@ import SwiftUI
 final class ChattingViewController: UIViewController {
     private let chatView = ChatView()
     
-    private let messages: [Message] = [
-        Message(role: .assistant, content: "오늘은 무엇을 하셨나요?", createdAt: Date()),
-        Message(role: .user, content: "오늘은 채팅 Cell을 구성했어요", createdAt: Date()+1),
-        Message(role: .assistant, content: "어떻게 구성하셨나요?", createdAt: Date()+2),
-        Message(role: .user, content: "Cell은 SwiftUI로 TableView에서는 Hosting을 사용했어요", createdAt: Date()+3),
-        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
-        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
-        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
-        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
-        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
-        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
-        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
-        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
-    ]
+    private let messages: [Message] = Array(repeating: Message(role: .user, content: "안녕하세요", createdAt: Date()), count: 3)
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         chatView.chattingTableView.delegate = self
         chatView.chattingTableView.dataSource = self
-        
     }
     
     override func loadView() {
         self.view = chatView
     }
-    
 }
 
 extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {

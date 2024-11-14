@@ -15,9 +15,9 @@ final class ChatView: UIView {
         super.init(frame: frame)
         setUpLayout()
         
-        // 테이블 뷰의 레이아웃이 완료된 후 스크롤 실행
         DispatchQueue.main.async { [weak self] in
             self?.scrollToBottom()
+            self?.updateScrollEnabled()
         }
     }
     
@@ -25,9 +25,9 @@ final class ChatView: UIView {
         super.init(coder: coder)
         setUpLayout()
         
-        // 테이블 뷰의 레이아웃이 완료된 후 스크롤 실행
         DispatchQueue.main.async { [weak self] in
             self?.scrollToBottom()
+            self?.updateScrollEnabled()
         }
     }
     
@@ -54,11 +54,19 @@ final class ChatView: UIView {
         chattingTableView.backgroundColor = UIColor.appColor(.backgroundMain)
     }
     
+    func updateScrollEnabled() {
+        let contentHeight = chattingTableView.contentSize.height
+        let tableHeight = chattingTableView.frame.height
+        chattingTableView.isScrollEnabled = contentHeight > tableHeight
+    }
+    
     func scrollToBottom() {
         let rows = chattingTableView.numberOfRows(inSection: 0)
         guard rows > 0 else { return }
         
         let indexPath = IndexPath(row: rows - 1, section: 0)
-        chattingTableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
+        chattingTableView.scrollToRow(at: indexPath,
+                                      at: .bottom,
+                                      animated: false)
     }
 }
