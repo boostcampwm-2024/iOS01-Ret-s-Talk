@@ -17,6 +17,13 @@ final class ChattingViewController: UIViewController {
         Message(role: .assistant, content: "어떻게 구성하셨나요?", createdAt: Date()+2),
         Message(role: .user, content: "Cell은 SwiftUI로 TableView에서는 Hosting을 사용했어요", createdAt: Date()+3),
         Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
+        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
+        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
+        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
+        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
+        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
+        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
+        Message(role: .assistant, content: "리뷰를 통해 수정하겠군요", createdAt: Date()+4),
     ]
     
     override func viewDidLoad() {
@@ -24,6 +31,7 @@ final class ChattingViewController: UIViewController {
         
         chatView.chattingTableView.delegate = self
         chatView.chattingTableView.dataSource = self
+        
     }
     
     override func loadView() {

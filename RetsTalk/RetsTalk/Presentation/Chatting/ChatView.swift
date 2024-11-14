@@ -14,11 +14,21 @@ final class ChatView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setUpLayout()
+        
+        // 테이블 뷰의 레이아웃이 완료된 후 스크롤 실행
+        DispatchQueue.main.async { [weak self] in
+            self?.scrollToBottom()
+        }
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setUpLayout()
+        
+        // 테이블 뷰의 레이아웃이 완료된 후 스크롤 실행
+        DispatchQueue.main.async { [weak self] in
+            self?.scrollToBottom()
+        }
     }
     
     private func setUpLayout() {
@@ -34,13 +44,21 @@ final class ChatView: UIView {
             messageInputView.leadingAnchor.constraint(equalTo: leadingAnchor),
             messageInputView.trailingAnchor.constraint(equalTo: trailingAnchor),
             
-            chattingTableView.topAnchor.constraint(equalTo: topAnchor),
+            chattingTableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             chattingTableView.bottomAnchor.constraint(equalTo: messageInputView.topAnchor),
             chattingTableView.leadingAnchor.constraint(equalTo: leadingAnchor),
             chattingTableView.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
         
         chattingTableView.separatorStyle = .none
-        chattingTableView.backgroundColor = UIColor.appColor(.strokeRetrospect)
+        chattingTableView.backgroundColor = UIColor.appColor(.backgroundMain)
+    }
+    
+    func scrollToBottom() {
+        let rows = chattingTableView.numberOfRows(inSection: 0)
+        guard rows > 0 else { return }
+        
+        let indexPath = IndexPath(row: rows - 1, section: 0)
+        chattingTableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
     }
 }
