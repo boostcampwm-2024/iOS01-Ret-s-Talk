@@ -44,7 +44,7 @@ final class MessageInputView: UIView {
         return view
     }()
     
-    private lazy var textInputView: UITextView = {
+    private var textInputView: UITextView = {
         let textView = UITextView()
         textView.font = .appFont(.body)
         textView.textColor = .placeholderText
@@ -52,11 +52,10 @@ final class MessageInputView: UIView {
         textView.backgroundColor = .clear
         textView.textContainerInset = UIEdgeInsets(top: 1, left: 0, bottom: 0, right: 0)
         textView.isScrollEnabled = false
-        textView.delegate = self
         return textView
     }()
     
-    private lazy var sendButton: UIButton = {
+    private var sendButton: UIButton = {
         let button = UIButton()
         let icon = UIImage(
             systemName: Texts.sendButtonIconName,
@@ -64,9 +63,6 @@ final class MessageInputView: UIView {
         )
         button.setImage(icon, for: .normal)
         button.tintColor = UIColor.appColor(.blazingOrange)
-        button.addAction(UIAction(handler: { _ in
-            self.textInputView.resignFirstResponder()
-        }), for: .touchUpInside)
         return button
     }()
     
@@ -74,17 +70,30 @@ final class MessageInputView: UIView {
     
     init() {
         super.init(frame: .zero)
+        
         setUpLayout()
+        setUpActions()
+        textInputView.delegate = self
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        
         setUpLayout()
+        setUpActions()
+        textInputView.delegate = self
     }
-
+    
     // MARK: custom method
     
+    private func setUpActions() {
+        sendButton.addAction(UIAction(handler: { _ in
+            self.textInputView.resignFirstResponder()
+        }), for: .touchUpInside)
+    }
+    
     private func setUpLayout() {
+        self.translatesAutoresizingMaskIntoConstraints = false
         setUpBackgroundViewLayout()
         setUpSendButtonLayout()
         setUpTextInputViewLayout()
@@ -94,56 +103,66 @@ final class MessageInputView: UIView {
         self.addSubview(backgroundView)
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            backgroundView
-                .leftAnchor
-                .constraint(equalTo: self.leftAnchor, constant: Metrics.backgroundHorizontalMargin),
-            backgroundView
-                .rightAnchor
-                .constraint(equalTo: self.rightAnchor, constant: -Metrics.backgroundHorizontalMargin),
-            backgroundView
-                .bottomAnchor
-                .constraint(equalTo: self.bottomAnchor, constant: -Metrics.backgroundVerticalMargin),
-            backgroundView
-                .topAnchor
-                .constraint(equalTo: self.topAnchor, constant: Metrics.backgroundVerticalMargin),
-            ])
+            backgroundView.leftAnchor.constraint(
+                equalTo: leftAnchor,
+                constant: Metrics.backgroundHorizontalMargin
+            ),
+            backgroundView.rightAnchor.constraint(
+                equalTo: rightAnchor,
+                constant: -Metrics.backgroundHorizontalMargin
+            ),
+            backgroundView.bottomAnchor.constraint(
+                equalTo: bottomAnchor,
+                constant: -Metrics.backgroundVerticalMargin
+            ),
+            backgroundView.topAnchor.constraint(
+                equalTo: topAnchor,
+                
+                constant: Metrics.backgroundVerticalMargin),
+        ])
     }
     
     private func setUpSendButtonLayout() {
         backgroundView.addSubview(sendButton)
         sendButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            sendButton
-                .heightAnchor
-                .constraint(equalToConstant: Metrics.sendButtonSideLength),
-            sendButton
-                .widthAnchor
-                .constraint(equalToConstant: Metrics.sendButtonSideLength),
-            sendButton
-                .topAnchor
-                .constraint(equalTo: backgroundView.topAnchor, constant: Metrics.sendButtonMargin),
-            sendButton
-                .trailingAnchor
-                .constraint(equalTo: backgroundView.trailingAnchor, constant: -Metrics.sendButtonMargin),
-            ])
+            sendButton.heightAnchor.constraint(
+                equalToConstant: Metrics.sendButtonSideLength
+            ),
+            sendButton.widthAnchor.constraint(
+                equalToConstant: Metrics.sendButtonSideLength
+            ),
+            sendButton.topAnchor.constraint(
+                equalTo: backgroundView.topAnchor,
+                constant: Metrics.sendButtonMargin
+            ),
+            sendButton.trailingAnchor.constraint(
+                equalTo: backgroundView.trailingAnchor,
+                constant: -Metrics.sendButtonMargin
+            ),
+        ])
     }
     
     private func setUpTextInputViewLayout() {
         backgroundView.addSubview(textInputView)
         textInputView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            textInputView
-                .topAnchor
-                .constraint(equalTo: backgroundView.topAnchor, constant: Metrics.textViewVerticalMargin),
-            textInputView
-                .bottomAnchor
-                .constraint(equalTo: backgroundView.bottomAnchor, constant: -Metrics.textViewVerticalMargin),
-            textInputView
-                .leadingAnchor
-                .constraint(equalTo: backgroundView.leadingAnchor, constant: Metrics.textViewHorizontalMargin),
-            textInputView
-                .trailingAnchor
-                .constraint(equalTo: sendButton.leadingAnchor, constant: -Metrics.sendButtonMargin),
+            textInputView.topAnchor.constraint(
+                equalTo: backgroundView.topAnchor,
+                constant: Metrics.textViewVerticalMargin
+            ),
+            textInputView.bottomAnchor.constraint(
+                equalTo: backgroundView.bottomAnchor,
+                constant: -Metrics.textViewVerticalMargin
+            ),
+            textInputView.leadingAnchor.constraint(
+                equalTo: backgroundView.leadingAnchor,
+                constant: Metrics.textViewHorizontalMargin
+            ),
+            textInputView.trailingAnchor.constraint(
+                equalTo: sendButton.leadingAnchor,
+                constant: -Metrics.sendButtonMargin
+            ),
         ])
     }
 }
@@ -158,13 +177,13 @@ extension MessageInputView: UITextViewDelegate {
         
         if inputViewHeight <= Metrics.textViewMaxHeight {
             textView.isScrollEnabled = false
-            self.delegate?.updateMessageInputViewHeight(to: max(
+            delegate?.updateMessageInputViewHeight(to: max(
                 Metrics.backgroundHeight + backgroundVerticalMargin,
                 inputViewHeight + backgroundVerticalMargin
             ))
         } else {
             textView.isScrollEnabled = true
-            self.delegate?.updateMessageInputViewHeight(to: Metrics.textViewMaxHeight + backgroundVerticalMargin)
+            delegate?.updateMessageInputViewHeight(to: Metrics.textViewMaxHeight + backgroundVerticalMargin)
         }
     }
     
