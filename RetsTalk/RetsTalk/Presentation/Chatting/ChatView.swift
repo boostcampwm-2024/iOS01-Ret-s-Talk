@@ -17,7 +17,6 @@ final class ChatView: UIView {
         
         DispatchQueue.main.async { [weak self] in
             self?.scrollToBottom()
-            self?.updateScrollEnabled()
         }
     }
     
@@ -27,7 +26,6 @@ final class ChatView: UIView {
         
         DispatchQueue.main.async { [weak self] in
             self?.scrollToBottom()
-            self?.updateScrollEnabled()
         }
     }
     
@@ -52,12 +50,6 @@ final class ChatView: UIView {
         
         chattingTableView.separatorStyle = .none
         chattingTableView.backgroundColor = UIColor.appColor(.backgroundMain)
-    }
-    
-    func updateScrollEnabled() {
-        let contentHeight = chattingTableView.contentSize.height
-        let tableHeight = chattingTableView.frame.height
-        chattingTableView.isScrollEnabled = contentHeight > tableHeight
     }
     
     func scrollToBottom() {
