@@ -7,6 +7,7 @@
 
 import UIKit
 
+@MainActor
 final class ChatView: UIView {
     private let chattingTableView = UITableView()
     private let messageInputView = MessageInputView()
@@ -46,7 +47,7 @@ final class ChatView: UIView {
         )
         
         guard let messageInputViewHeightConstraint = messageInputViewHeightConstraint,
-        let chatViewBottomConstraint = chatViewBottomConstraint else {
+              let chatViewBottomConstraint = chatViewBottomConstraint else {
             fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
         }
         

@@ -7,7 +7,7 @@
 
 import CoreData
 
-final class CoreDataStorage {
+final class CoreDataStorage: @unchecked Sendable {
     static let shared = CoreDataStorage()
     
     var context: NSManagedObjectContext { persistentContainer.viewContext }
