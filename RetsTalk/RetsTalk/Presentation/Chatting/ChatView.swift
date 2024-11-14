@@ -11,17 +11,22 @@ import UIKit
 final class ChatView: UIView {
     private let chattingTableView = UITableView()
     private let messageInputView = MessageInputView()
+    private var messageInputViewHeightConstraint: NSLayoutConstraint?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         
         setUpLayout()
+        messageInputViewSetUp()
+        chattingTableViewSetUp()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         
         setUpLayout()
+        messageInputViewSetUp()
+        chattingTableViewSetUp()
     }
     
     override func layoutSubviews() {
@@ -29,26 +34,35 @@ final class ChatView: UIView {
         
         scrollToBottom()
     }
-    
-    private func setUpLayout() {
+  
+    private func messageInputViewSetUp() {
         addSubview(messageInputView)
-        addSubview(chattingTableView)
+        messageInputView.delegate = self
+        messageInputViewHeightConstraint = messageInputView.heightAnchor.constraint(equalToConstant: 54)
+        guard let messageInputViewHeightConstraint = messageInputViewHeightConstraint else {
+            fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
+        }
         
-        messageInputView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            messageInputViewHeightConstraint,
+            messageInputView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            messageInputView.leftAnchor.constraint(equalTo: leftAnchor),
+            messageInputView.rightAnchor.constraint(equalTo: rightAnchor),
+        ])
+    }
+  
+    private func chattingTableViewSetUp() {
+        addSubview(chattingTableView)
+     
         chattingTableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            messageInputView.heightAnchor.constraint(equalToConstant: 54),
-            messageInputView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            messageInputView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            messageInputView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            
             chattingTableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             chattingTableView.bottomAnchor.constraint(equalTo: messageInputView.topAnchor),
-            chattingTableView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            chattingTableView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            chattingTableView.leftAnchor.constraint(equalTo: leftAnchor),
+            chattingTableView.rightAnchor.constraint(equalTo: rightAnchor),
         ])
-        
+    
         chattingTableView.separatorStyle = .none
         chattingTableView.backgroundColor = UIColor.appColor(.backgroundMain)
         chattingTableView.allowsSelection = false
@@ -69,5 +83,20 @@ final class ChatView: UIView {
     func setTableViewDelegate(_ delegate: UITableViewDelegate & UITableViewDataSource) {
         chattingTableView.delegate = delegate
         chattingTableView.dataSource = delegate
+    }
+}
+
+// MARK: - MessageInputViewDelegate conformance
+
+extension ChatView: MessageInputViewDelegate {
+    func updateMessageInputViewHeight(to height: CGFloat) {
+        guard let messageInputViewHeightConstraint = messageInputViewHeightConstraint else {
+            fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
+        }
+        
+        messageInputViewHeightConstraint.constant = height
+        UIView.performWithoutAnimation {
+            self.layoutIfNeeded()
+        }
     }
 }
