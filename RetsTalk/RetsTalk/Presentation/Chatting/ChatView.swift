@@ -10,7 +10,8 @@ import UIKit
 final class ChatView: UIView {
     private let chattingTableView = UITableView()
     private let messageInputView = MessageInputView()
-    
+    private var messageInputViewHeightConstraint: NSLayoutConstraint!
+
     func setUp() {
         messageInputViewSetUp()
         chattingTableViewSetUp()
@@ -18,12 +19,13 @@ final class ChatView: UIView {
     
     private func messageInputViewSetUp() {
         self.addSubview(messageInputView)
-        
+        messageInputView.delegate = self
         messageInputView.translatesAutoresizingMaskIntoConstraints = false
         messageInputView.backgroundColor = .blue
+        messageInputViewHeightConstraint = messageInputView.heightAnchor.constraint(equalToConstant: 54)
 
         NSLayoutConstraint.activate([
-            messageInputView.heightAnchor.constraint(equalToConstant: 54),
+            messageInputViewHeightConstraint,
             messageInputView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
             messageInputView.leftAnchor.constraint(equalTo: self.leftAnchor),
             messageInputView.rightAnchor.constraint(equalTo: self.rightAnchor),
@@ -54,5 +56,16 @@ extension ChatView: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         return UITableViewCell()
+    }
+}
+
+// MARK: - extension: MessageInputViewDelegate
+
+extension ChatView: MessageInputViewDelegate {
+    func updateMessageInputViewHeight(to height: CGFloat) {
+        messageInputViewHeightConstraint.constant = height
+        UIView.performWithoutAnimation {
+            self.layoutIfNeeded()
+        }
     }
 }
