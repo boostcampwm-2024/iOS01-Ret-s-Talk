@@ -167,8 +167,6 @@ final class MessageInputView: UIView {
     }
 }
 
-// MARK: - UITextViewDelegate
-
 extension MessageInputView: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         let contentSize = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .infinity))
