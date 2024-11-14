@@ -42,6 +42,27 @@
 			);
 			target = 21759C3A2CD8AE0D0033EA52 /* RetsTalk */;
 		};
+		BA99E4FE2CE58E7A001CBB80 /* Exceptions for "RetsTalk" folder in "RetsTalkTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Data/Persistent/CoreDataPersistable.swift,
+				Data/Persistent/CoreDataStorage.swift,
+				"Data/Persistent/MessageEntity+CoreDataClass.swift",
+				"Data/Persistent/RetrospectEntity+CoreDataClass.swift",
+				Domain/Message.swift,
+				Domain/Retrospect.swift,
+				RetsTalk.xcdatamodeld,
+			);
+			target = 21759C532CD8AE0F0033EA52 /* RetsTalkTests */;
+		};
+		BA99E50B2CE5B97A001CBB80 /* Exceptions for "RetsTalkTests" folder in "RetsTalkTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				CoreDataTests/MessageTest.swift,
+				CoreDataTests/RetrospectTest.swift,
+			);
+			target = 21759C532CD8AE0F0033EA52 /* RetsTalkTests */;
+		};
 		D59E35E42CD9F389001B6D5A /* Exceptions for "RetsTalk" folder in "NetworkTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -62,6 +83,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				21759C662CD8AE0F0033EA52 /* Exceptions for "RetsTalk" folder in "RetsTalk" target */,
+				BA99E4FE2CE58E7A001CBB80 /* Exceptions for "RetsTalk" folder in "RetsTalkTests" target */,
 				D59E35E42CD9F389001B6D5A /* Exceptions for "RetsTalk" folder in "NetworkTests" target */,
 			);
 			path = RetsTalk;
@@ -69,6 +91,9 @@
 		};
 		21759C572CD8AE0F0033EA52 /* RetsTalkTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BA99E50B2CE5B97A001CBB80 /* Exceptions for "RetsTalkTests" folder in "RetsTalkTests" target */,
+			);
 			path = RetsTalkTests;
 			sourceTree = "<group>";
 		};
