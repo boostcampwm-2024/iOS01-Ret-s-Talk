@@ -13,23 +13,30 @@ struct MessageCell: View {
     
     var body: some View {
         Text(message)
-            .font(.system(size: 14))
-            .padding(8)
+            .font(.appFont(.body))
+            .padding(Metrics.textPadding)
             .background(isUser ? Color.appColor(.blueberry) : Color.appColor(.backgroundRetrospect))
             .foregroundColor(isUser ? .white : Color.appColor(.blueberry))
-            .cornerRadius(10)
+            .cornerRadius(Metrics.cornerRadius)
             .overlay(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: Metrics.cornerRadius)
                     .stroke(
                         isUser ? Color.appColor(.blueberry): Color.appColor(.strokeRetrospect),
-                        lineWidth: 1
+                        lineWidth: Metrics.RectangleStrokeWidth
                     )
             )
             .frame(
                 maxWidth: .infinity,
                 alignment: isUser ? .trailing : .leading
             )
-            .padding(isUser ? .leading : .trailing, 80)
+            .padding(isUser ? .leading : .trailing, Metrics.sidePadding)
+    }
+    
+    private enum Metrics {
+        static let textPadding = 8.0
+        static let cornerRadius = 10.0
+        static let RectangleStrokeWidth = 1.0
+        static let sidePadding = 80.0
     }
 }
 
