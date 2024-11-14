@@ -14,16 +14,19 @@ final class ChatView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        
         setUpLayout()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        
         setUpLayout()
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
+        
         scrollToBottom()
     }
     
