@@ -17,12 +17,11 @@ final class CoreDataPersistableTests: XCTestCase {
 
     func test_add결과_예상과_동일() throws {
         // given
-        let content: String = "Hello"
+        let content = "Hello"
 
         // when
-        let message = try addDummyEntity(content: content)
-        guard let message = message as? MessageTestEntity else {
-            XCTFail("add 결과가 MessageTestEntity 타입이 아님")
+        guard let message = try addDummyEntity(content: content) else {
+            XCTFail("add 결과가 올바르지 않아서 nil 반환")
             return
         }
 
@@ -32,7 +31,7 @@ final class CoreDataPersistableTests: XCTestCase {
 
     func test_fetch가_엔티티_수만큼_반환() async throws {
         // given
-        let repeatingNumber: Int = 5
+        let repeatingNumber = 5
         try addDummyEntities(repeating: repeatingNumber)
 
         // when
@@ -45,31 +44,27 @@ final class CoreDataPersistableTests: XCTestCase {
 
     func test_update를_통해_엔티티_수정() throws {
         // given
-        let entity = try addDummyEntity(content: "Hello")
-        guard let entity else {
-            XCTFail("add 결과가 MessageTestEntity 타입이 아님")
+        guard let entity = try addDummyEntity(content: "Hello") else {
+            XCTFail("add 결과가 올바르지 않아서 nil 반환")
             return
         }
 
         // when
         let updatedEntity = try coreDataManager?.update(entity: entity) { entity in
-            guard let entity = entity as? MessageTestEntity else { return }
-
             entity.content = "World"
         }
 
         // then
-        guard let updatedEntity = updatedEntity as? MessageTestEntity else { return }
+        guard let updatedEntity else { return }
 
         XCTAssertEqual(updatedEntity.content, "World")
     }
 
     func test_delete_단일_객체() async throws {
         // given
-        let content: String = "Hello"
-        let entity = try addDummyEntity(content: content)
-        guard let entity else {
-            XCTFail("add 결과가 MessageTestEntity 타입이 아님")
+        let content = "Hello"
+        guard let entity = try addDummyEntity(content: content) else {
+            XCTFail("add 결과가 올바르지 않아서 nil 반환")
             return
         }
 
@@ -80,13 +75,13 @@ final class CoreDataPersistableTests: XCTestCase {
         let fetchRequest = MessageTestEntity.fetchRequest()
         guard let fetchedMessages = try await coreDataManager?.fetch(by: fetchRequest) else { return }
 
-        XCTAssertEqual(fetchedMessages.count, 0)
+        XCTAssertTrue(fetchedMessages.isEmpty)
     }
 
     func test_delete_복수_객체() async throws {
         // given
-        let repeatingNumber: Int = 5
-        let fetchLimit: Int = 2
+        let repeatingNumber = 5
+        let fetchLimit = 2
         try addDummyEntities(repeating: 5)
 
         // when
@@ -102,7 +97,7 @@ final class CoreDataPersistableTests: XCTestCase {
 
     // MARK: Helper
 
-    private func addDummyEntity(content: String) throws -> NSManagedObject? {
+    private func addDummyEntity(content: String) throws -> MessageEntity? {
         let message = try coreDataManager?.add(entityProvider: { context in
             let message = MessageTestEntity(context: context)
             message.content = content
@@ -110,7 +105,7 @@ final class CoreDataPersistableTests: XCTestCase {
             message.isUser = true
             return message
         })
-        return message
+        return message as? MessageEntity
     }
 
     private func addDummyEntities(repeating: Int) throws {
