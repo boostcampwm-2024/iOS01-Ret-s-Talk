@@ -11,7 +11,10 @@ import SwiftUI
 final class ChattingViewController: UIViewController {
     private let chatView = ChatView()
     
-    private let messages: [Message] = Array(repeating: Message(role: .user, content: "안녕하세요", createdAt: Date()), count: 3)
+    private let messages: [Message] = Array(
+        repeating: Message(role: .user, content: "안녕하세요", createdAt: Date()),
+        count: 3
+    )
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,7 +40,7 @@ extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
         cell.contentConfiguration = UIHostingConfiguration {
             MessageCell(message: message.content, isUser: message.role == .user)
         }
-        
+
         cell.selectionStyle = .none
         cell.backgroundColor = .clear
         
