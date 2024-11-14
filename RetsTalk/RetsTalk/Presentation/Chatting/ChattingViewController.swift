@@ -13,18 +13,17 @@ final class ChattingViewController: UIViewController {
     
     private let messages: [Message] = Array(
         repeating: Message(role: .user, content: "안녕하세요", createdAt: Date()),
-        count: 3
+        count: 20
     )
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        chatView.chattingTableView.delegate = self
-        chatView.chattingTableView.dataSource = self
+        chatView.setTableViewDelegate(self)
     }
     
     override func loadView() {
-        self.view = chatView
+        view = chatView
     }
 }
 
@@ -40,8 +39,6 @@ extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
         cell.contentConfiguration = UIHostingConfiguration {
             MessageCell(message: message.content, isUser: message.role == .user)
         }
-
-        cell.selectionStyle = .none
         cell.backgroundColor = .clear
         
         return cell

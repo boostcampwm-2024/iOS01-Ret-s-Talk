@@ -14,8 +14,7 @@ struct MessageCell: View {
     var body: some View {
         Text(message)
             .font(.system(size: 14))
-            .padding(.vertical, 8)
-            .padding(.horizontal, 8)
+            .padding(8)
             .background(isUser ? Color.appColor(.blueberry) : Color.appColor(.backgroundRetrospect))
             .foregroundColor(isUser ? .white : Color.appColor(.blueberry))
             .cornerRadius(10)

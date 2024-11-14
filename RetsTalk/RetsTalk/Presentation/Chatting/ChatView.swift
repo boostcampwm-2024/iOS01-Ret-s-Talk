@@ -7,26 +7,24 @@
 
 import UIKit
 
+@MainActor
 final class ChatView: UIView {
-    let chattingTableView = UITableView()
-    let messageInputView = MessageInputView()
+    private let chattingTableView = UITableView()
+    private let messageInputView = MessageInputView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         setUpLayout()
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.scrollToBottom()
-        }
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setUpLayout()
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.scrollToBottom()
-        }
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        scrollToBottom()
     }
     
     private func setUpLayout() {
@@ -50,15 +48,23 @@ final class ChatView: UIView {
         
         chattingTableView.separatorStyle = .none
         chattingTableView.backgroundColor = UIColor.appColor(.backgroundMain)
+        chattingTableView.allowsSelection = false
     }
     
     func scrollToBottom() {
         let rows = chattingTableView.numberOfRows(inSection: 0)
-        guard rows > 0 else { return }
+        guard 0 < rows else { return }
         
         let indexPath = IndexPath(row: rows - 1, section: 0)
-        chattingTableView.scrollToRow(at: indexPath,
-                                      at: .bottom,
-                                      animated: false)
+        chattingTableView.scrollToRow(
+            at: indexPath,
+            at: .bottom,
+            animated: false
+        )
+    }
+    
+    func setTableViewDelegate(_ delegate: UITableViewDelegate & UITableViewDataSource) {
+        chattingTableView.delegate = delegate
+        chattingTableView.dataSource = delegate
     }
 }
