@@ -82,7 +82,7 @@ final class CoreDataPersistableTests: XCTestCase {
         // given
         let repeatingNumber = 5
         let fetchLimit = 2
-        try addDummyEntities(repeating: 5)
+        try addDummyEntities(repeating: repeatingNumber)
 
         // when
         let fetchRequest = MessageTestEntity.fetchRequest()
