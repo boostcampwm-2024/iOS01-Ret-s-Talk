@@ -16,5 +16,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
         return true
     }
-
 }
