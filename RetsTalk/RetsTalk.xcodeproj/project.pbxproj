@@ -39,6 +39,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Retrospect/View/Cell/RetrospectCell.swift,
 			);
 			target = 21759C3A2CD8AE0D0033EA52 /* RetsTalk */;
 		};
@@ -57,11 +58,22 @@
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		12A29F122CEB652D007E083C /* Exceptions for "RetsTalk" folder in "Copy Bundle Resources" phase from "RetsTalk" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 21759C392CD8AE0D0033EA52 /* Resources */;
+			membershipExceptions = (
+				Retrospect/View/Cell/RetrospectCell.swift,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		21759C3D2CD8AE0D0033EA52 /* RetsTalk */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				21759C662CD8AE0F0033EA52 /* Exceptions for "RetsTalk" folder in "RetsTalk" target */,
+				12A29F122CEB652D007E083C /* Exceptions for "RetsTalk" folder in "Copy Bundle Resources" phase from "RetsTalk" target */,
 				D59E35E42CD9F389001B6D5A /* Exceptions for "RetsTalk" folder in "NetworkTests" target */,
 			);
 			path = RetsTalk;
