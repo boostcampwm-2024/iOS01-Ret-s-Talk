@@ -8,8 +8,4 @@
 import UIKit
 
 class RetrospectViewController: UIViewController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-    }
 }
