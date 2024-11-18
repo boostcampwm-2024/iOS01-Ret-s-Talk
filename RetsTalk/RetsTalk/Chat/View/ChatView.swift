@@ -40,10 +40,12 @@ final class ChatView: UIView {
         messageInputView.delegate = self
         messageInputView.translatesAutoresizingMaskIntoConstraints = false
         
-        messageInputViewHeightConstraint = messageInputView.heightAnchor.constraint(equalToConstant: 54)
+        messageInputViewHeightConstraint = messageInputView.heightAnchor.constraint(
+            equalToConstant: Metrics.messageInputViewHeight
+        )
         chatViewBottomConstraint = messageInputView.bottomAnchor.constraint(
             equalTo: bottomAnchor,
-            constant: -40
+            constant: Metrics.chatViewBottomFromBottom
         )
         
         guard let messageInputViewHeightConstraint = messageInputViewHeightConstraint,
@@ -112,5 +114,14 @@ extension ChatView: MessageInputViewDelegate {
         UIView.performWithoutAnimation {
             self.layoutIfNeeded()
         }
+    }
+}
+
+// MARK: - Constants
+
+extension ChatView {
+    private enum Metrics {
+        static let messageInputViewHeight = 54.0
+        static let chatViewBottomFromBottom = -40.0
     }
 }
