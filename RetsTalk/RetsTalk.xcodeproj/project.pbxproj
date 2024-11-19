@@ -25,6 +25,13 @@
 			remoteGlobalIDString = 21759C3A2CD8AE0D0033EA52;
 			remoteInfo = RetsTalk;
 		};
+		D5EEA5F52CEC32A600090456 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21759C332CD8AE0D0033EA52 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 21759C3A2CD8AE0D0033EA52;
+			remoteInfo = RetsTalk;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +39,7 @@
 		21759C542CD8AE0F0033EA52 /* RetsTalkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RetsTalkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		21759C782CD8B5560033EA52 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		D59E35DA2CD9F13A001B6D5A /* NetworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NetworkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D5EEA5F12CEC32A600090456 /* PersistTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PersistTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -56,6 +64,24 @@
 			);
 			target = D59E35D92CD9F13A001B6D5A /* NetworkTests */;
 		};
+		D5EEA6022CEC32BE00090456 /* Exceptions for "RetsTalk" folder in "PersistTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Persistent/CoreDataManager.swift,
+				Persistent/EntityRepresentable.swift,
+				Persistent/Persistable.swift,
+				Persistent/PersistFetchRequestable.swift,
+				"Utility/Extensions/Collection+Extension.swift",
+			);
+			target = D5EEA5F02CEC32A600090456 /* PersistTests */;
+		};
+		D5EEA6812CEC3D9500090456 /* Exceptions for "PersistTests" folder in "RetsTalk" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				TestModel.xcdatamodeld,
+			);
+			target = 21759C3A2CD8AE0D0033EA52 /* RetsTalk */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
@@ -75,6 +101,7 @@
 				21759C662CD8AE0F0033EA52 /* Exceptions for "RetsTalk" folder in "RetsTalk" target */,
 				12A29F122CEB652D007E083C /* Exceptions for "RetsTalk" folder in "Copy Bundle Resources" phase from "RetsTalk" target */,
 				D59E35E42CD9F389001B6D5A /* Exceptions for "RetsTalk" folder in "NetworkTests" target */,
+				D5EEA6022CEC32BE00090456 /* Exceptions for "RetsTalk" folder in "PersistTests" target */,
 			);
 			path = RetsTalk;
 			sourceTree = "<group>";
@@ -87,6 +114,14 @@
 		D59E35DB2CD9F13A001B6D5A /* NetworkTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = NetworkTests;
+			sourceTree = "<group>";
+		};
+		D5EEA5F22CEC32A600090456 /* PersistTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D5EEA6812CEC3D9500090456 /* Exceptions for "PersistTests" folder in "RetsTalk" target */,
+			);
+			path = PersistTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -113,6 +148,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D5EEA5EE2CEC32A600090456 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -123,6 +165,7 @@
 				21759C3D2CD8AE0D0033EA52 /* RetsTalk */,
 				21759C572CD8AE0F0033EA52 /* RetsTalkTests */,
 				D59E35DB2CD9F13A001B6D5A /* NetworkTests */,
+				D5EEA5F22CEC32A600090456 /* PersistTests */,
 				21759C3C2CD8AE0D0033EA52 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -133,6 +176,7 @@
 				21759C3B2CD8AE0D0033EA52 /* RetsTalk.app */,
 				21759C542CD8AE0F0033EA52 /* RetsTalkTests.xctest */,
 				D59E35DA2CD9F13A001B6D5A /* NetworkTests.xctest */,
+				D5EEA5F12CEC32A600090456 /* PersistTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -211,6 +255,29 @@
 			productReference = D59E35DA2CD9F13A001B6D5A /* NetworkTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		D5EEA5F02CEC32A600090456 /* PersistTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D5EEA5F92CEC32A600090456 /* Build configuration list for PBXNativeTarget "PersistTests" */;
+			buildPhases = (
+				D5EEA5ED2CEC32A600090456 /* Sources */,
+				D5EEA5EE2CEC32A600090456 /* Frameworks */,
+				D5EEA5EF2CEC32A600090456 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D5EEA5F62CEC32A600090456 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D5EEA5F22CEC32A600090456 /* PersistTests */,
+			);
+			name = PersistTests;
+			packageProductDependencies = (
+			);
+			productName = PersistTests;
+			productReference = D5EEA5F12CEC32A600090456 /* PersistTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -229,6 +296,10 @@
 						TestTargetID = 21759C3A2CD8AE0D0033EA52;
 					};
 					D59E35D92CD9F13A001B6D5A = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = 21759C3A2CD8AE0D0033EA52;
+					};
+					D5EEA5F02CEC32A600090456 = {
 						CreatedOnToolsVersion = 16.1;
 						TestTargetID = 21759C3A2CD8AE0D0033EA52;
 					};
@@ -254,6 +325,7 @@
 				21759C3A2CD8AE0D0033EA52 /* RetsTalk */,
 				21759C532CD8AE0F0033EA52 /* RetsTalkTests */,
 				D59E35D92CD9F13A001B6D5A /* NetworkTests */,
+				D5EEA5F02CEC32A600090456 /* PersistTests */,
 			);
 		};
 /* End PBXProject section */
@@ -275,6 +347,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		D59E35D82CD9F13A001B6D5A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D5EEA5EF2CEC32A600090456 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -305,6 +384,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D5EEA5ED2CEC32A600090456 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -329,6 +415,11 @@
 			isa = PBXTargetDependency;
 			target = 21759C3A2CD8AE0D0033EA52 /* RetsTalk */;
 			targetProxy = D59E35DE2CD9F13A001B6D5A /* PBXContainerItemProxy */;
+		};
+		D5EEA5F62CEC32A600090456 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 21759C3A2CD8AE0D0033EA52 /* RetsTalk */;
+			targetProxy = D5EEA5F52CEC32A600090456 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -612,6 +703,44 @@
 			};
 			name = Release;
 		};
+		D5EEA5F72CEC32A600090456 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B3PWYBKFUK;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.codesquad.boostcamp9.PersistTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RetsTalk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RetsTalk";
+			};
+			name = Debug;
+		};
+		D5EEA5F82CEC32A600090456 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B3PWYBKFUK;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.codesquad.boostcamp9.PersistTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RetsTalk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RetsTalk";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -647,6 +776,15 @@
 			buildConfigurations = (
 				D59E35E12CD9F13A001B6D5A /* Debug */,
 				D59E35E22CD9F13A001B6D5A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D5EEA5F92CEC32A600090456 /* Build configuration list for PBXNativeTarget "PersistTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D5EEA5F72CEC32A600090456 /* Debug */,
+				D5EEA5F82CEC32A600090456 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
