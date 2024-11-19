@@ -8,21 +8,29 @@
 import Foundation
 
 struct Retrospect {
-    let id: UUID = UUID()
-    let author: User
-    let summary: String? = nil
-    var status: Status = .progress(.inputWaiting)
-    let isPinned: Bool = false
-    let createdAt: Date = Date()
+    let id: UUID
+    let user: User
+    var summary: String?
+    var status: Status
+    var isPinned: Bool
+    let createdAt: Date
     
-    enum Status {
-        case finish
-        case progress(LastStatus)
+    init(user: User) {
+        self.id = UUID()
+        self.user = user
+        self.status = .inProgress(.waitingForUserInput)
+        self.isPinned = false
+        self.createdAt = Date()
     }
     
-    enum LastStatus {
-        case responseError
-        case inputWaiting
-        case responseWaiting
+    enum Status {
+        case finished
+        case inProgress(ProgressStatus)
+    }
+    
+    enum ProgressStatus {
+        case responseErrorOccurred
+        case waitingForUserInput
+        case waitingForResponse
     }
 }
