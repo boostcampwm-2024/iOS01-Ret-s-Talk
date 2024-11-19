@@ -17,7 +17,15 @@ final class RetrospectManager: RetrospectManageable {
     }
     
     func create() {
-    
+        let retropsect = Retrospect(author: User(nickname: "alstjr"))
+        
+        let messageManager = MessageManager(
+            retrospectID: retropsect.id,
+            messageManagerListener: self
+        )
+        
+        retrospects.append(retropsect)
+        messageMap[retropsect.id] = messageManager
     }
     
     func delete(_ retrospect: Retrospect) {
