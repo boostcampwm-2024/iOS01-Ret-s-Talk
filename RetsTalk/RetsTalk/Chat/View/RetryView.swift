@@ -8,9 +8,12 @@
 import UIKit
 
 final class RetryView: UIView {
+    
+    // MARK:  UI Components
+
     private let backgroundLabel: UILabel = {
         let label = UILabel()
-        label.text = Constants.backgroundLabelText
+        label.text = Texts.backgroundLabelText
         label.textColor = .blazingOrange
         label.font = UIFont.appFont(.body)
         return label
@@ -18,33 +21,39 @@ final class RetryView: UIView {
     
     private let retryButton: UIButton = {
         let button = UIButton()
-        button.setTitle(Constants.buttonLabelText, for: .normal)
+        button.setTitle(Texts.buttonLabelText, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .blazingOrange
         button.layer.cornerRadius = Metrics.cornerRadius
         return button
     }()
     
+    // MARK: init method
+
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setUp()
+        
+        configureAppearance()
+        setUpSubViewLayout()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        setUp()
+        
+        configureAppearance()
+        setUpSubViewLayout()
     }
     
-    private func setUp() {
+    // MARK: custom method
+
+    private func configureAppearance() {
         backgroundColor = .backgroundRetrospect
         layer.borderWidth = Metrics.backgroundBorderWidth
         layer.borderColor = UIColor.blazingOrange.cgColor
         layer.cornerRadius = Metrics.cornerRadius
-        
-        setUpLayout()
     }
     
-    private func setUpLayout() {
+    private func setUpSubViewLayout() {
         addSubview(retryButton)
         addSubview(backgroundLabel)
         
@@ -73,16 +82,19 @@ final class RetryView: UIView {
 }
 
 private extension RetryView {
+    
+    // MARK: constants
+
     enum Metrics {
         static let cornerRadius = 16.0
         static let backgroundBorderWidth = 0.5
         static let backgroundLabelHeight = 36.0
         static let padding = 10.0
         static let buttonHeight = 44.0
-        static let retryViewHeight = 88.0
+        static let retryViewHeight = 92.0
     }
     
-    enum Constants {
+    enum Texts {
         static let buttonLabelText = "다시 시도"
         static let backgroundLabelText = "인터넷 연결상태가 좋지 않습니다."
     }
