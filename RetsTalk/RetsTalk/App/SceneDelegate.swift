@@ -21,9 +21,4 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = ChattingViewController()
         window?.makeKeyAndVisible()
     }
-    
-    // TODO: - 앱 백그라운드 종료 시 CoreData 저장 추가 예정
-    func sceneDidEnterBackground(_ scene: UIScene) {
-
-    }
 }
