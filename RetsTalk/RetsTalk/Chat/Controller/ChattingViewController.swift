@@ -37,7 +37,7 @@ final class ChattingViewController: UIViewController {
         title = "2024년 11월 19일" // 모델 연결 전 임시 하드코딩
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: Texts.leftBarButtonImageName),
+            image: UIImage(systemImage: .leftChevron),
             style: .plain,
             target: self,
             action: #selector(backwardButtonTapped)
@@ -106,7 +106,7 @@ extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-// MARK: constants
+// MARK: - Constants
 
 extension ChattingViewController {
     enum Texts {

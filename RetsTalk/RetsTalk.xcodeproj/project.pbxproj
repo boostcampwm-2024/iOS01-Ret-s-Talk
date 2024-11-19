@@ -67,11 +67,9 @@
 		D5EEA6022CEC32BE00090456 /* Exceptions for "RetsTalk" folder in "PersistTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Persistent/CoreDataManager.swift,
 				Persistent/EntityRepresentable.swift,
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,
-				"Utility/Extensions/Collection+Extension.swift",
 			);
 			target = D5EEA5F02CEC32A600090456 /* PersistTests */;
 		};
