@@ -15,20 +15,41 @@ final class ChattingViewController: UIViewController {
         Message(role: .assistant, content: "오늘 하루는 어떠셨나요?", createdAt: Date()),
         Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
         Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
+        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
+        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
     ]
     
+    // MARK: lifecycle method
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
         chatView.setTableViewDelegate(self)
-        
+        addTapGestureOfDismissingKeyboard()
         addKeyboardObservers()
     }
     
     override func loadView() {
         view = chatView
     }
-  
+    
+    // MARK: custom method
+
+    private func addTapGestureOfDismissingKeyboard() {
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGestureRecognizer)
+    }
+    
     private func addKeyboardObservers() {
         NotificationCenter.default.addObserver(
             self,
@@ -41,7 +62,11 @@ final class ChattingViewController: UIViewController {
             name: UIResponder.keyboardWillHideNotification, object: nil
         )
     }
-  
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
     @objc private func keyboardWillShow(_ notification: Notification) {
         if let userInfo = notification.userInfo,
            let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
@@ -55,11 +80,13 @@ final class ChattingViewController: UIViewController {
     }
 }
 
+// MARK: - UITableViewDelegate, UITableViewDataSource conformance
+
 extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return messages.count
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = messages[indexPath.row]
         
