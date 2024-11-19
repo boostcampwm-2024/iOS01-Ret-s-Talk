@@ -22,6 +22,15 @@ final class PersistTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
+        
+        persistentManager = CoreDataManager(inMemory: true, name: "TestModel") { loadResult in
+            switch loadResult {
+            case .success:
+                break
+            case let .failure(error):
+                XCTFail(error.localizedDescription)
+            }
+        }
     }
     
     // MARK: Test
