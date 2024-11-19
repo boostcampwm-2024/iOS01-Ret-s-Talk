@@ -8,9 +8,21 @@
 import Foundation
 
 struct Retrospect {
-    let summary: String?
-    let isFinished: Bool
-    let isBookmarked: Bool
-    let createdAt: Date
-    let chat: [Message]
+    let id: UUID = UUID()
+    let author: User
+    let summary: String? = nil
+    var status: Status = .progress(.inputWaiting)
+    let isPinned: Bool = false
+    let createdAt: Date = Date()
+    
+    enum Status {
+        case finish
+        case progress(LastStatus)
+    }
+    
+    enum LastStatus {
+        case responseError
+        case inputWaiting
+        case responseWaiting
+    }
 }
