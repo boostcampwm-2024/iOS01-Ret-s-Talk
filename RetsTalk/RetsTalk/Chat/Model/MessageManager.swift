@@ -26,6 +26,6 @@ final class MessageManager: MessageManageable {
     }
     
     func endRetrospect() {
-        
+        messageManagerListener.didFinishRetrospect(self)
     }
 }

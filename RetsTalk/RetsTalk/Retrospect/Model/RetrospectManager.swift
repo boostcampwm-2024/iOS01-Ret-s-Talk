@@ -32,3 +32,19 @@ final class RetrospectManager: RetrospectManageable {
         
     }
 }
+
+extension RetrospectManager: MessageManagerListener {
+    func didFinishRetrospect(_ messageManager: MessageManager) {
+        guard let index = retrospects
+            .firstIndex(where: { $0.id == messageManager.retrospectID })
+        else { return }
+        retrospects[index].status = .finish
+    }
+    
+    func didChangStatus(_ messageManager: MessageManager, to status: Retrospect.Status) {
+        guard let index = retrospects
+            .firstIndex(where: { $0.id == messageManager.retrospectID })
+        else { return }
+        retrospects[index].status = status
+    }
+}
