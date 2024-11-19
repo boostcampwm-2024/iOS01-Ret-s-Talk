@@ -114,6 +114,10 @@ final class ChatView: UIView {
             chattingTableView.insertRows(at: indexPaths, with: .bottom)
         }
     }
+
+    func updateSendButtonState(isEnabled: Bool) {
+        messageInputView.updateSendButtonState(isEnabled: isEnabled)
+    }
 }
 
 extension ChatView: MessageInputViewDelegate {

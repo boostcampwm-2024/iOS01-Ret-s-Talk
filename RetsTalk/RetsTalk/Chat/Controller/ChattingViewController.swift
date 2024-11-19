@@ -86,10 +86,12 @@ extension ChattingViewController: ChatViewDelegate {
             do {
                 let responseMessage = try await messageManager.send(userMessage)
                 messageManager.messages.append(responseMessage)
-                let responseIndexPath = IndexPath(row: messageManager.messages.count - 1, section: 0)
 
+                let responseIndexPath = IndexPath(row: messageManager.messages.count - 1, section: 0)
                 chatView.insertMessages(at: [responseIndexPath])
+
                 chatView.scrollToBottom()
+                chatView.updateSendButtonState(isEnabled: true)
             } catch {
                 print("response error")
             }

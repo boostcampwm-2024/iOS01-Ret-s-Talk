@@ -93,6 +93,8 @@ final class MessageInputView: UIView {
         sendButton.addAction(UIAction(handler: { _ in
             self.textInputView.resignFirstResponder()
             self.delegate?.sendMessage(with: self.textInputView.text)
+            self.textInputView.text = ""
+            self.updateSendButtonState(isEnabled: false)
         }), for: .touchUpInside)
     }
     
@@ -168,6 +170,10 @@ final class MessageInputView: UIView {
                 constant: -Metrics.sendButtonMargin
             ),
         ])
+    }
+
+    func updateSendButtonState(isEnabled: Bool) {
+        sendButton.isEnabled = isEnabled
     }
 }
 
