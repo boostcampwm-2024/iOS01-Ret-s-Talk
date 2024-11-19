@@ -54,12 +54,14 @@ final class ChattingViewController: UIViewController {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(keyboardWillShow(_:)),
-            name: UIResponder.keyboardWillShowNotification, object: nil
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
         )
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(keyboardWillHide(_:)),
-            name: UIResponder.keyboardWillHideNotification, object: nil
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
         )
     }
     

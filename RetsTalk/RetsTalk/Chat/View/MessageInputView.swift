@@ -69,11 +69,11 @@ final class MessageInputView: UIView {
     // MARK: custom method
     
     private func setUpActions() {
-        sendButton.addAction(UIAction(handler: { _ in
+        sendButton.addAction(UIAction(handler: { [weak self] _ in
             // 메세지 전송 기능 연결
             // 임시 함수 등록
-            self.textInputView.text = nil
-            self.sendButton.isEnabled = false
+            self?.textInputView.text = nil
+            self?.sendButton.isEnabled = false
         }), for: .touchUpInside)
     }
     
@@ -168,17 +168,17 @@ extension MessageInputView: UITextViewDelegate {
     }
     
     func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.textColor == .placeholderText {
-            textView.text = nil
-            textView.textColor = .black
-        }
+        guard textView.textColor == .placeholderText else { return }
+        
+        textView.text = nil
+        textView.textColor = .black
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
-        if textView.text.isEmpty || textView.text == nil {
-            textView.text = Texts.textInputPlaceholder
-            textView.textColor = .placeholderText
-        }
+        guard (textView.text ?? "").isEmpty else { return }
+        
+        textView.text = Texts.textInputPlaceholder
+        textView.textColor = .placeholderText
     }
     
     private func updateHeight(to value: CGFloat) {
@@ -186,10 +186,10 @@ extension MessageInputView: UITextViewDelegate {
     }
 }
 
+// MARK: - Constants
+
 private extension MessageInputView {
     
-    // MARK: constants
-
     private enum Metrics {
         static let backgroundHeight = 40.0
         static let backgroundCornerRadius = 20.0
