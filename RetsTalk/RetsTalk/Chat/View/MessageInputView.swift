@@ -10,6 +10,7 @@ import UIKit
 @MainActor
 protocol MessageInputViewDelegate: AnyObject {
     func updateMessageInputViewHeight(to height: CGFloat)
+    func sendMessage(with text: String)
 }
 
 @MainActor
@@ -91,6 +92,7 @@ final class MessageInputView: UIView {
     private func setUpActions() {
         sendButton.addAction(UIAction(handler: { _ in
             self.textInputView.resignFirstResponder()
+            self.delegate?.sendMessage(with: self.textInputView.text)
         }), for: .touchUpInside)
     }
     

@@ -10,19 +10,18 @@ import SwiftUI
 
 final class ChattingViewController: UIViewController {
     private let chatView = ChatView()
-    
-    private let messages: [Message] = [
-        Message(role: .assistant, content: "오늘 하루는 어떠셨나요?", createdAt: Date()),
-        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
-        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
-    ]
-    
+    private let messageManager: MockMessageManager = MockMessageManager(
+        messageManagerListener: MockMessageManagerListener()
+    )
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
         chatView.setTableViewDelegate(self)
-        
+        chatView.delegate = self
+
         addKeyboardObservers()
+        messageManager.messages = messageManager.fetchMessages(offset: 0, amount: 10)
     }
     
     override func loadView() {
@@ -57,19 +56,43 @@ final class ChattingViewController: UIViewController {
 
 extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return messages.count
+        return messageManager.messages.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let message = messages[indexPath.row]
-        
+        let message = messageManager.messages[indexPath.row]
+
         let cell = tableView.dequeueReusableCell(withIdentifier: "MessageCell", for: indexPath)
-        
         cell.contentConfiguration = UIHostingConfiguration {
             MessageCell(message: message.content, isUser: message.role == .user)
         }
         cell.backgroundColor = .clear
-        
         return cell
+    }
+}
+
+extension ChattingViewController: ChatViewDelegate {
+    func sendMessage(with text: String) {
+        let initialMessageCount = messageManager.messages.count
+        let userMessage = Message(role: .user, content: text, createdAt: Date())
+        // 실제로는 비동기 처리 or 반응형으로 처리가 되어야 함, 아직 미완된 기능이라 일단 넘어가도록 하였음
+        messageManager.messages.append(userMessage)
+        let userIndexPath = IndexPath(row: initialMessageCount, section: 0)
+
+        chatView.insertMessages(at: [userIndexPath])
+        chatView.scrollToBottom()
+
+        Task {
+            do {
+                let responseMessage = try await messageManager.send(userMessage)
+                messageManager.messages.append(responseMessage)
+                let responseIndexPath = IndexPath(row: messageManager.messages.count - 1, section: 0)
+
+                chatView.insertMessages(at: [responseIndexPath])
+                chatView.scrollToBottom()
+            } catch {
+                print("response error")
+            }
+        }
     }
 }

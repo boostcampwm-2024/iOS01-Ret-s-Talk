@@ -8,15 +8,21 @@
 import UIKit
 
 @MainActor
+protocol ChatViewDelegate: AnyObject {
+    func sendMessage(with text: String)
+}
+
+@MainActor
 final class ChatView: UIView {
     private let chattingTableView = UITableView()
     private let messageInputView = MessageInputView()
     private var messageInputViewHeightConstraint: NSLayoutConstraint?
     private var chatViewBottomConstraint: NSLayoutConstraint?
-    
+    var delegate: ChatViewDelegate?
+
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
+
         messageInputViewSetUp()
         chattingTableViewSetUp()
     }
@@ -102,9 +108,19 @@ final class ChatView: UIView {
             self.layoutIfNeeded()
         }
     }
+
+    func insertMessages(at indexPaths: [IndexPath]) {
+        chattingTableView.performBatchUpdates {
+            chattingTableView.insertRows(at: indexPaths, with: .bottom)
+        }
+    }
 }
 
 extension ChatView: MessageInputViewDelegate {
+    func sendMessage(with text: String) {
+        delegate?.sendMessage(with: text)
+    }
+    
     func updateMessageInputViewHeight(to height: CGFloat) {
         guard let messageInputViewHeightConstraint = messageInputViewHeightConstraint else {
             fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
