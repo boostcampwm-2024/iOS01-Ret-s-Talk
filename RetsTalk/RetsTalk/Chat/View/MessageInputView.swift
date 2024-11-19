@@ -16,27 +16,6 @@ protocol MessageInputViewDelegate: AnyObject {
 final class MessageInputView: UIView {
     var delegate: MessageInputViewDelegate?
     
-    // MARK: Constants
-    
-    private enum Metrics {
-        static let backgroundHeight = 40.0
-        static let backgroundCornerRadius = 20.0
-        static let backgroundVerticalMargin = 7.0
-        static let backgroundHorizontalMargin = 16.0
-        
-        static let sendButtonSideLength = 28.0
-        static let sendButtonMargin = 6.0
-        
-        static let textViewVerticalMargin = 10.0
-        static let textViewHorizontalMargin = 10.0
-        static let textViewMaxHeight = 100.0
-    }
-    
-    private enum Texts {
-        static let sendButtonIconName = "arrow.up.circle"
-        static let textInputPlaceholder = "메시지 입력"
-    }
-    
     // MARK: UI Components
     
     private var backgroundView = {
