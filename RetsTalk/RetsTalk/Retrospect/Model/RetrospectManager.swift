@@ -9,7 +9,6 @@ import Foundation
 
 final class RetrospectManager: RetrospectManageable {
     private(set) var retrospects: [Retrospect] = []
-    
     fileprivate var messageMap: [UUID: MessageManageable] = [:]
     
     func fetchRetrospects(offset: Int, mount: Int) {

@@ -8,6 +8,6 @@
 import Foundation
 
 struct User {
-        let id: UUID = UUID()
-        let nickname: String
+    let id: UUID = UUID()
+    let nickname: String
 }
