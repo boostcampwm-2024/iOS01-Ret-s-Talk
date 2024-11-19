@@ -38,15 +38,14 @@ final class PersistTests: XCTestCase {
     
     func test_불러오기_연산으로_특정_엔티티_데이터를_가져올_수_있는지() async throws {
         let persistentManager = try XCTUnwrap(persistentManager)
+        try await addMultipleEntities(ofContents: testableContents)
         let targetContent = try XCTUnwrap(testableContents.randomElement())
         
-        try await addMultipleEntities()
         let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
             NSPredicate(format: "content = %@", argumentArray: [targetContent]),
             NSPredicate(format: "integer = %@", argumentArray: [0]),
         ])
         let request = PersistfetchRequest<TestEntity>(predicate: predicate, fetchLimit: 5)
-        
         let fetchedEntities = try await persistentManager.fetch(by: request)
         
         XCTAssertEqual(fetchedEntities.count, 1)
@@ -55,25 +54,21 @@ final class PersistTests: XCTestCase {
     
     func test_업데이트_연산으로_기존_엔티티_값을_변경할_수_있는지() async throws {
         let persistentManager = try XCTUnwrap(persistentManager)
+        try await addMultipleEntities(ofContents: testableContents)
         let targetContent = try XCTUnwrap(testableContents.randomElement())
+        let sourceEntity = TestEntity(content: targetContent)
         let updatingEntity = TestEntity(content: "아파트아파트")
         
-        try await addMultipleEntities()
-        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-            NSPredicate(format: "content = %@", argumentArray: [targetContent]),
-            NSPredicate(format: "integer = %@", argumentArray: [0]),
-        ])
-        
-        let updatedEntity = try await persistentManager.update(to: updatingEntity, forMatching: predicate)
+        let updatedEntity = try await persistentManager.update(from: sourceEntity, to: updatingEntity)
         
         XCTAssertEqual(updatedEntity.content, updatingEntity.content)
     }
     
     func test_삭제_연산으로_특정_엔티티_데이터를_제거할_수_있는지() async throws {
         let persistentManager = try XCTUnwrap(persistentManager)
+        try await addMultipleEntities(ofContents: testableContents)
         let targetContent = try XCTUnwrap(testableContents.randomElement())
         let targetEntity = TestEntity(content: targetContent)
-        try await addMultipleEntities()
         
         try await persistentManager.delete(contentsOf: [targetEntity])
         
@@ -84,8 +79,8 @@ final class PersistTests: XCTestCase {
     
     // MARK: Supporting method
     
-    private func addMultipleEntities() async throws {
+    private func addMultipleEntities(ofContents contents: [String]) async throws {
         let persistentManager = try XCTUnwrap(persistentManager)
-        _ = try await persistentManager.add(contentsOf: testableContents.map({ TestEntity(content: $0) }))
+        _ = try await persistentManager.add(contentsOf: contents.map({ TestEntity(content: $0) }))
     }
 }
