@@ -39,7 +39,6 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
         if inMemory {
             description.url = URL(fileURLWithPath: "/dev/null")
         }
-        description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
         
         persistentContainer.viewContext.automaticallyMergesChangesFromParent = false
@@ -73,7 +72,6 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
             
             return dictionaryList
         }
-        
         return dictionaryList.map { Entity(dictionary: $0 as? [String: Any] ?? [:]) }
     }
     
@@ -197,7 +195,7 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
     private func deleteOldPersistentHistory() {
         Task {
             let taskContext = newTaskContext()
-            let deleteRequest = NSPersistentHistoryChangeRequest.deleteHistory(before: Date().oneMonthAgo())
+            let deleteRequest = NSPersistentHistoryChangeRequest.deleteHistory(before: Date().aMonthAgo())
             _ = try await taskContext.perform {
                 try taskContext.execute(deleteRequest)
             }
@@ -240,7 +238,7 @@ extension CoreDataManager {
 // MARK: - Extends Date for readability
 
 fileprivate extension Date {
-    func oneMonthAgo() -> Date {
+    func aMonthAgo() -> Date {
         let secondsInOneMonth = TimeInterval(30 * 24 * 60 * 60)
         return self.addingTimeInterval(-secondsInOneMonth)
     }
