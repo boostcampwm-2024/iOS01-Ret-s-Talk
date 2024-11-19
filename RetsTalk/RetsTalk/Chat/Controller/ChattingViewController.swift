@@ -34,7 +34,7 @@ final class ChattingViewController: UIViewController {
     // MARK: custom method
     
     private func setUpNavigationBar() {
-        title = "2024년 11월 19일" //모델 연결 전 임시 하드코딩
+        title = "2024년 11월 19일" // 모델 연결 전 임시 하드코딩
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: Texts.leftBarButtonImageName),
