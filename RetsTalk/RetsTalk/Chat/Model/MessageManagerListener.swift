@@ -7,5 +7,5 @@
 
 protocol MessageManagerListener {
     func didFinishRetrospect(_ messageManager: MessageManager)
-    func didChangStatus(_ messageManager: MessageManager, to status: Retrospect.Status)
+    func didChangeStatus(_ messageManager: MessageManager, to status: Retrospect.Status)
 }

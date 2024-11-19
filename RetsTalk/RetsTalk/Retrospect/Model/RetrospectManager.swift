@@ -41,7 +41,7 @@ extension RetrospectManager: MessageManagerListener {
         retrospects[index].status = .finish
     }
     
-    func didChangStatus(_ messageManager: MessageManager, to status: Retrospect.Status) {
+    func didChangeStatus(_ messageManager: MessageManager, to status: Retrospect.Status) {
         guard let index = retrospects
             .firstIndex(where: { $0.id == messageManager.retrospectID })
         else { return }
