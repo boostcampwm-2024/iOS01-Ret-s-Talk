@@ -9,7 +9,7 @@ import UIKit
 
 final class RetryView: UIView {
     
-    // MARK:  UI Components
+    // MARK: UI Components
 
     private let backgroundLabel: UILabel = {
         let label = UILabel()
