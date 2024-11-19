@@ -1,0 +1,45 @@
+{
+  "configurations" : [
+    {
+      "id" : "4A2E8855-F347-4C39-B9B9-ED5AA5E390E8",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:RetsTalk.xcodeproj",
+      "identifier" : "21759C3A2CD8AE0D0033EA52",
+      "name" : "RetsTalk"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:RetsTalk.xcodeproj",
+        "identifier" : "21759C532CD8AE0F0033EA52",
+        "name" : "RetsTalkTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:RetsTalk.xcodeproj",
+        "identifier" : "D59E35D92CD9F13A001B6D5A",
+        "name" : "NetworkTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:RetsTalk.xcodeproj",
+        "identifier" : "D5EEA5F02CEC32A600090456",
+        "name" : "PersistTests"
+      }
+    }
+  ],
+  "version" : 1
+}
