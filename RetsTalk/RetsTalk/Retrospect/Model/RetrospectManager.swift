@@ -9,22 +9,25 @@ import Foundation
 
 final class RetrospectManager: RetrospectManageable {
     private(set) var retrospects: [Retrospect] = []
-    fileprivate var messageMap: [UUID: MessageManageable] = [:]
+    fileprivate var messageManagerMapping: [UUID: MessageManageable] = [:]
     
-    func fetchRetrospects(offset: Int, mount: Int) {
+    func fetchRetrospects(offset: Int, amount: Int) {
         
     }
     
     func create() {
-        let retropsect = Retrospect(author: User(nickname: "alstjr"))
-        
+        let retropsect = Retrospect(user: User(nickname: "alstjr"))
         let messageManager = MessageManager(
             retrospectID: retropsect.id,
             messageManagerListener: self
         )
         
         retrospects.append(retropsect)
-        messageMap[retropsect.id] = messageManager
+        messageManagerMapping[retropsect.id] = messageManager
+    }
+    
+    func update(_ retrospect: Retrospect) {
+        
     }
     
     func delete(_ retrospect: Retrospect) {
@@ -32,18 +35,20 @@ final class RetrospectManager: RetrospectManageable {
     }
 }
 
+// MARK: - MessageManagerListener conformance
+
 extension RetrospectManager: MessageManagerListener {
-    func didFinishRetrospect(_ messageManager: MessageManager) {
-        guard let index = retrospects
-            .firstIndex(where: { $0.id == messageManager.retrospectID })
+    func didFinishRetrospect(_ messageManager: MessageManageable) {
+        guard let index = retrospects.firstIndex(where: { $0.id == messageManager.retrospectID })
         else { return }
-        retrospects[index].status = .finish
+        
+        retrospects[index].status = .finished
     }
     
-    func didChangeStatus(_ messageManager: MessageManager, to status: Retrospect.Status) {
-        guard let index = retrospects
-            .firstIndex(where: { $0.id == messageManager.retrospectID })
+    func didChangeStatus(_ messageManager: MessageManageable, to status: Retrospect.Status) {
+        guard let index = retrospects.firstIndex(where: { $0.id == messageManager.retrospectID })
         else { return }
+        
         retrospects[index].status = status
     }
 }
