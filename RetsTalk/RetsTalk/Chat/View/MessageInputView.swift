@@ -189,7 +189,6 @@ extension MessageInputView: UITextViewDelegate {
 // MARK: - Constants
 
 private extension MessageInputView {
-    
     private enum Metrics {
         static let backgroundHeight = 40.0
         static let backgroundCornerRadius = 20.0
