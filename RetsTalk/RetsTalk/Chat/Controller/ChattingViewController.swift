@@ -35,6 +35,7 @@ final class ChattingViewController: UIViewController {
         super.viewDidLoad()
         
         setUpNavigationBar()
+        addTapGestureOfDismissingKeyboard()
         addKeyboardObservers()
         chatView.setTableViewDelegate(self)
     }
