@@ -83,4 +83,14 @@ final class MessageManagerTests: XCTestCase {
             XCTAssertEqual(messageResult[index].createdAt, testMessage.createdAt)
         }
     }
+    
+    func test_fetchMessage_제일_최신에_있는_데이터를_불러오는가() async throws {
+        let messageManager = try XCTUnwrap(messageManager)
+        
+        try await messageManager.fetchMessages(offset: 0, amount: 2)
+        
+        let messageResult = messageManager.retrospectSubject.value.chat
+        XCTAssertEqual(messageResult.first?.content, "Hello")
+        XCTAssertEqual(messageResult.last?.content, "영어를 했어요")
+    }
 }
