@@ -9,7 +9,7 @@ import Foundation
 
 final class MessageManager: MessageManageable {
     let retrospectID: UUID
-    private(set) var messages: [Message] = []
+    @Published private(set) var messages: [Message] = []
     private(set) var messageManagerListener: MessageManagerListener
     let persistent: Persistable
     
@@ -24,14 +24,15 @@ final class MessageManager: MessageManageable {
     }
     
     func fetchMessages(offset: Int, amount: Int) async throws {
-        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-            NSPredicate(format: "retrospectID = %@", argumentArray: [retrospectID]),
-        ])
+        let predicate = NSPredicate(format: "retrospectID = %@", argumentArray: [retrospectID])
+        let sortDescriptor = NSSortDescriptor(key: "createdAt", ascending: false)
         let request = PersistfetchRequest<Message>(
             predicate: predicate,
+            sortDescriptors: [sortDescriptor],
             fetchLimit: amount,
             fetchOffset: offset
         )
+        
         let fetchedEntities = try await persistent.fetch(by: request)
         
         messages.append(contentsOf: fetchedEntities)
