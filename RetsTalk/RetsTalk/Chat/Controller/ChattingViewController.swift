@@ -30,13 +30,13 @@ final class ChattingViewController: UIViewController {
     ]
     
     // MARK: lifecycle method
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        chatView.setTableViewDelegate(self)
-        addTapGestureOfDismissingKeyboard()
+        setUpNavigationBar()
         addKeyboardObservers()
+        chatView.setTableViewDelegate(self)
     }
     
     override func loadView() {
@@ -48,6 +48,26 @@ final class ChattingViewController: UIViewController {
     private func addTapGestureOfDismissingKeyboard() {
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGestureRecognizer)
+    }
+    
+    private func setUpNavigationBar() {
+        title = "2024년 11월 19일" // 모델 연결 전 임시 하드코딩
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemImage: .leftChevron),
+            style: .plain,
+            target: self,
+            action: #selector(backwardButtonTapped)
+        )
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            title: Texts.rightBarButtonTitle,
+            style: .plain,
+            target: self,
+            action: #selector(endChattingButtonTapped)
+        )
+        
+        navigationItem.leftBarButtonItem?.tintColor = .blazingOrange
+        navigationItem.rightBarButtonItem?.tintColor = .blazingOrange
     }
     
     private func addKeyboardObservers() {
@@ -80,6 +100,14 @@ final class ChattingViewController: UIViewController {
     @objc private func keyboardWillHide(_ notification: Notification) {
         chatView.updateBottomConstraintForKeyboard(height: 40)
     }
+    
+    @objc private func backwardButtonTapped() {
+        // navigationController: pop 작업
+    }
+    
+    @objc private func endChattingButtonTapped() {
+        // 대화끝내기 alert 작업
+    }
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource conformance
@@ -100,5 +128,14 @@ extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
         cell.backgroundColor = .clear
         
         return cell
+    }
+}
+
+// MARK: - Constants
+
+extension ChattingViewController {
+    enum Texts {
+        static let leftBarButtonImageName = "chevron.left"
+        static let rightBarButtonTitle = "끝내기"
     }
 }
