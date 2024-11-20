@@ -44,6 +44,21 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		12A2A34F2CED8570007E083C /* Exceptions for "RetsTalk" folder in "RetsTalkTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Chat/Model/Message.swift,
+				Chat/Model/MessageManageable.swift,
+				Chat/Model/MessageManager.swift,
+				Chat/Model/MessageManagerListener.swift,
+				Persistent/EntityRepresentable.swift,
+				Persistent/Persistable.swift,
+				Persistent/PersistFetchRequestable.swift,
+				Retrospect/Model/Retrospect.swift,
+				User/Model/User.swift,
+			);
+			target = 21759C532CD8AE0F0033EA52 /* RetsTalkTests */;
+		};
 		21759C662CD8AE0F0033EA52 /* Exceptions for "RetsTalk" folder in "RetsTalk" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -72,6 +87,7 @@
 				Persistent/Implementation/CoreDataManager.swift,
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,
+				"Utility/Extensions/Collection+Extension.swift",
 			);
 			target = D5EEA5F02CEC32A600090456 /* PersistTests */;
 		};
@@ -100,6 +116,7 @@
 			exceptions = (
 				21759C662CD8AE0F0033EA52 /* Exceptions for "RetsTalk" folder in "RetsTalk" target */,
 				12A29F122CEB652D007E083C /* Exceptions for "RetsTalk" folder in "Copy Bundle Resources" phase from "RetsTalk" target */,
+				12A2A34F2CED8570007E083C /* Exceptions for "RetsTalk" folder in "RetsTalkTests" target */,
 				D59E35E42CD9F389001B6D5A /* Exceptions for "RetsTalk" folder in "NetworkTests" target */,
 				D5EEA6022CEC32BE00090456 /* Exceptions for "RetsTalk" folder in "PersistTests" target */,
 			);
