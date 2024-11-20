@@ -6,22 +6,22 @@
 //
 
 import Foundation
+import Combine
 
 final class MessageManager: MessageManageable {
-    let retrospectID: UUID
-    private(set) var messages: [Message] = []
+    var retrospectSubject: CurrentValueSubject<Retrospect, Never>
     private(set) var messageManagerListener: MessageManagerListener
     
-    init(retrospectID: UUID, messageManagerListener: MessageManagerListener) {
-        self.retrospectID = retrospectID
+    init(retrospect: Retrospect, messageManagerListener: MessageManagerListener) {
+        self.retrospectSubject = CurrentValueSubject(retrospect)
         self.messageManagerListener = messageManagerListener
     }
     
-    func fetchMessages(offset: Int, amount: Int) {
+    func fetchMessages(offset: Int, amount: Int) async throws {
         
     }
     
-    func send(_ message: Message) {
+    func send(_ message: Message) async throws {
         
     }
     
