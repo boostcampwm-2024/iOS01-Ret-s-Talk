@@ -72,6 +72,7 @@
 				Persistent/Implementation/CoreDataManager.swift,
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,
+				"Utility/Extensions/Collection+Extension.swift",
 			);
 			target = D5EEA5F02CEC32A600090456 /* PersistTests */;
 		};
