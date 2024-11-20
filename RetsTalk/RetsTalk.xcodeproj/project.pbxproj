@@ -54,8 +54,12 @@
 		D59E35E42CD9F389001B6D5A /* Exceptions for "RetsTalk" folder in "NetworkTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Network/CLOVAStudioAPI.swift,
-				Network/CLOVAStudioNetworkManager.swift,
+				Chat/Model/AssistantMessageProvider.swift,
+				Chat/Model/Message.swift,
+				Network/CLOVAStudio/CLOVAStudioAPI.swift,
+				Network/CLOVAStudio/CLOVAStudioManager.swift,
+				"Network/CLOVAStudio/CLOVAStudioManager+AssistantMessageProvider.swift",
+				Network/CLOVAStudio/CLOVAStudioSecret.swift,
 				Network/HTTPMethod.swift,
 				Network/NetworkError.swift,
 				Network/NetworkRequestable.swift,
@@ -68,6 +72,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Persistent/EntityRepresentable.swift,
+				Persistent/Implementation/CoreDataManager.swift,
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,
 				"Utility/Extensions/Collection+Extension.swift",
@@ -296,7 +301,6 @@
 					};
 					D59E35D92CD9F13A001B6D5A = {
 						CreatedOnToolsVersion = 16.1;
-						TestTargetID = 21759C3A2CD8AE0D0033EA52;
 					};
 					D5EEA5F02CEC32A600090456 = {
 						CreatedOnToolsVersion = 16.1;
@@ -659,7 +663,6 @@
 		D59E35E12CD9F13A001B6D5A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B3PWYBKFUK;
@@ -675,14 +678,12 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RetsTalk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RetsTalk";
 			};
 			name = Debug;
 		};
 		D59E35E22CD9F13A001B6D5A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B3PWYBKFUK;
@@ -698,7 +699,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RetsTalk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RetsTalk";
 			};
 			name = Release;
 		};
@@ -719,7 +719,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RetsTalk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RetsTalk";
 			};
@@ -742,7 +742,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RetsTalk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RetsTalk";
 			};
