@@ -7,6 +7,4 @@
 
 import Foundation
 
-final class MockMessageManagerListener: MessageManagerListener {
-    
-}
+final class MockMessageManagerListener: MessageManagerListener {}
