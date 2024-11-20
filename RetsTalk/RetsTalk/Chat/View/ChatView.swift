@@ -112,16 +112,14 @@ final class ChatView: UIView {
     }
 
     func insertMessages(at indexPaths: [IndexPath]) {
-        print("🔵 \(chattingTableView.numberOfRows(inSection: 0))")
-        print(indexPaths)
         chattingTableView.performBatchUpdates {
             chattingTableView.insertRows(at: indexPaths, with: .bottom)
             scrollToBottom()
         }
     }
 
-    func updateSendButtonState(isEnabled: Bool) {
-        messageInputView.updateSendButtonState(isEnabled: isEnabled)
+    func updateRequestInProgressState(_ state: Bool) {
+        messageInputView.updateRequestInProgressState(state)
     }
 }
 

@@ -152,7 +152,7 @@ extension ChattingViewController: ChatViewDelegate {
             do {
                 try await messageManager.send(userMessage)
 
-                chatView.updateSendButtonState(isEnabled: true)
+                chatView.updateRequestInProgressState(false)
             } catch {
                 print("response error")
             }
