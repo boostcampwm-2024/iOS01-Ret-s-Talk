@@ -23,8 +23,18 @@ final class MessageManager: MessageManageable {
         self.persistent = persistent
     }
     
-    func fetchMessages(offset: Int, amount: Int) {
+    func fetchMessages(offset: Int, amount: Int) async throws {
+        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            NSPredicate(format: "retrospectID = %@", argumentArray: [retrospectID]),
+        ])
+        let request = PersistfetchRequest<Message>(
+            predicate: predicate,
+            fetchLimit: amount,
+            fetchOffset: offset
+        )
+        let fetchedEntities = try await persistent.fetch(by: request)
         
+        messages.append(contentsOf: fetchedEntities)
     }
     
     func send(_ message: Message) {

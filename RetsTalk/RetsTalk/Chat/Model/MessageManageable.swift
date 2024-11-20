@@ -12,7 +12,7 @@ protocol MessageManageable {
     var messages: [Message] { get }
     var messageManagerListener: MessageManagerListener { get }
     
-    func fetchMessages(offset: Int, amount: Int)
+    func fetchMessages(offset: Int, amount: Int) async throws
     func send(_ message: Message)
     func endRetrospect()
 }
