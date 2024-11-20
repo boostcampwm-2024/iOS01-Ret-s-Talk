@@ -25,7 +25,7 @@ final class MessageManager: MessageManageable {
     
     func fetchMessages(offset: Int, amount: Int) async throws {
         let predicate = NSPredicate(format: "retrospectID = %@", argumentArray: [retrospectSubject.value.id])
-        let sortDescriptor = NSSortDescriptor(key: "createdAt", ascending: false)
+        let sortDescriptor = NSSortDescriptor(key: "createdAt", ascending: true)
         let request = PersistfetchRequest<Message>(
             predicate: predicate,
             sortDescriptors: [sortDescriptor],

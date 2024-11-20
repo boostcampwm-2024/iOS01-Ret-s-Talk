@@ -73,11 +73,12 @@ final class MessageManagerTests: XCTestCase {
     func test_fetchMessage_데이터를_순서대로_불러오는가() async throws {
         let messageManager = try XCTUnwrap(messageManager)
         
-        testableMessages.sort { $0.createdAt > $1.createdAt }
+        testableMessages.sort { $0.createdAt < $1.createdAt }
         try await messageManager.fetchMessages(offset: 0, amount: testableMessages.count)
         
         let messageResult = messageManager.retrospectSubject.value.chat
         for (index, testMessage) in testableMessages.enumerated() {
+            print(testMessage.content)
             XCTAssertEqual(messageResult[index].content, testMessage.content)
             XCTAssertEqual(messageResult[index].createdAt, testMessage.createdAt)
         }
