@@ -1,5 +1,5 @@
 //
-//  CLOVAStudioNetworkManager.swift
+//  CLOVAStudioManager.swift
 //  RetsTalk
 //
 //  Created on 11/6/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class CLOVAStudioNetworkManager: NetworkRequestable {
+final class CLOVAStudioManager: NetworkRequestable {
     let urlSession: URLSession
     
     init(urlSession: URLSession) {
@@ -34,7 +34,7 @@ final class CLOVAStudioNetworkManager: NetworkRequestable {
 
 // MARK: - Status
 
-fileprivate extension CLOVAStudioNetworkManager {
+fileprivate extension CLOVAStudioManager {
     enum Status: Int, CustomStringConvertible {
         case success = 200
         case noContent = 204

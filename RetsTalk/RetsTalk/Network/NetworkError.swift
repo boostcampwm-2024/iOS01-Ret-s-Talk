@@ -5,13 +5,15 @@
 //  Created by HanSeung on 11/5/24.
 //
 
-enum NetworkError: Error {
+import Foundation
+
+enum NetworkError: LocalizedError {
     case invalidURL
     case badResponse
     case serverError(message: String)
     case unknown
     
-    var description: String {
+    var errorDescription: String? {
         switch self {
         case .invalidURL:
             "유효하지 않은 URL입니다."

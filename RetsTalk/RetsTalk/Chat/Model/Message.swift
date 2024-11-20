@@ -12,7 +12,7 @@ struct Message {
     let content: String
     let createdAt: Date
     
-    enum Role {
+    enum Role: String {
         case user
         case assistant
     }
