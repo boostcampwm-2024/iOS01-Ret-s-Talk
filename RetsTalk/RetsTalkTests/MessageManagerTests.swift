@@ -23,9 +23,9 @@ final class MessageManagerTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-                
+        
         messageManager = MessageManager(
-            retrospectID: UUID(),
+            retrospect: Retrospect(user: User(nickname: "testUser")),
             messageManagerListener: MockRetrospectManager(),
             persistent: MockMessageStore(messages: testableMessages)
         )
@@ -38,7 +38,8 @@ final class MessageManagerTests: XCTestCase {
         
         try await messageManager.fetchMessages(offset: 0, amount: 2)
         
-        XCTAssertEqual(messageManager.messages.count, 2)
+        let messageResult = messageManager.retrospectSubject.value.chat
+        XCTAssertEqual(messageResult.count, 2)
     }
     
     func test_fetchMessage_많은_메시지를_불러오는가() async throws {
@@ -46,7 +47,8 @@ final class MessageManagerTests: XCTestCase {
         
         try await messageManager.fetchMessages(offset: 0, amount: 5)
         
-        XCTAssertEqual(messageManager.messages.count, 5)
+        let messageResult = messageManager.retrospectSubject.value.chat
+        XCTAssertEqual(messageResult.count, 5)
     }
     
     func test_fetchMessage_가지고_있는_부분보다_많은_메시지를_요청하면_최대까지만_불러오는가() async throws {
@@ -54,7 +56,8 @@ final class MessageManagerTests: XCTestCase {
         
         try await messageManager.fetchMessages(offset: 0, amount: 10)
         
-        XCTAssertEqual(messageManager.messages.count, 7)
+        let messageResult = messageManager.retrospectSubject.value.chat
+        XCTAssertEqual(messageResult.count, 7)
     }
     
     func test_fetchMessage_데이터를_추가로_불러올_수_있는가() async throws {
@@ -63,7 +66,8 @@ final class MessageManagerTests: XCTestCase {
         try await messageManager.fetchMessages(offset: 0, amount: 2)
         try await messageManager.fetchMessages(offset: 2, amount: 2)
         
-        XCTAssertEqual(messageManager.messages.count, 4)
+        let messageResult = messageManager.retrospectSubject.value.chat
+        XCTAssertEqual(messageResult.count, 4)
     }
     
     func test_fetchMessage_데이터를_순서대로_불러오는가() async throws {
