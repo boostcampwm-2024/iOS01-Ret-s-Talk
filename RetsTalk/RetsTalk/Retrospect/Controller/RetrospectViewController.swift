@@ -9,7 +9,7 @@ import UIKit
 
 final class RetrospectListViewController: UIViewController {
     
-    // MARK: Lifecycle method
+    // MARK: ViewController lifecycle method
 
     override func viewDidLoad() {
         super.viewDidLoad()
