@@ -58,10 +58,20 @@ private extension RetrospectCell {
         }
         
         private func formatDateToKoreanStyle(date: Date) -> String {
+            let calendar = Calendar.current
             let dateFormatter = DateFormatter()
             dateFormatter.locale = Locale(identifier: Texts.dateLocaleIdentifier)
-            dateFormatter.dateFormat = Texts.dateFormat
-            return dateFormatter.string(from: date)
+            
+            switch date {
+            case _ where calendar.isDateInToday(date):
+                dateFormatter.dateFormat = Texts.dateFormatRecent
+                return dateFormatter.string(from: date)
+            case _ where calendar.isDateInYesterday(date):
+                return Texts.dateFormatYesterday
+            default:
+                dateFormatter.dateFormat = Texts.dateFormat
+                return dateFormatter.string(from: date)
+            }
         }
     }
 }
@@ -84,8 +94,10 @@ private extension RetrospectCell {
         static let cellBackgroundColorName = "BackgroundRetrospect"
         static let cellStrokeColorName = "StrokeRetrospect"
         
-        static let dateFormat = "M월 d일 EEEE"
         static let dateLocaleIdentifier = "ko_KR"
+        static let dateFormat = "M월 d일 EEEE"
+        static let dateFormatRecent = "오늘 a h:mm"
+        static let dateFormatYesterday = "어제"
     }
 }
 
