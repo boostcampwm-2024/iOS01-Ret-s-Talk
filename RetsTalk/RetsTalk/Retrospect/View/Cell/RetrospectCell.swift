@@ -94,7 +94,6 @@ struct RetrospectView_Previews: PreviewProvider {
         ZStack {
             Color("BackgroundMain").edgesIgnoringSafeArea(.all)
             VStack {
-                RetrospectCell(summary: "디버깅에 너무너무 지친 하루였지만, 원인을 찾고 문제를 해결하면서 더 단단해진 뭐 그런 기분이다. 최대한 길이를 길게 써보려고 함", createdAt: Date())
                 RetrospectCell(summary: "디버깅에 지친 하루이다.", createdAt: Date())
                 RetrospectCell(summary: "디버깅에 지친 하루였지만, 원인을 찾고 문제를 해결하면서 조금 더 단단해진 기분이다.", createdAt: Date())
             }

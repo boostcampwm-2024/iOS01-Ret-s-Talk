@@ -47,7 +47,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Retrospect/View/Cell/RetrospectCell.swift,
 			);
 			target = 21759C3A2CD8AE0D0033EA52 /* RetsTalk */;
 		};
