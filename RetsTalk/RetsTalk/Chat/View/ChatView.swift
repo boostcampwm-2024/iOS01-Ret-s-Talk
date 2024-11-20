@@ -23,13 +23,15 @@ final class ChatView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
 
+        backgroundColor = .backgroundMain
         messageInputViewSetUp()
         chattingTableViewSetUp()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        
+
+        backgroundColor = .backgroundMain
         messageInputViewSetUp()
         chattingTableViewSetUp()
     }

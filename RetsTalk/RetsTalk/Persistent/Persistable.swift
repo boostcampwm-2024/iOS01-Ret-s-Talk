@@ -24,8 +24,8 @@ protocol Persistable {
     ///   - predicate: 최신화 할 엔티티 데이터를 찾기 위한 조건문.
     /// - Returns: 최신화 된 엔티티 데이터.
     func update<Entity>(
-        to entity: Entity,
-        forMatching predicate: NSPredicate
+        from sourceEntity: Entity,
+        to updatingEntity: Entity
     ) async throws -> Entity where Entity: EntityRepresentable
     /// 로컬 저장소에서 엔티티 데이터를 제거합니다.
     /// - Parameter entities: 제거할 엔티티 데이터.

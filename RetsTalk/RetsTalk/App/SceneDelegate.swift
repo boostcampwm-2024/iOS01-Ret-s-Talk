@@ -16,14 +16,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         options connectionOptions: UIScene.ConnectionOptions
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-
+        
+        let navigationController = customedNavigationController(rootViewController: RetrospectListViewController())
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = ChattingViewController()
+        window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
     }
-    
-    // TODO: - 앱 백그라운드 종료 시 CoreData 저장 추가 예정
-    func sceneDidEnterBackground(_ scene: UIScene) {
+}
 
+// MARK: - Custom method
+
+extension SceneDelegate {
+    private func customedNavigationController(rootViewController: UIViewController) -> UINavigationController {
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        navigationController.navigationBar.scrollEdgeAppearance = appearance
+        navigationController.navigationBar.backgroundColor = .systemBackground
+        return navigationController
     }
 }

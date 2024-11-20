@@ -8,7 +8,8 @@
 protocol RetrospectManageable {
     var retrospects: [Retrospect] { get }
     
-    func fetchRetrospects(offset: Int, mount: Int)
+    func fetchRetrospects(offset: Int, amount: Int)
     func create()
+    func update(_ retrospect: Retrospect)
     func delete(_ retrospect: Retrospect)
 }

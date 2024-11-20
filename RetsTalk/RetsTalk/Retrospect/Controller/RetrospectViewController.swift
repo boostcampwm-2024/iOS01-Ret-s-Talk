@@ -7,5 +7,29 @@
 
 import UIKit
 
-class RetrospectViewController: UIViewController {
+final class RetrospectListViewController: UIViewController {
+    
+    // MARK: ViewController lifecycle method
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        view.backgroundColor = .backgroundMain // 임시 배경색 설정
+        setUpNavigationBar()
+    }
+    
+    // MARK: Custom method
+
+    private func setUpNavigationBar() {
+        title = Texts.titleLabelText
+        navigationController?.navigationBar.prefersLargeTitles = true
+    }
+}
+
+// MARK: - Constants
+
+extension RetrospectListViewController {
+    enum Texts {
+        static let titleLabelText = "회고"
+    }
 }

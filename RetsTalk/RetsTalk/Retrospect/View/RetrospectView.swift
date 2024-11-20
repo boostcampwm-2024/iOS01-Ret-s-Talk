@@ -7,6 +7,6 @@
 
 import UIKit
 
-final class RetrospectView: UIView {
+final class RetrospectListView: UIView {
     
 }

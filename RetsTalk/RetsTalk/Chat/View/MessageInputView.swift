@@ -45,6 +45,7 @@ final class MessageInputView: UIView {
         )
         button.setImage(icon, for: .normal)
         button.tintColor = UIColor.appColor(.blazingOrange)
+        button.isEnabled = false
         return button
     }()
     
@@ -72,9 +73,8 @@ final class MessageInputView: UIView {
         sendButton.addAction(UIAction(handler: { [weak self] _ in
             guard let self = self else { return }
             
-            self.textInputView.resignFirstResponder()
             self.delegate?.sendMessage(self, with: self.textInputView.text)
-            self.textInputView.text = ""
+            self.textInputView.text = nil
             self.updateSendButtonState(isEnabled: false)
         }), for: .touchUpInside)
     }
@@ -164,32 +164,33 @@ extension MessageInputView: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         let contentSize = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .infinity))
         let inputViewHeight = contentSize.height + 2 * Metrics.textViewVerticalMargin
-        let backgroundVerticalMargin = 2 * Metrics.backgroundVerticalMargin
-        
-        if inputViewHeight <= Metrics.textViewMaxHeight {
-            textView.isScrollEnabled = false
-            delegate?.updateMessageInputViewHeight(self, to: max(
-                Metrics.backgroundHeight + backgroundVerticalMargin,
-                inputViewHeight + backgroundVerticalMargin
-            ))
+
+        textView.isScrollEnabled = inputViewHeight > Metrics.textViewMaxHeight
+        if textView.isScrollEnabled {
+            updateHeight(to: Metrics.textViewMaxHeight)
         } else {
-            textView.isScrollEnabled = true
-            delegate?.updateMessageInputViewHeight(self, to: Metrics.textViewMaxHeight + backgroundVerticalMargin)
+            updateHeight(to: max(Metrics.backgroundHeight, inputViewHeight))
         }
+        
+        sendButton.isEnabled = !(textView.text?.isEmpty ?? true)
     }
     
     func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.textColor == .placeholderText {
-            textView.textColor = .black
-            textView.text = ""
-        }
+        guard textView.textColor == .placeholderText else { return }
+        
+        textView.text = nil
+        textView.textColor = .black
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
-        if textView.text.isEmpty {
-            textView.textColor = .placeholderText
-            textView.text = Texts.textInputPlaceholder
-        }
+        guard (textView.text ?? "").isEmpty else { return }
+        
+        textView.text = Texts.textInputPlaceholder
+        textView.textColor = .placeholderText
+    }
+    
+    private func updateHeight(to value: CGFloat) {
+        delegate?.updateMessageInputViewHeight(self, to: value + 2 * Metrics.backgroundVerticalMargin)
     }
 }
 

@@ -7,4 +7,12 @@
 
 import Foundation
 
-final class MockMessageManagerListener: MessageManagerListener {}
+final class MockMessageManagerListener: MessageManagerListener {
+    func didFinishRetrospect(_ messageManager: any MessageManageable) {
+
+    }
+    
+    func didChangeStatus(_ messageManager: any MessageManageable, to status: Retrospect.Status) {
+        
+    }
+}
