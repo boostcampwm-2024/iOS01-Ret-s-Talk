@@ -40,7 +40,6 @@
 		21759C782CD8B5560033EA52 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		D59E35DA2CD9F13A001B6D5A /* NetworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NetworkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5EEA5F12CEC32A600090456 /* PersistTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PersistTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D5EEA9F52CEC777600090456 /* RetsTalk.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = RetsTalk.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -84,7 +83,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Persistent/EntityRepresentable.swift,
-				Persistent/Implementation/CoreDataManager.swift,
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,
 				"Utility/Extensions/Collection+Extension.swift",
@@ -178,7 +176,6 @@
 		21759C322CD8AE0D0033EA52 = {
 			isa = PBXGroup;
 			children = (
-				D5EEA9F52CEC777600090456 /* RetsTalk.xctestplan */,
 				21759C782CD8B5560033EA52 /* .swiftlint.yml */,
 				21759C3D2CD8AE0D0033EA52 /* RetsTalk */,
 				21759C572CD8AE0F0033EA52 /* RetsTalkTests */,

@@ -8,22 +8,30 @@
 import UIKit
 
 @MainActor
+protocol ChatViewDelegate: AnyObject {
+    func sendMessage(_ chatView: ChatView, with text: String)
+}
+
+@MainActor
 final class ChatView: UIView {
     private let chattingTableView = UITableView()
     private let messageInputView = MessageInputView()
     private var messageInputViewHeightConstraint: NSLayoutConstraint?
     private var chatViewBottomConstraint: NSLayoutConstraint?
-    
+    weak var delegate: ChatViewDelegate?
+
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
+
+        backgroundColor = .backgroundMain
         messageInputViewSetUp()
         chattingTableViewSetUp()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        
+
+        backgroundColor = .backgroundMain
         messageInputViewSetUp()
         chattingTableViewSetUp()
     }
@@ -40,10 +48,12 @@ final class ChatView: UIView {
         messageInputView.delegate = self
         messageInputView.translatesAutoresizingMaskIntoConstraints = false
         
-        messageInputViewHeightConstraint = messageInputView.heightAnchor.constraint(equalToConstant: 54)
+        messageInputViewHeightConstraint = messageInputView.heightAnchor.constraint(
+            equalToConstant: Metrics.messageInputViewHeight
+        )
         chatViewBottomConstraint = messageInputView.bottomAnchor.constraint(
             equalTo: bottomAnchor,
-            constant: -40
+            constant: Metrics.chatViewBottomFromBottom
         )
         
         guard let messageInputViewHeightConstraint = messageInputViewHeightConstraint,
@@ -100,10 +110,29 @@ final class ChatView: UIView {
             self.layoutIfNeeded()
         }
     }
+
+    func insertMessages(at indexPaths: [IndexPath]) {
+        print("🔵 \(chattingTableView.numberOfRows(inSection: 0))")
+        print(indexPaths)
+        chattingTableView.performBatchUpdates {
+            chattingTableView.insertRows(at: indexPaths, with: .bottom)
+            scrollToBottom()
+        }
+    }
+
+    func updateSendButtonState(isEnabled: Bool) {
+        messageInputView.updateSendButtonState(isEnabled: isEnabled)
+    }
 }
 
+// MARK: - MessageInputViewDelegate
+
 extension ChatView: MessageInputViewDelegate {
-    func updateMessageInputViewHeight(to height: CGFloat) {
+    func sendMessage(_ messageInputView: MessageInputView, with text: String) {
+        delegate?.sendMessage(self, with: text)
+    }
+    
+    func updateMessageInputViewHeight(_ messageInputView: MessageInputView, to height: CGFloat) {
         guard let messageInputViewHeightConstraint = messageInputViewHeightConstraint else {
             fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
         }
@@ -112,5 +141,14 @@ extension ChatView: MessageInputViewDelegate {
         UIView.performWithoutAnimation {
             self.layoutIfNeeded()
         }
+    }
+}
+
+// MARK: - Constants
+
+private extension ChatView {
+    enum Metrics {
+        static let messageInputViewHeight = 54.0
+        static let chatViewBottomFromBottom = -40.0
     }
 }

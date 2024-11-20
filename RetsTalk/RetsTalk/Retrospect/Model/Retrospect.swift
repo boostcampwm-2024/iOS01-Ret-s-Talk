@@ -14,6 +14,7 @@ struct Retrospect {
     var status: Status
     var isPinned: Bool
     let createdAt: Date
+    var chat: [Message]
     
     init(user: User) {
         self.id = UUID()
@@ -21,6 +22,7 @@ struct Retrospect {
         self.status = .inProgress(.waitingForUserInput)
         self.isPinned = false
         self.createdAt = Date()
+        self.chat = []
     }
     
     enum Status {

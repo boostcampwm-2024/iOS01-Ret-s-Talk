@@ -6,25 +6,25 @@
 //
 
 import Foundation
+import Combine
 
 final class MessageManager: MessageManageable {
-    let retrospectID: UUID
-    @Published private(set) var messages: [Message] = []
+    var retrospectSubject: CurrentValueSubject<Retrospect, Never>
     private(set) var messageManagerListener: MessageManagerListener
     let persistent: Persistable
-    
+
     init(
-        retrospectID: UUID,
+        retrospect: Retrospect,
         messageManagerListener: MessageManagerListener,
         persistent: Persistable
     ) {
-        self.retrospectID = retrospectID
+        self.retrospectSubject = CurrentValueSubject(retrospect)
         self.messageManagerListener = messageManagerListener
         self.persistent = persistent
     }
     
     func fetchMessages(offset: Int, amount: Int) async throws {
-        let predicate = NSPredicate(format: "retrospectID = %@", argumentArray: [retrospectID])
+        let predicate = NSPredicate(format: "retrospectID = %@", argumentArray: [retrospectSubject.value.id])
         let sortDescriptor = NSSortDescriptor(key: "createdAt", ascending: false)
         let request = PersistfetchRequest<Message>(
             predicate: predicate,
@@ -35,10 +35,10 @@ final class MessageManager: MessageManageable {
         
         let fetchedEntities = try await persistent.fetch(by: request)
         
-        messages.append(contentsOf: fetchedEntities)
+        retrospectSubject.value.chat.append(contentsOf: fetchedEntities)
     }
     
-    func send(_ message: Message) {
+    func send(_ message: Message) async throws {
         
     }
     

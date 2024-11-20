@@ -18,7 +18,7 @@ final class RetrospectManager: RetrospectManageable {
     func create() {
         let retropsect = Retrospect(user: User(nickname: "alstjr"))
         let messageManager = MessageManager(
-            retrospectID: retropsect.id,
+            retrospect: retropsect,
             messageManagerListener: self
         )
         
@@ -39,14 +39,14 @@ final class RetrospectManager: RetrospectManageable {
 
 extension RetrospectManager: MessageManagerListener {
     func didFinishRetrospect(_ messageManager: MessageManageable) {
-        guard let index = retrospects.firstIndex(where: { $0.id == messageManager.retrospectID })
+        guard let index = retrospects.firstIndex(where: { $0.id == messageManager.retrospectSubject.value.id })
         else { return }
         
         retrospects[index].status = .finished
     }
     
     func didChangeStatus(_ messageManager: MessageManageable, to status: Retrospect.Status) {
-        guard let index = retrospects.firstIndex(where: { $0.id == messageManager.retrospectID })
+        guard let index = retrospects.firstIndex(where: { $0.id == messageManager.retrospectSubject.value.id })
         else { return }
         
         retrospects[index].status = status

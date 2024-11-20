@@ -7,24 +7,30 @@
 
 import UIKit
 import SwiftUI
+import Combine
 
 final class ChattingViewController: UIViewController {
     private let chatView = ChatView()
-    
-    private let messages: [Message] = [
-        Message(role: .assistant, content: "오늘 하루는 어떠셨나요?", createdAt: Date()),
-        Message(role: .user, content: "데모를 진행했어요~", createdAt: Date()),
-        Message(role: .assistant, content: "그렇군요 잘했어요~", createdAt: Date()),
-    ]
-    
-    // MARK: lifecycle method
-    
+    private let messageManager: MockMessageManager = MockMessageManager(
+        messageManagerListener: MockMessageManagerListener()
+    )
+    private var cancellables: Set<AnyCancellable> = []
+
+    // MARK: ViewController lifecycle method
+  
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setUpNavigationBar()
-        addKeyboardObservers()
         chatView.setTableViewDelegate(self)
+        chatView.delegate = self
+      
+        setUpNavigationBar()
+        addTapGestureOfDismissingKeyboard()
+        addKeyboardObservers()
+        
+        messageManager.fetchMessages(offset: Numeric.initialOffset, amount: Numeric.amount)
+
+        observeMessages()
     }
     
     override func loadView() {
@@ -32,6 +38,11 @@ final class ChattingViewController: UIViewController {
     }
     
     // MARK: custom method
+
+    private func addTapGestureOfDismissingKeyboard() {
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGestureRecognizer)
+    }
     
     private func setUpNavigationBar() {
         title = "2024년 11월 19일" // 모델 연결 전 임시 하드코딩
@@ -57,13 +68,19 @@ final class ChattingViewController: UIViewController {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(keyboardWillShow(_:)),
-            name: UIResponder.keyboardWillShowNotification, object: nil
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
         )
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(keyboardWillHide(_:)),
-            name: UIResponder.keyboardWillHideNotification, object: nil
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
         )
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     @objc private func keyboardWillShow(_ notification: Notification) {
@@ -77,7 +94,27 @@ final class ChattingViewController: UIViewController {
     @objc private func keyboardWillHide(_ notification: Notification) {
         chatView.updateBottomConstraintForKeyboard(height: 40)
     }
-    
+
+    private func observeMessages() {
+        var previousMessageCount = messageManager.messages.count
+
+        messageManager.messagePublisher
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] newMessages in
+                guard let self = self else { return }
+
+                let oldCount = previousMessageCount
+                let newCount = newMessages.count
+                previousMessageCount = newCount
+                guard oldCount < newCount else { return }
+
+                let newIndexPaths = (oldCount..<newCount).map { IndexPath(row: $0, section: 0) }
+                chatView.insertMessages(at: newIndexPaths)
+            }
+            .store(in: &cancellables)
+    }
+
     @objc private func backwardButtonTapped() {
         // navigationController: pop 작업
     }
@@ -87,28 +124,51 @@ final class ChattingViewController: UIViewController {
     }
 }
 
+// MARK: - UITableViewDelegate, UITableViewDataSource conformance
+
 extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return messages.count
+        return messageManager.messages.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let message = messages[indexPath.row]
-        
+        let message = messageManager.messages[indexPath.row]
+
         let cell = tableView.dequeueReusableCell(withIdentifier: "MessageCell", for: indexPath)
-        
         cell.contentConfiguration = UIHostingConfiguration {
             MessageCell(message: message.content, isUser: message.role == .user)
         }
         cell.backgroundColor = .clear
-        
         return cell
+    }
+}
+
+// MARK: - ChatViewDelegate
+
+extension ChattingViewController: ChatViewDelegate {
+    func sendMessage(_ chatView: ChatView, with text: String) {
+        let userMessage = Message(role: .user, content: text, createdAt: Date())
+        // 실제로는 비동기 처리 or 반응형으로 처리가 되어야 함, 아직 미완된 기능이라 일단 넘어가도록 하였음
+        Task {
+            do {
+                try await messageManager.send(userMessage)
+
+                chatView.updateSendButtonState(isEnabled: true)
+            } catch {
+                print("response error")
+            }
+        }
     }
 }
 
 // MARK: - Constants
 
-extension ChattingViewController {
+private extension ChattingViewController {
+    enum Numeric {
+        static let initialOffset = 0
+        static let amount = 10
+    }
+
     enum Texts {
         static let leftBarButtonImageName = "chevron.left"
         static let rightBarButtonTitle = "끝내기"
