@@ -21,23 +21,11 @@ final class MockMessageStore: Persistable {
     func fetch<Entity>(
         by request: any PersistFetchRequestable<Entity>
     ) async throws -> [Entity] where Entity: EntityRepresentable {
-        let sortedMessages = messages.sorted { lhs, rhs in
-            for descriptor in request.sortDescriptors {
-                if let key = descriptor.key, key == "createdAt" {
-                    let comparisonResult = lhs.createdAt.compare(rhs.createdAt)
-                    if descriptor.ascending {
-                        return comparisonResult == .orderedAscending
-                    } else {
-                        return comparisonResult == .orderedDescending
-                    }
-                }
-            }
-            return false
-        }
-        
+
+        messages.sort { $0.createdAt < $1.createdAt }
         let firstIndex = request.fetchOffset
-        let lastIndex = min(request.fetchOffset + request.fetchLimit, sortedMessages.count)
-        let fetchMessages = Array(sortedMessages[firstIndex..<lastIndex])
+        let lastIndex = min(request.fetchOffset + request.fetchLimit, messages.count)
+        let fetchMessages = Array(messages[firstIndex..<lastIndex])
         
         guard let result = fetchMessages as? [Entity] else {
             return []

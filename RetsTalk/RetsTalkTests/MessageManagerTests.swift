@@ -78,7 +78,6 @@ final class MessageManagerTests: XCTestCase {
         
         let messageResult = messageManager.retrospectSubject.value.chat
         for (index, testMessage) in testableMessages.enumerated() {
-            print(testMessage.content)
             XCTAssertEqual(messageResult[index].content, testMessage.content)
             XCTAssertEqual(messageResult[index].createdAt, testMessage.createdAt)
         }
