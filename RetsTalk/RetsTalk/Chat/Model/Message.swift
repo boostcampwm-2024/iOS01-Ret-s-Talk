@@ -35,5 +35,5 @@ extension Message: EntityRepresentable {
         createdAt = dictionary["createdAt"] as? Date ?? Date()
     }
     
-    static let entityName = "Message"
+    static let entityName = "MessageEntity"
 }
