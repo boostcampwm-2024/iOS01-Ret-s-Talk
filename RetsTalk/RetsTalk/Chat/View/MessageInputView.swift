@@ -9,34 +9,13 @@ import UIKit
 
 @MainActor
 protocol MessageInputViewDelegate: AnyObject {
-    func updateMessageInputViewHeight(to height: CGFloat)
-    func sendMessage(with text: String)
+    func updateMessageInputViewHeight(_ messageInputView: MessageInputView, to height: CGFloat)
+    func sendMessage(_ messageInputView: MessageInputView, with text: String)
 }
 
 @MainActor
 final class MessageInputView: UIView {
-    var delegate: MessageInputViewDelegate?
-    
-    // MARK: Constants
-    
-    private enum Metrics {
-        static let backgroundHeight = 40.0
-        static let backgroundCornerRadius = 20.0
-        static let backgroundVerticalMargin = 7.0
-        static let backgroundHorizontalMargin = 16.0
-        
-        static let sendButtonSideLength = 28.0
-        static let sendButtonMargin = 6.0
-        
-        static let textViewVerticalMargin = 10.0
-        static let textViewHorizontalMargin = 10.0
-        static let textViewMaxHeight = 100.0
-    }
-    
-    private enum Texts {
-        static let sendButtonIconName = "arrow.up.circle"
-        static let textInputPlaceholder = "메시지 입력"
-    }
+    weak var delegate: MessageInputViewDelegate?
     
     // MARK: UI Components
     
@@ -69,8 +48,8 @@ final class MessageInputView: UIView {
         return button
     }()
     
-    // MARK: init
-    
+    // MARK: Init
+
     init() {
         super.init(frame: .zero)
         
@@ -87,12 +66,14 @@ final class MessageInputView: UIView {
         textInputView.delegate = self
     }
     
-    // MARK: custom method
-    
+    // MARK: Custom method
+
     private func setUpActions() {
-        sendButton.addAction(UIAction(handler: { _ in
+        sendButton.addAction(UIAction(handler: { [weak self] _ in
+            guard let self = self else { return }
+            
             self.textInputView.resignFirstResponder()
-            self.delegate?.sendMessage(with: self.textInputView.text)
+            self.delegate?.sendMessage(self, with: self.textInputView.text)
             self.textInputView.text = ""
             self.updateSendButtonState(isEnabled: false)
         }), for: .touchUpInside)
@@ -177,6 +158,8 @@ final class MessageInputView: UIView {
     }
 }
 
+// MARK: - UITextViewDelegate
+
 extension MessageInputView: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         let contentSize = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .infinity))
@@ -185,13 +168,13 @@ extension MessageInputView: UITextViewDelegate {
         
         if inputViewHeight <= Metrics.textViewMaxHeight {
             textView.isScrollEnabled = false
-            delegate?.updateMessageInputViewHeight(to: max(
+            delegate?.updateMessageInputViewHeight(self, to: max(
                 Metrics.backgroundHeight + backgroundVerticalMargin,
                 inputViewHeight + backgroundVerticalMargin
             ))
         } else {
             textView.isScrollEnabled = true
-            delegate?.updateMessageInputViewHeight(to: Metrics.textViewMaxHeight + backgroundVerticalMargin)
+            delegate?.updateMessageInputViewHeight(self, to: Metrics.textViewMaxHeight + backgroundVerticalMargin)
         }
     }
     
@@ -207,5 +190,28 @@ extension MessageInputView: UITextViewDelegate {
             textView.textColor = .placeholderText
             textView.text = Texts.textInputPlaceholder
         }
+    }
+}
+
+// MARK: - Constants
+
+private extension MessageInputView {
+    enum Metrics {
+        static let backgroundHeight = 40.0
+        static let backgroundCornerRadius = 20.0
+        static let backgroundVerticalMargin = 7.0
+        static let backgroundHorizontalMargin = 16.0
+
+        static let sendButtonSideLength = 28.0
+        static let sendButtonMargin = 6.0
+
+        static let textViewVerticalMargin = 10.0
+        static let textViewHorizontalMargin = 10.0
+        static let textViewMaxHeight = 100.0
+    }
+
+    enum Texts {
+        static let sendButtonIconName = "arrow.up.circle"
+        static let textInputPlaceholder = "메시지 입력"
     }
 }

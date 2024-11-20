@@ -9,7 +9,7 @@ import UIKit
 
 @MainActor
 protocol ChatViewDelegate: AnyObject {
-    func sendMessage(with text: String)
+    func sendMessage(_ chatView: ChatView, with text: String)
 }
 
 @MainActor
@@ -18,7 +18,7 @@ final class ChatView: UIView {
     private let messageInputView = MessageInputView()
     private var messageInputViewHeightConstraint: NSLayoutConstraint?
     private var chatViewBottomConstraint: NSLayoutConstraint?
-    var delegate: ChatViewDelegate?
+    weak var delegate: ChatViewDelegate?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -110,8 +110,11 @@ final class ChatView: UIView {
     }
 
     func insertMessages(at indexPaths: [IndexPath]) {
+        print("🔵 \(chattingTableView.numberOfRows(inSection: 0))")
+        print(indexPaths)
         chattingTableView.performBatchUpdates {
             chattingTableView.insertRows(at: indexPaths, with: .bottom)
+            scrollToBottom()
         }
     }
 
@@ -120,12 +123,14 @@ final class ChatView: UIView {
     }
 }
 
+// MARK: - MessageInputViewDelegate
+
 extension ChatView: MessageInputViewDelegate {
-    func sendMessage(with text: String) {
-        delegate?.sendMessage(with: text)
+    func sendMessage(_ messageInputView: MessageInputView, with text: String) {
+        delegate?.sendMessage(self, with: text)
     }
     
-    func updateMessageInputViewHeight(to height: CGFloat) {
+    func updateMessageInputViewHeight(_ messageInputView: MessageInputView, to height: CGFloat) {
         guard let messageInputViewHeightConstraint = messageInputViewHeightConstraint else {
             fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
         }
@@ -139,8 +144,8 @@ extension ChatView: MessageInputViewDelegate {
 
 // MARK: - Constants
 
-extension ChatView {
-    private enum Metrics {
+private extension ChatView {
+    enum Metrics {
         static let messageInputViewHeight = 54.0
         static let chatViewBottomFromBottom = -40.0
     }
