@@ -18,7 +18,7 @@ final class MockServerTests: XCTestCase {
         let sessionConfiguration = URLSessionConfiguration.ephemeral
         sessionConfiguration.protocolClasses = [MockURLProtocol.self]
         let mockSession = URLSession(configuration: sessionConfiguration)
-        fetcher = CLOVAStudioNetworkManager(urlSession: mockSession)
+        fetcher = CLOVAStudioManager(urlSession: mockSession)
     }
     
     override func tearDown() {
