@@ -96,16 +96,15 @@ final class ChattingViewController: UIViewController {
     }
 
     private func observeMessages() {
-        var previousMessageCount = messageManager.messages.count
+        var previousMessageCount = messageManager.retrospectSubject.value.chat.count
 
-        messageManager.messagePublisher
-            .dropFirst()
+        messageManager.retrospectSubject
             .receive(on: RunLoop.main)
             .sink { [weak self] newMessages in
                 guard let self = self else { return }
 
                 let oldCount = previousMessageCount
-                let newCount = newMessages.count
+                let newCount = newMessages.chat.count
                 previousMessageCount = newCount
                 guard oldCount < newCount else { return }
 
@@ -128,11 +127,11 @@ final class ChattingViewController: UIViewController {
 
 extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return messageManager.messages.count
+        return messageManager.retrospectSubject.value.chat.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let message = messageManager.messages[indexPath.row]
+        let message = messageManager.retrospectSubject.value.chat[indexPath.row]
 
         let cell = tableView.dequeueReusableCell(withIdentifier: "MessageCell", for: indexPath)
         cell.contentConfiguration = UIHostingConfiguration {
