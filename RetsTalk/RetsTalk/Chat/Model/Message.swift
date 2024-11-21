@@ -12,8 +12,28 @@ struct Message {
     let content: String
     let createdAt: Date
     
-    enum Role {
+    enum Role: String {
         case user
         case assistant
     }
+}
+
+// MARK: - EntityRepresentable
+
+extension Message: EntityRepresentable {
+    var mappingDictionary: [String: Any] {
+        [
+            "role": role,
+            "content": content,
+            "createdAt": createdAt,
+        ]
+    }
+    
+    init(dictionary: [String: Any]) {
+        role = dictionary["role"] as? Role ?? .user
+        content = dictionary["content"] as? String ?? ""
+        createdAt = dictionary["createdAt"] as? Date ?? Date()
+    }
+    
+    static let entityName = "MessageEntity"
 }
