@@ -9,7 +9,7 @@ import UIKit
 import SwiftUI
 import Combine
 
-final class ChattingViewController: UIViewController {
+final class ChattingViewController: AlertPresentableViewController {
     private let chatView = ChatView()
     private let messageManager: MockMessageManager = MockMessageManager(
         messageManagerListener: MockMessageManagerListener()
@@ -117,10 +117,27 @@ final class ChattingViewController: UIViewController {
 
     @objc private func backwardButtonTapped() {
         // navigationController: pop 작업
+        messageManager.messageManagerListener.didChangeStatus(messageManager, to: .inProgress(.waitingForUserInput))
+        navigationController?.popViewController(animated: true)
     }
     
     @objc private func endChattingButtonTapped() {
         // 대화끝내기 alert 작업
+        let actions: [UIAlertAction] = [
+            UIAlertAction(
+                title: Texts.cancel,
+                style: .default, handler: { _ in print("취소됨") }
+            ),
+            UIAlertAction(
+                title: Texts.end,
+                style: .destructive, handler: { [weak self] _ in
+                    print("끝냄")
+                    self?.messageManager.endRetrospect()
+                    self?.navigationController?.popViewController(animated: true)
+                }
+            ),
+        ]
+        presentAlert(for: .end, actions: actions)
     }
 }
 
