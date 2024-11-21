@@ -27,11 +27,14 @@ struct CLOVAStudioAPI: URLRequestComposable {
 extension CLOVAStudioAPI {
     enum Path: CustomStringConvertible {
         case chatbot
+        case summary
         
         var description: String {
             switch self {
             case .chatbot:
                 "/testapp/v1/chat-completions/HCX-DASH-001"
+            case .summary:
+                "/testapp/v1/api-tools/summarization/v2/\(CLOVAStudioSecret.APP_ID)"
             }
         }
     }

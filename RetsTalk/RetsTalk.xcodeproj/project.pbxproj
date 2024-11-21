@@ -74,6 +74,7 @@
 				Network/CLOVAStudio/CLOVAStudioAPI.swift,
 				Network/CLOVAStudio/CLOVAStudioManager.swift,
 				"Network/CLOVAStudio/CLOVAStudioManager+AssistantMessageProvider.swift",
+				"Network/CLOVAStudio/CLOVAStudioManager+SummaryProvider.swift",
 				Network/CLOVAStudio/CLOVAStudioSecret.swift,
 				Network/HTTPMethod.swift,
 				Network/NetworkError.swift,
