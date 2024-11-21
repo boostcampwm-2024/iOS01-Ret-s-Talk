@@ -14,7 +14,7 @@ struct Retrospect {
     var status: Status
     var isPinned: Bool
     let createdAt: Date
-    var chat: [Message]
+    private(set) var chat: [Message]
     
     init(user: User) {
         self.id = UUID()
@@ -25,7 +25,19 @@ struct Retrospect {
         self.chat = []
     }
     
-    enum Status {
+    mutating func insertFront(contentsOf messages: [Message]) {
+        chat.insert(contentsOf: messages, at: chat.startIndex)
+    }
+    
+    mutating func append(contentsOf messages: [Message]) {
+        chat.append(contentsOf: messages)
+    }
+}
+
+// MARK: Retrospect State
+
+extension Retrospect {
+    enum Status: Equatable {
         case finished
         case inProgress(ProgressStatus)
     }

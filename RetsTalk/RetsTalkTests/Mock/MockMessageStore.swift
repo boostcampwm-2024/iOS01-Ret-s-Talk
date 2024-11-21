@@ -15,7 +15,7 @@ final class MockMessageStore: Persistable {
     }
     
     func add<Entity>(contentsOf entities: [Entity]) async throws -> [Entity] {
-        return entities
+        entities
     }
     
     func fetch<Entity>(
@@ -35,10 +35,8 @@ final class MockMessageStore: Persistable {
     }
     
     func update<Entity>(from sourceEntity: Entity, to updatingEntity: Entity) async throws -> Entity {
-        return updatingEntity
+        updatingEntity
     }
     
-    func delete<Entity>(contentsOf entities: [Entity]) async throws {
-        
-    }
+    func delete<Entity>(contentsOf entities: [Entity]) async throws {}
 }
