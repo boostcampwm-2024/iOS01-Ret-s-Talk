@@ -6,13 +6,35 @@
 //
 
 import Foundation
+import Combine
 
 final class RetrospectManager: RetrospectManageable {
-    private(set) var retrospects: [Retrospect] = []
-    fileprivate var messageManagerMapping: [UUID: MessageManageable] = [:]
+    private(set) var user: User
+    private var retrospects: [Retrospect] {
+        didSet { retrospectsSubject.send(retrospects) }
+    }
+    private(set) var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
+    fileprivate var messageManagerMapping: [UUID: MessageManageable]
+    
+    init(retrospects: [Retrospect]) {
+        self.retrospects = retrospects
+        self.retrospectsSubject = CurrentValueSubject(retrospects)
+        self.messageManagerMapping = [:]
+    }
     
     func fetchRetrospects(offset: Int, amount: Int) {
+        let predicate = NSPredicate(format: "retrospectID = %@", argumentArray: [user.id])
+        let sortDescriptor = NSSortDescriptor(key: "createdAt", ascending: true)
+        let request = PersistfetchRequest<Message>(
+            predicate: predicate,
+            sortDescriptors: [sortDescriptor],
+            fetchLimit: amount,
+            fetchOffset: offset
+        )
         
+        let fetchedEntities = try await persistent.fetch(by: request)
+        
+        retrospects.chat.append(contentsOf: fetchedEntities)
     }
     
     func create() {
