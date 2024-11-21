@@ -33,7 +33,7 @@ extension CLOVAStudioManager: SummaryProvider {
         let texts: [String]
         
         init(chat: [Message]) {
-            let intro = "아래 문장들을 - 없이 한 문장으로 요약해줘"
+            let intro = "아래 대화들을 경험과 느낀점을 가지고 한문장으로 요약을 해줘 이 문장은 요약에 포함하면 절대 안돼"
             let chat = chat.map { $0.content }
             print([intro] + chat)
             self.texts = [intro] + chat
