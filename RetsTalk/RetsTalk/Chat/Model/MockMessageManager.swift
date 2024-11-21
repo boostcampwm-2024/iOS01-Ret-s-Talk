@@ -36,19 +36,19 @@ final class MockMessageManager: MessageManageable {
         ]
 
         if dummies.count < offset+amount {
-            retrospectSubject.value.chat += dummies
+            retrospectSubject.value.append(contentsOf: dummies)
         } else {
             let returnValue = Array(dummies[offset..<offset+amount])
-            retrospectSubject.value.chat += returnValue
+            retrospectSubject.value.append(contentsOf: returnValue)
         }
     }
 
     @MainActor
     func send(_ message: Message) async throws {
-        retrospectSubject.value.chat.append(message)
+        retrospectSubject.value.append(contentsOf: [message])
         try await Task.sleep(nanoseconds: 1_000_000_000)
         let responseMessage = Message(role: .assistant, content: "이것은 응답값 입니다.", createdAt: Date())
-        retrospectSubject.value.chat.append(responseMessage)
+        retrospectSubject.value.append(contentsOf: [responseMessage])
     }
     
     func endRetrospect() {}
