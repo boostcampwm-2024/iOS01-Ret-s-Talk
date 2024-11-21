@@ -11,12 +11,24 @@ import Combine
 
 final class ChattingViewController: AlertPresentableViewController {
     private let chatView = ChatView()
-    private let messageManager: MockMessageManager = MockMessageManager(
-        messageManagerListener: MockMessageManagerListener()
-    )
+    private let messageManager: MessageManageable
     private var retrospect: Retrospect { messageManager.retrospectSubject.value }
+    private var messageManagerListener: MessageManagerListener { messageManager.messageManagerListener }
     private var cancellables: Set<AnyCancellable> = []
 
+    init(messageManager: MessageManageable) {
+        self.messageManager = messageManager
+
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+
+        // TODO: 모델 구체화 되면 해당 바탕으로 초기값 넣어주기
+
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: ViewController lifecycle method
   
     override func viewDidLoad() {
@@ -28,9 +40,8 @@ final class ChattingViewController: AlertPresentableViewController {
         setUpNavigationBar()
         addTapGestureOfDismissingKeyboard()
         addKeyboardObservers()
-        
-        messageManager.fetchMessages(offset: Numeric.initialOffset, amount: Numeric.amount)
 
+        initialMessageFetch()
         observeMessages()
     }
     
@@ -86,7 +97,7 @@ final class ChattingViewController: AlertPresentableViewController {
     
     @objc private func keyboardWillShow(_ notification: Notification) {
         if let userInfo = notification.userInfo,
-           let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+            let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
             let keyboardHeight = keyboardFrame.height
             chatView.updateBottomConstraintForKeyboard(height: keyboardHeight)
         }
@@ -139,6 +150,16 @@ final class ChattingViewController: AlertPresentableViewController {
         ]
         presentAlert(for: .end, actions: actions)
     }
+
+    private func initialMessageFetch() {
+        Task {
+            do {
+                try await messageManager.fetchMessages(offset: Numeric.initialOffset, amount: Numeric.amount)
+            } catch {
+                
+            }
+        }
+    }
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource conformance
@@ -168,9 +189,11 @@ extension ChattingViewController: ChatViewDelegate {
         // 실제로는 비동기 처리 or 반응형으로 처리가 되어야 함, 아직 미완된 기능이라 일단 넘어가도록 하였음
         Task {
             do {
+                messageManagerListener.didChangeStatus(messageManager, to: .inProgress(.waitingForResponse))
                 try await messageManager.send(userMessage)
 
                 chatView.updateRequestInProgressState(false)
+                messageManagerListener.didChangeStatus(messageManager, to: .inProgress(.waitingForUserInput))
             } catch {
                 print("response error")
             }
@@ -183,11 +206,13 @@ extension ChattingViewController: ChatViewDelegate {
 private extension ChattingViewController {
     enum Numeric {
         static let initialOffset = 0
-        static let amount = 10
+        static let amount = 20
     }
 
     enum Texts {
         static let leftBarButtonImageName = "chevron.left"
         static let rightBarButtonTitle = "끝내기"
+        static let cancel = "취소"
+        static let end = "대화 끝내기"
     }
 }
