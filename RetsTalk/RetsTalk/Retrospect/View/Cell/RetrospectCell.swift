@@ -1,3 +1,10 @@
+//
+//  RetrospectCell.swift
+//  RetsTalk
+//
+//  Created on 11/21/24.
+//
+
 import SwiftUI
 
 struct RetrospectCell: View {
@@ -59,7 +66,6 @@ private extension RetrospectCell {
         
         }
     }
-
 
 // MARK: - Constants
 

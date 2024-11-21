@@ -7,7 +7,7 @@
 
 struct CLOVAStudioAPI: URLRequestComposable {
     static let scheme = "https"
-    static let host = "clovastudio.stream.ntruss.com"
+    static let host = "clovastudio.apigw.ntruss.com"
     
     var path: Path
     var method: HTTPMethod
