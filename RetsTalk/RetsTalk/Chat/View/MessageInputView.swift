@@ -18,9 +18,10 @@ final class MessageInputView: UIView {
     weak var delegate: MessageInputViewDelegate?
     private var isRequestInProgress = false {
         didSet {
-            if textInputView.text.isNotEmpty { updateSendButtonState(isEnabled: !isRequestInProgress) }
+            updateSendButtonState()
         }
     }
+    private var isPlaceholderDeactivated = false
 
     // MARK: UI Components
     
@@ -159,7 +160,14 @@ final class MessageInputView: UIView {
         ])
     }
 
-    func updateSendButtonState(isEnabled: Bool) {
+    private func updateSendButtonState() {
+        if !isRequestInProgress && textInputView.text.isNotEmpty && isPlaceholderDeactivated {
+            sendButton.isEnabled = true
+        } else {
+            sendButton.isEnabled = false
+        }
+    }
+
     private func updateSendButtonState(isEnabled: Bool) {
         sendButton.isEnabled = isEnabled
     }
@@ -182,12 +190,7 @@ extension MessageInputView: UITextViewDelegate {
         } else {
             updateHeight(to: max(Metrics.backgroundHeight, inputViewHeight))
         }
-        updateSendButtonState(
-            isEnabled:
-                textView.text?.trimmingCharacters(in: .whitespacesAndNewlines).isNotEmpty ?? false
-                &&
-                !isRequestInProgress
-        )
+        updateSendButtonState()
     }
     
     func textViewDidBeginEditing(_ textView: UITextView) {
@@ -195,6 +198,7 @@ extension MessageInputView: UITextViewDelegate {
         
         textView.text = nil
         textView.textColor = .black
+        isPlaceholderDeactivated = true
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
@@ -202,6 +206,7 @@ extension MessageInputView: UITextViewDelegate {
         
         textView.text = Texts.textInputPlaceholder
         textView.textColor = .placeholderText
+        isPlaceholderDeactivated = false
     }
     
     private func updateHeight(to value: CGFloat) {
