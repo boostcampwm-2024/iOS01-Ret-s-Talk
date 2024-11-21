@@ -58,10 +58,19 @@ final class RetrospectListView: UIView {
         createRetrospectButton.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            createRetrospectButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -10),
-            createRetrospectButton.centerXAnchor.constraint(equalTo: centerXAnchor),
-            createRetrospectButton.widthAnchor.constraint(equalToConstant: Metrics.diameter),
-            createRetrospectButton.heightAnchor.constraint(equalToConstant: Metrics.diameter),
+            createRetrospectButton.bottomAnchor.constraint(
+                equalTo: safeAreaLayoutGuide.bottomAnchor,
+                constant: Metrics.buttonBottomAnchorConstant
+            ),
+            createRetrospectButton.centerXAnchor.constraint(
+                equalTo: centerXAnchor
+            ),
+            createRetrospectButton.widthAnchor.constraint(
+                equalToConstant: Metrics.diameter
+            ),
+            createRetrospectButton.heightAnchor.constraint(
+                equalToConstant: Metrics.diameter
+            ),
         ])
         sendSubviewToBack(retrospectListTableView)
 
@@ -83,6 +92,7 @@ final class RetrospectListView: UIView {
 private extension RetrospectListView {
     enum Metrics {
         static let diameter = 80.0
+        static let buttonBottomAnchorConstant = -10.0
     }
     
     enum Texts {
