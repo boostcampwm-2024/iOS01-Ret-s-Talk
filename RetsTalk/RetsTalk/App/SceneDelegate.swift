@@ -17,7 +17,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        let navigationController = customedNavigationController(rootViewController: RetrospectListViewController())
+        let retrospectStorage = CoreDataManager(inMemory: true, name: "RetsTalk") { loadResult in
+            switch loadResult {
+            case .success:
+                break
+            case let .failure(error):
+                print(error)
+            }
+        }
+        let assistantMessageProvider = CLOVAStudioManager(urlSession: .shared)
+        let messageManager = MessageManager(
+            retrospect: Retrospect(user: User(nickname: "JK")),
+            persistent: retrospectStorage,
+            assistantMessageProvider: assistantMessageProvider,
+            messageManagerListener: MockMessageManagerListener()
+        )
+        let rootViewController = ChattingViewController(messageManager: messageManager)
+        let navigationController = customedNavigationController(rootViewController: rootViewController)
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()

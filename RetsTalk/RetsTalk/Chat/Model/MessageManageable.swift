@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-protocol MessageManageable {
+protocol MessageManageable: Sendable {
     var retrospectSubject: CurrentValueSubject<Retrospect, Never> { get }
     var messageManagerListener: MessageManagerListener { get }
     

@@ -8,6 +8,7 @@
 import Foundation
 
 struct Message {
+    var retrospectID: UUID
     let role: Role
     let content: String
     let createdAt: Date
@@ -23,14 +24,16 @@ struct Message {
 extension Message: EntityRepresentable {
     var mappingDictionary: [String: Any] {
         [
-            "role": role,
+            "retrospectID": retrospectID,
+            "isUser": role == .user,
             "content": content,
             "createdAt": createdAt,
         ]
     }
     
     init(dictionary: [String: Any]) {
-        role = dictionary["role"] as? Role ?? .user
+        retrospectID = dictionary["retrospectID"] as? UUID ?? UUID()
+        role = (dictionary["isUser"] as? Bool ?? true) ? .user : .assistant
         content = dictionary["content"] as? String ?? ""
         createdAt = dictionary["createdAt"] as? Date ?? Date()
     }

@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-final class MessageManager: MessageManageable {
+final class MessageManager: MessageManageable, @unchecked Sendable {
     private var retrospect: Retrospect {
         didSet { retrospectSubject.send(retrospect) }
     }
@@ -47,7 +47,8 @@ final class MessageManager: MessageManageable {
         retrospect.append(contentsOf: addedUserMessage)
         retrospect.status = .inProgress(.waitingForResponse)
         do {
-            let assistantMessage = try await assistantMessageProvider.requestAssistantMessage(for: retrospect.chat)
+            var assistantMessage = try await assistantMessageProvider.requestAssistantMessage(for: retrospect.chat)
+            assistantMessage.retrospectID = retrospect.id
             let addedAssistantMessage = try await messageStorage.add(contentsOf: [assistantMessage])
             retrospect.append(contentsOf: addedAssistantMessage)
             retrospect.status = .inProgress(.waitingForUserInput)

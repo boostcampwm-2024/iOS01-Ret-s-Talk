@@ -34,7 +34,7 @@ struct Retrospect {
     }
 }
 
-// MARK: Retrospect State
+// MARK: - Retrospect State
 
 extension Retrospect {
     enum Status: Equatable {

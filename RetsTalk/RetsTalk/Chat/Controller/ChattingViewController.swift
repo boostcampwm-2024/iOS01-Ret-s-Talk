@@ -11,7 +11,7 @@ import Combine
 
 final class ChattingViewController: AlertPresentableViewController {
     private let chatView = ChatView()
-    private let messageManager: MessageManageable
+    private nonisolated let messageManager: MessageManageable
     private var retrospect: Retrospect { messageManager.retrospectSubject.value }
     private var messageManagerListener: MessageManagerListener { messageManager.messageManagerListener }
     private var cancellables: Set<AnyCancellable> = []
@@ -23,13 +23,14 @@ final class ChattingViewController: AlertPresentableViewController {
     }
     
     required init?(coder: NSCoder) {
-
-        // TODO: 모델 구체화 되면 해당 바탕으로 초기값 넣어주기
-
         fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: ViewController lifecycle method
+    
+    override func loadView() {
+        view = chatView
+    }
   
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,8 +46,19 @@ final class ChattingViewController: AlertPresentableViewController {
         observeMessages()
     }
     
-    override func loadView() {
-        view = chatView
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        Task {
+            try await messageManager.send(
+                Message(
+                    retrospectID: retrospect.id,
+                    role: .user,
+                    content: "",
+                    createdAt: Date()
+                )
+            )
+        }
     }
     
     // MARK: custom method
@@ -116,12 +128,13 @@ final class ChattingViewController: AlertPresentableViewController {
                 guard let self = self else { return }
 
                 let oldCount = previousMessageCount
-                let newCount = newMessages.chat.count
+                let newCount = newMessages.chat.filter({ !$0.content.isEmpty }).count
                 previousMessageCount = newCount
                 guard oldCount < newCount else { return }
 
                 let newIndexPaths = (oldCount..<newCount).map { IndexPath(row: $0, section: 0) }
                 chatView.insertMessages(at: newIndexPaths)
+                chatView.scrollToBottom()
             }
             .store(in: &cancellables)
     }
@@ -137,11 +150,13 @@ final class ChattingViewController: AlertPresentableViewController {
         let actions: [UIAlertAction] = [
             UIAlertAction(
                 title: Texts.cancel,
-                style: .default, handler: { _ in print("취소됨") }
+                style: .default,
+                handler: { _ in print("취소됨") }
             ),
             UIAlertAction(
                 title: Texts.end,
-                style: .destructive, handler: { [weak self] _ in
+                style: .destructive,
+                handler: { [weak self] _ in
                     print("끝냄")
                     self?.messageManager.endRetrospect()
                     self?.navigationController?.popViewController(animated: true)
@@ -166,16 +181,16 @@ final class ChattingViewController: AlertPresentableViewController {
 
 extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        retrospect.chat.count
+        retrospect.chat.filter({ !$0.content.isEmpty }).count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let message = retrospect.chat[indexPath.row]
-
+        let message = retrospect.chat.filter({ !$0.content.isEmpty })[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "MessageCell", for: indexPath)
         cell.contentConfiguration = UIHostingConfiguration {
             MessageCell(message: message.content, isUser: message.role == .user)
         }
+        .margins(.vertical, 4)
         cell.backgroundColor = .clear
         return cell
     }
@@ -185,7 +200,7 @@ extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
 
 extension ChattingViewController: ChatViewDelegate {
     func sendMessage(_ chatView: ChatView, with text: String) {
-        let userMessage = Message(role: .user, content: text, createdAt: Date())
+        let userMessage = Message(retrospectID: retrospect.id, role: .user, content: text, createdAt: Date())
         // 실제로는 비동기 처리 or 반응형으로 처리가 되어야 함, 아직 미완된 기능이라 일단 넘어가도록 하였음
         Task {
             do {

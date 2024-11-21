@@ -114,7 +114,6 @@ final class ChatView: UIView {
     func insertMessages(at indexPaths: [IndexPath]) {
         chattingTableView.performBatchUpdates {
             chattingTableView.insertRows(at: indexPaths, with: .bottom)
-            scrollToBottom()
         }
     }
 

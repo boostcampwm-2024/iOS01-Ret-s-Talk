@@ -12,7 +12,7 @@ struct MessageCell: View {
     let isUser: Bool
     
     var body: some View {
-        Text(message)
+        Text(message.charWrapping)
             .font(.appFont(.body))
             .padding(Metrics.textPadding)
             .background(isUser ? Color.appColor(.blueberry) : Color.appColor(.backgroundRetrospect))

@@ -53,7 +53,7 @@ extension CLOVAStudioManager: AssistantMessageProvidable {
         }
         
         var message: Message {
-            Message(role: .assistant, content: result?.message?.content ?? "", createdAt: Date())
+            Message(retrospectID: UUID(), role: .assistant, content: result?.message?.content ?? "", createdAt: Date())
         }
     }
     
@@ -65,7 +65,8 @@ extension CLOVAStudioManager: AssistantMessageProvidable {
             role: "system",
             content: """
             너는 사용자의 회고를 도와주는 대화 상대야. 오늘 무슨 일이 있었는지, 아쉬운 점과 잘한 점 그리고 개선할 점을 위주로 대화를 이끌어가면 돼.
-            사용자의 질문에 대답을 하기보다는, 사용자가 자신의 질문에 대해 스스로 답을 찾도록 유도해줘.
+            사용자의 질문에 대답을 하기보다는, 사용자가 자신의 질문에 대해 스스로 답을 찾도록 유도해줘. 너무 길게 말하지 말고, 대화는 계속 이어지도록
+            질문을 던져주세요.
             """
         )
     }
