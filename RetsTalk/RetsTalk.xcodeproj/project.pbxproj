@@ -80,6 +80,7 @@
 				Network/NetworkRequestable.swift,
 				Network/URLRequestComposable.swift,
 				Persistent/EntityRepresentable.swift,
+				Retrospect/Model/SummaryProvider.swift,
 				"Utility/Extensions/Encodable+Extension.swift",
 			);
 			target = D59E35D92CD9F13A001B6D5A /* NetworkTests */;
