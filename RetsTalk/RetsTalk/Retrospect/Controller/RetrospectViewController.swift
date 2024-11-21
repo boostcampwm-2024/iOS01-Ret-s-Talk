@@ -55,13 +55,13 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let data = dataSource[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: Texts.cellIdentifier, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.retrospectCellIdentifier, for: indexPath)
         
         cell.backgroundColor = .clear
         cell.contentConfiguration = UIHostingConfiguration {
             RetrospectCell(summary: data.0, createdAt: data.1)
         }
-        .margins(.vertical, 4)
+        .margins(.vertical, Metrics.cellVerticalMargin)
         
         return cell
     }
@@ -69,20 +69,20 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
     // MARK: Section 임시 생성 코드
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        1
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return "11월"
+        "11월"
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 36
+        Metrics.tableViewHeaderHeight
     }
     
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         if let header = view as? UITableViewHeaderFooterView {
-            header.textLabel?.font = UIFont.boldSystemFont(ofSize: 24)
+            header.textLabel?.font = UIFont.appFont(.heavyTitle)
             header.textLabel?.textColor = UIColor.black
             header.contentView.backgroundColor = .clear
         }
@@ -91,9 +91,13 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
 
 // MARK: - Constants
 
-extension RetrospectListViewController {
+private extension RetrospectListViewController {
+    enum Metrics {
+        static let cellVerticalMargin = 4.0
+        static let tableViewHeaderHeight = 36.0
+    }
+    
     enum Texts {
-        static let cellIdentifier = "RetrospectCell"
         static let titleLabelText = "회고"
     }
 }

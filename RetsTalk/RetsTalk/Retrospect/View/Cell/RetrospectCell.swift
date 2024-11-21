@@ -40,7 +40,7 @@ private extension RetrospectCell {
                     .truncationMode(.tail)
                 Spacer()
             }
-            .frame(height: 40, alignment: .topLeading)
+            .frame(height: Numerics.summaryTextHeight, alignment: .topLeading)
         }
     }
     
@@ -52,29 +52,14 @@ private extension RetrospectCell {
         }
         
         var body: some View {
-            Text(formatDateToKoreanStyle(date: date))
+            Text(date.formattedToKoreanStyle)
                 .font(Font(UIFont.appFont(.caption)))
                 .foregroundStyle(.blueBerry)
         }
         
-        private func formatDateToKoreanStyle(date: Date) -> String {
-            let calendar = Calendar.current
-            let dateFormatter = DateFormatter()
-            dateFormatter.locale = Locale(identifier: Texts.dateLocaleIdentifier)
-            
-            switch date {
-            case _ where calendar.isDateInToday(date):
-                dateFormatter.dateFormat = Texts.dateFormatRecent
-                return dateFormatter.string(from: date)
-            case _ where calendar.isDateInYesterday(date):
-                return Texts.dateFormatYesterday
-            default:
-                dateFormatter.dateFormat = Texts.dateFormat
-                return dateFormatter.string(from: date)
-            }
         }
     }
-}
+
 
 // MARK: - Constants
 
@@ -88,18 +73,16 @@ private extension RetrospectCell {
     
     enum Numerics {
         static let summaryTextLineLimit = 2
+        static let summaryTextHeight = 40.0
     }
     
     enum Texts {
         static let cellBackgroundColorName = "BackgroundRetrospect"
         static let cellStrokeColorName = "StrokeRetrospect"
-        
-        static let dateLocaleIdentifier = "ko_KR"
-        static let dateFormat = "M월 d일 EEEE"
-        static let dateFormatRecent = "오늘 a h:mm"
-        static let dateFormatYesterday = "어제"
     }
 }
+
+// MARK: - Preview
 
 struct RetrospectView_Previews: PreviewProvider {
     static var previews: some View {
