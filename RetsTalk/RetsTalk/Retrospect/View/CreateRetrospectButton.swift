@@ -20,11 +20,13 @@ final class CreateRetrospectButton: UIButton {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        
         setupStyle()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        
         setupStyle()
     }
     
