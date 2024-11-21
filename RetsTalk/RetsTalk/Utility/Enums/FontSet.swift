@@ -8,9 +8,7 @@
 import UIKit
 
 enum FontSet {
-    /// bold
-    case heavyTitle
-    /// semiBold
+    case largeTitle
     case title
     case semiTitle
     case body
@@ -18,7 +16,7 @@ enum FontSet {
     
     var size: CGFloat {
         switch self {
-        case .heavyTitle:
+        case .largeTitle:
             return 34
         case .title:
             return 20
@@ -31,24 +29,9 @@ enum FontSet {
         }
     }
     
-    var lineHeight: CGFloat {
-        switch self {
-        case .heavyTitle:
-            return 41
-        case .title:
-            return 20
-        case .semiTitle:
-            return 20
-        case .body:
-            return 18
-        case .caption:
-            return 18
-        }
-    }
-    
     var weight: UIFont.Weight {
         switch self {
-        case .heavyTitle:
+        case .largeTitle:
             return .bold
         case .title:
             return .semibold
