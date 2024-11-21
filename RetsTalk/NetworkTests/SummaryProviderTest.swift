@@ -22,7 +22,7 @@ final class SummaryProviderTest: XCTestCase {
         summaryProvider = CLOVAStudioManager(urlSession: .shared)
     }
 
-    func test_대화_목록을_통해_요약을_적절하게_제공하는지() async throws {
+    func test_대화를_통해_요약을_제공하는지() async throws {
         let summaryProvider = try XCTUnwrap(summaryProvider)
         
         do {
