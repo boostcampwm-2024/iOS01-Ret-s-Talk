@@ -161,11 +161,7 @@ final class MessageInputView: UIView {
     }
 
     private func updateSendButtonState() {
-        if !isRequestInProgress && textInputView.text.isNotEmpty && isPlaceholderDeactivated {
-            sendButton.isEnabled = true
-        } else {
-            sendButton.isEnabled = false
-        }
+        sendButton.isEnabled = !isRequestInProgress && textInputView.text.isNotEmpty && isPlaceholderDeactivated
     }
 
     private func updateSendButtonState(isEnabled: Bool) {
