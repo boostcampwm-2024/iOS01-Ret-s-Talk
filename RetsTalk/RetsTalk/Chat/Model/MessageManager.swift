@@ -39,11 +39,22 @@ final class MessageManager: MessageManageable {
     func fetchMessages(offset: Int, amount: Int) async throws {
         let request = recentMessageFetchRequest(offset: offset, amount: amount)
         let fetchedMessages = try await messageStorage.fetch(by: request)
-        retrospect.append(contentsOf: fetchedMessages)
+        retrospect.insertFront(contentsOf: fetchedMessages)
     }
     
     func send(_ message: Message) async throws {
-        
+        let addedUserMessage = try await messageStorage.add(contentsOf: [message])
+        retrospect.append(contentsOf: addedUserMessage)
+        retrospect.status = .inProgress(.waitingForResponse)
+        do {
+            let assistantMessage = try await assistantMessageProvider.requestAssistantMessage(for: retrospect.chat)
+            let addedAssistantMessage = try await messageStorage.add(contentsOf: [assistantMessage])
+            retrospect.append(contentsOf: addedAssistantMessage)
+            retrospect.status = .inProgress(.waitingForUserInput)
+        } catch {
+            retrospect.status = .inProgress(.responseErrorOccurred)
+            throw error
+        }
     }
     
     func endRetrospect() {
