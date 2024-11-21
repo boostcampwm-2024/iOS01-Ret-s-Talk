@@ -8,7 +8,8 @@
 import Foundation
 
 extension CLOVAStudioManager: SummaryProvider {
-    func requestSummary(for chat: [Message]) -> String {
+    func requestSummary(for chat: [Message]) async throws -> String {
         return ""
     }
+    
 }

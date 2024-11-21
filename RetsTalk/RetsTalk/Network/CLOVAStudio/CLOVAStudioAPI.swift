@@ -7,7 +7,7 @@
 
 struct CLOVAStudioAPI: URLRequestComposable {
     static let scheme = "https"
-    static let host = "clovastudio.stream.ntruss.com"
+    static let host = "clovastudio.apigw.ntruss.com"
     
     var path: Path
     var method: HTTPMethod
@@ -34,7 +34,7 @@ extension CLOVAStudioAPI {
             case .chatbot:
                 "/testapp/v1/chat-completions/HCX-DASH-001"
             case .summary:
-                "/testapp/v1/api-tools/summarization/v2/\(CLOVAStudioSecret.APP_ID)"
+                "/testapp/v1/api-tools/summarization/v2/12966aae8d3846849a112c6a992d5577"
             }
         }
     }
