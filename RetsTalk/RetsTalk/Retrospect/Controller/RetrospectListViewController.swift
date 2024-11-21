@@ -32,7 +32,7 @@ final class RetrospectListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         view.backgroundColor = .backgroundMain // 임시 배경색 설정
         setUpNavigationBar()
         retrospectListView.setTableViewDelegate(self)
