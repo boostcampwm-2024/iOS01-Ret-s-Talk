@@ -21,11 +21,7 @@ final class RetrospectListView: UIView {
         return tableView
     }()
     
-    private let createRetrospectButton: CreateRetrospectButton = {
-        let button = CreateRetrospectButton()
-        button.frame.size = .init(width: 80, height: 80)
-        return button
-    }()
+    private let createRetrospectButton = CreateRetrospectButton()
     
     // MARK: Init method
 
@@ -33,12 +29,14 @@ final class RetrospectListView: UIView {
         super.init(frame: frame)
         
         setUpTableViewLayout()
+        setUpButtonLayout()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         
         setUpTableViewLayout()
+        setUpButtonLayout()
     }
     
     // MARK: Custom Method
@@ -60,15 +58,34 @@ final class RetrospectListView: UIView {
         createRetrospectButton.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            createRetrospectButton.centerYAnchor.constraint(equalTo: centerYAnchor),
+            createRetrospectButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -10),
             createRetrospectButton.centerXAnchor.constraint(equalTo: centerXAnchor),
-            createRetrospectButton.widthAnchor.constraint(equalToConstant: 80),
-            createRetrospectButton.heightAnchor.constraint(equalToConstant: 80),
+            createRetrospectButton.widthAnchor.constraint(equalToConstant: Metrics.diameter),
+            createRetrospectButton.heightAnchor.constraint(equalToConstant: Metrics.diameter),
         ])
+        sendSubviewToBack(retrospectListTableView)
+
+        bringSubviewToFront(createRetrospectButton)
     }
     
     func setTableViewDelegate(_ delegate: UITableViewDelegate & UITableViewDataSource) {
         retrospectListTableView.delegate = delegate
         retrospectListTableView.dataSource = delegate
+    }
+    
+    func addCreateButtonAction(_ action: UIAction) {
+        createRetrospectButton.addAction(action, for: .touchUpInside)
+    }
+}
+
+// MARK: - Constants
+
+private extension RetrospectListView {
+    enum Metrics {
+        static let diameter = 80.0
+    }
+    
+    enum Texts {
+        static let foregroundImageName = "plus"
     }
 }

@@ -32,10 +32,14 @@ final class RetrospectListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        view.backgroundColor = .backgroundMain // 임시 배경색 설정
+        
         setUpNavigationBar()
         retrospectListView.setTableViewDelegate(self)
+        
+        // 회고생성버튼 임시 액션
+        retrospectListView.addCreateButtonAction(UIAction(handler: { _ in
+            self.navigationController?.pushViewController(ChattingViewController(), animated: true)
+        }))
     }
     
     // MARK: Custom method
@@ -82,7 +86,7 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         if let header = view as? UITableViewHeaderFooterView {
-            header.textLabel?.font = UIFont.appFont(.heavyTitle)
+            header.textLabel?.font = UIFont.appFont(.title)
             header.textLabel?.textColor = UIColor.black
             header.contentView.backgroundColor = .clear
         }
