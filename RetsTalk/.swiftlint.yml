@@ -24,6 +24,9 @@ force_unwrapping:
   
 force_cast:
     severity: error
+    
+identifier_name:
+    allowed_symbols: "_"
   
 opt_in_rules:
     - force_unwrapping

@@ -6,17 +6,13 @@
 //
 
 import Foundation
+import Combine
 
-final class MockMessageManager: MockMessageManageable {
-    var retrospectID: UUID
+final class MockMessageManager: MessageManageable {
+    var retrospectSubject: CurrentValueSubject<Retrospect, Never> = .init(Retrospect(user: .init(nickname: "jk")))
     var messageManagerListener: any MessageManagerListener
-    @Published private(set) var messages: [Message] = []
-    // 읽기 전용 messages는 구독 가능한 퍼블리셔로 동작하지 않습니다.
-    var messagePublisher: Published<[Message]>.Publisher { $messages }
 
     init(messageManagerListener: any MessageManagerListener) {
-        retrospectID = UUID()
-//        messages = []
         self.messageManagerListener = messageManagerListener
     }
 
@@ -40,19 +36,19 @@ final class MockMessageManager: MockMessageManageable {
         ]
 
         if dummies.count < offset+amount {
-            messages += dummies
+            retrospectSubject.value.chat += dummies
         } else {
             let returnValue = Array(dummies[offset..<offset+amount])
-            messages += returnValue
+            retrospectSubject.value.chat += returnValue
         }
     }
 
     @MainActor
     func send(_ message: Message) async throws {
-        messages.append(message)
+        retrospectSubject.value.chat.append(message)
         try await Task.sleep(nanoseconds: 1_000_000_000)
         let responseMessage = Message(role: .assistant, content: "이것은 응답값 입니다.", createdAt: Date())
-        messages.append(responseMessage)
+        retrospectSubject.value.chat.append(responseMessage)
     }
     
     func endRetrospect() {}

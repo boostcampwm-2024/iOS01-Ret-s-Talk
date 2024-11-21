@@ -16,7 +16,13 @@ protocol MessageInputViewDelegate: AnyObject {
 @MainActor
 final class MessageInputView: UIView {
     weak var delegate: MessageInputViewDelegate?
-    
+    private var isRequestInProgress = false {
+        didSet {
+            updateSendButtonState()
+        }
+    }
+    private var isPlaceholderDeactivated = false
+
     // MARK: UI Components
     
     private var backgroundView = {
@@ -75,7 +81,8 @@ final class MessageInputView: UIView {
             
             self.delegate?.sendMessage(self, with: self.textInputView.text)
             self.textInputView.text = nil
-            self.updateSendButtonState(isEnabled: false)
+            self.sendButton.isEnabled = false
+            self.updateRequestInProgressState(true)
         }), for: .touchUpInside)
     }
     
@@ -153,8 +160,16 @@ final class MessageInputView: UIView {
         ])
     }
 
-    func updateSendButtonState(isEnabled: Bool) {
+    private func updateSendButtonState() {
+        sendButton.isEnabled = !isRequestInProgress && textInputView.text.isNotEmpty && isPlaceholderDeactivated
+    }
+
+    private func updateSendButtonState(isEnabled: Bool) {
         sendButton.isEnabled = isEnabled
+    }
+
+    func updateRequestInProgressState(_ state: Bool) {
+        isRequestInProgress = state
     }
 }
 
@@ -171,8 +186,7 @@ extension MessageInputView: UITextViewDelegate {
         } else {
             updateHeight(to: max(Metrics.backgroundHeight, inputViewHeight))
         }
-        
-        sendButton.isEnabled = !(textView.text?.isEmpty ?? true)
+        updateSendButtonState()
     }
     
     func textViewDidBeginEditing(_ textView: UITextView) {
@@ -180,6 +194,7 @@ extension MessageInputView: UITextViewDelegate {
         
         textView.text = nil
         textView.textColor = .black
+        isPlaceholderDeactivated = true
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
@@ -187,6 +202,7 @@ extension MessageInputView: UITextViewDelegate {
         
         textView.text = Texts.textInputPlaceholder
         textView.textColor = .placeholderText
+        isPlaceholderDeactivated = false
     }
     
     private func updateHeight(to value: CGFloat) {

@@ -23,9 +23,9 @@ extension CLOVAStudioManager: AssistantMessageProvidable {
     private static let assistantMessageHeader = [
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "X-NCP-CLOVASTUDIO-API-KEY": CLOVAStudioSecret.CLOVASTUDIOAPIKEY,
-        "X-NCP-APIGW-API-KEY": CLOVAStudioSecret.APIGWAPIKEY,
-        "X-NCP-CLOVASTUDIO-REQUEST-ID": CLOVAStudioSecret.CLOVASTUDIOREQUESTID,
+        "X-NCP-CLOVASTUDIO-API-KEY": CLOVAStudioSecret.CLOVA_STUDIO_API_KEY,
+        "X-NCP-APIGW-API-KEY": CLOVAStudioSecret.APIGW_API_KEY,
+        "X-NCP-CLOVASTUDIO-REQUEST-ID": CLOVAStudioSecret.CLOVA_STUDIO_CHAT_REQUEST_ID,
     ]
     
     // MARK: Chat parameter
