@@ -8,16 +8,6 @@
 import UIKit
 
 final class CreateRetrospectButton: UIButton {
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupStyle()
-    }
-    
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupStyle()
-    }
-    
     override func layoutSubviews() {
         super.layoutSubviews()
         
@@ -28,6 +18,16 @@ final class CreateRetrospectButton: UIButton {
         imageView.center = CGPoint(x: bounds.midX, y: bounds.midY)
     }
     
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupStyle()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupStyle()
+    }
+    
     private func setupStyle() {
         backgroundColor = .blazingOrange
         tintColor = .white
@@ -36,10 +36,9 @@ final class CreateRetrospectButton: UIButton {
     }
 }
 
+// MARK: - Constants
+
 private extension CreateRetrospectButton {
-    
-    // MARK: constants
-    
     enum Metrics {
         static let imageScale = 0.4
     }
