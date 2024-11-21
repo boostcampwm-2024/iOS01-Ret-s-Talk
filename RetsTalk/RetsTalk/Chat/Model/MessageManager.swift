@@ -5,41 +5,41 @@
 //  Created by KimMinSeok on 11/19/24.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 final class MessageManager: MessageManageable {
     private var retrospect: Retrospect {
         didSet { retrospectSubject.send(retrospect) }
     }
     private(set) var retrospectSubject: CurrentValueSubject<Retrospect, Never>
+    
+    private let messageStorage: Persistable
+    private let assistantMessageProvider: AssistantMessageProvidable
+    
     private(set) var messageManagerListener: MessageManagerListener
-    let persistent: Persistable
+    
+    // MARK: Initialization
 
     init(
         retrospect: Retrospect,
-        messageManagerListener: MessageManagerListener,
-        persistent: Persistable
+        persistent: Persistable,
+        assistantMessageProvider: AssistantMessageProvidable,
+        messageManagerListener: MessageManagerListener
     ) {
         self.retrospect = retrospect
         self.retrospectSubject = CurrentValueSubject(retrospect)
+        self.messageStorage = persistent
+        self.assistantMessageProvider = assistantMessageProvider
         self.messageManagerListener = messageManagerListener
-        self.persistent = persistent
     }
     
+    // MARK: MessageManageable conformance
+    
     func fetchMessages(offset: Int, amount: Int) async throws {
-        let predicate = NSPredicate(format: "retrospectID = %@", argumentArray: [retrospect.id])
-        let sortDescriptor = NSSortDescriptor(key: "createdAt", ascending: true)
-        let request = PersistfetchRequest<Message>(
-            predicate: predicate,
-            sortDescriptors: [sortDescriptor],
-            fetchLimit: amount,
-            fetchOffset: offset
-        )
-        
-        let fetchedEntities = try await persistent.fetch(by: request)
-        
-        retrospect.chat.append(contentsOf: fetchedEntities)
+        let request = recentMessageFetchRequest(offset: offset, amount: amount)
+        let fetchedMessages = try await messageStorage.fetch(by: request)
+        retrospect.append(contentsOf: fetchedMessages)
     }
     
     func send(_ message: Message) async throws {
@@ -48,5 +48,19 @@ final class MessageManager: MessageManageable {
     
     func endRetrospect() {
         messageManagerListener.didFinishRetrospect(self)
+    }
+    
+    // MARK: Supporting methods
+    
+    private func recentMessageFetchRequest(offset: Int, amount: Int) -> PersistfetchRequest<Message> {
+        let matchingRetorspect = NSPredicate(format: "retrospectID = %@", argumentArray: [retrospect.id])
+        let recentDateSorting = NSSortDescriptor(key: "createdAt", ascending: false)
+        let request = PersistfetchRequest<Message>(
+            predicate: matchingRetorspect,
+            sortDescriptors: [recentDateSorting],
+            fetchLimit: amount,
+            fetchOffset: offset
+        )
+        return request
     }
 }

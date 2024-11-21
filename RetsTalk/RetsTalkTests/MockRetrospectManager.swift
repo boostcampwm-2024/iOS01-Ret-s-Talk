@@ -6,11 +6,7 @@
 //
 
 final class MockRetrospectManager: MessageManagerListener {
-    func didFinishRetrospect(_ messageManager: any MessageManageable) {
-        
-    }
+    func didFinishRetrospect(_ messageManager: any MessageManageable) {}
     
-    func didChangeStatus(_ messageManager: any MessageManageable, to status: Retrospect.Status) {
-        
-    }
+    func didChangeStatus(_ messageManager: any MessageManageable, to status: Retrospect.Status) {}
 }

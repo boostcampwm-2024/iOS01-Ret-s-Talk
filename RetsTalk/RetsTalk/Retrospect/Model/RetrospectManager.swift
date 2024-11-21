@@ -19,8 +19,9 @@ final class RetrospectManager: RetrospectManageable {
         let retropsect = Retrospect(user: User(nickname: "alstjr"))
         let messageManager = MessageManager(
             retrospect: retropsect,
-            messageManagerListener: self,
-            persistent: CoreDataManager(name: "RetsTalk", completion: { _ in })
+            persistent: CoreDataManager(name: "RetsTalk", completion: { _ in }),
+            assistantMessageProvider: CLOVAStudioManager(urlSession: .shared),
+            messageManagerListener: self
         )
         
         retrospects.append(retropsect)
