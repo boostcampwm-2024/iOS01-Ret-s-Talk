@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class MockMessageStore: Persistable {
+final class MockMessageStore: Persistable, @unchecked Sendable {
     var messages: [Message]
     
     init(messages: [Message]) {

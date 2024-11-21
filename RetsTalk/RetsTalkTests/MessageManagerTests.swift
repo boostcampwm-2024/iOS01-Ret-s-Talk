@@ -11,13 +11,13 @@ final class MessageManagerTests: XCTestCase {
     private var messageManager: MessageManageable?
     
     private var testableMessages: [Message] = [
-        Message(role: .user, content: "수능 공부를 했습니다.", createdAt: Date() + 3),
-        Message(role: .user, content: "오늘은 공부를 했어요", createdAt: Date() + 5),
-        Message(role: .user, content: "무슨 과목을 하셨나요?", createdAt: Date() + 2),
-        Message(role: .assistant, content: "오늘은 무엇을 하셨나요?", createdAt: Date() + 6),
-        Message(role: .assistant, content: "무슨 공부를 하셨나요?", createdAt: Date() + 4),
-        Message(role: .user, content: "Hello", createdAt: Date()),
-        Message(role: .user, content: "영어를 했어요", createdAt: Date() + 1),
+        Message(retrospectID: UUID(), role: .user, content: "수능 공부를 했습니다.", createdAt: Date() + 3),
+        Message(retrospectID: UUID(), role: .user, content: "오늘은 공부를 했어요", createdAt: Date() + 5),
+        Message(retrospectID: UUID(), role: .user, content: "무슨 과목을 하셨나요?", createdAt: Date() + 2),
+        Message(retrospectID: UUID(), role: .assistant, content: "오늘은 무엇을 하셨나요?", createdAt: Date() + 6),
+        Message(retrospectID: UUID(), role: .assistant, content: "무슨 공부를 하셨나요?", createdAt: Date() + 4),
+        Message(retrospectID: UUID(), role: .user, content: "Hello", createdAt: Date()),
+        Message(retrospectID: UUID(), role: .user, content: "영어를 했어요", createdAt: Date() + 1),
     ]
     
     // MARK: Set up
@@ -106,7 +106,12 @@ final class MessageManagerTests: XCTestCase {
     func test_회고_도움_메시지를_받아왔을때_상태_반영을_하는지() async throws {
         let messageManager = try XCTUnwrap(messageManager)
         let userMessage = try XCTUnwrap(testableMessages.randomElement())
-        let assistantMessage = Message(role: .assistant, content: "응답 테스트 메시지", createdAt: Date())
+        let assistantMessage = Message(
+            retrospectID: UUID(),
+            role: .assistant,
+            content: "응답 테스트 메시지",
+            createdAt: Date()
+        )
         MockAssistantMessageProvider.requestAssistantMessageHandler = { _ in
             let retrospect = messageManager.retrospectSubject.value
             XCTAssertEqual(retrospect.status, .inProgress(.waitingForResponse))

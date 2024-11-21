@@ -14,7 +14,7 @@ struct MockAssistantMessageProvider: AssistantMessageProvidable {
         guard let handler = MockAssistantMessageProvider.requestAssistantMessageHandler
         else {
             XCTFail("요청 처리 핸들러가 설정되지 않았습니다.")
-            return Message(role: .assistant, content: "", createdAt: Date())
+            return Message(retrospectID: UUID(), role: .assistant, content: "", createdAt: Date())
         }
         
         return try handler(chat)
