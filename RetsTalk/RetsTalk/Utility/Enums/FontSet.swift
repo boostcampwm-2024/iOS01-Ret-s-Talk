@@ -45,4 +45,17 @@ enum FontSet {
             return 18
         }
     }
+    
+    var weight: UIFont.Weight {
+        switch self {
+        case .heavyTitle:
+            return .bold
+        case .title:
+            return .semibold
+        case .caption:
+            return .medium
+        default:
+            return .regular
+        }
+    }
 }
