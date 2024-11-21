@@ -25,6 +25,10 @@ struct Retrospect {
         self.chat = []
     }
     
+    mutating func insertFront(contentsOf messages: [Message]) {
+        chat.insert(contentsOf: messages, at: chat.startIndex)
+    }
+    
     mutating func append(contentsOf messages: [Message]) {
         chat.append(contentsOf: messages)
     }
@@ -33,7 +37,7 @@ struct Retrospect {
 // MARK: Retrospect State
 
 extension Retrospect {
-    enum Status {
+    enum Status: Equatable {
         case finished
         case inProgress(ProgressStatus)
     }
