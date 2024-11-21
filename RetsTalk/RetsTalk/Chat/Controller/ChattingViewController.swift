@@ -14,6 +14,7 @@ final class ChattingViewController: UIViewController {
     private let messageManager: MockMessageManager = MockMessageManager(
         messageManagerListener: MockMessageManagerListener()
     )
+    private var retrospect: Retrospect { messageManager.retrospectSubject.value }
     private var cancellables: Set<AnyCancellable> = []
 
     // MARK: ViewController lifecycle method
@@ -96,7 +97,7 @@ final class ChattingViewController: UIViewController {
     }
 
     private func observeMessages() {
-        var previousMessageCount = messageManager.retrospectSubject.value.chat.count
+        var previousMessageCount = retrospect.chat.count
 
         messageManager.retrospectSubject
             .receive(on: RunLoop.main)
@@ -127,11 +128,11 @@ final class ChattingViewController: UIViewController {
 
 extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return messageManager.retrospectSubject.value.chat.count
+        retrospect.chat.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let message = messageManager.retrospectSubject.value.chat[indexPath.row]
+        let message = retrospect.chat[indexPath.row]
 
         let cell = tableView.dequeueReusableCell(withIdentifier: "MessageCell", for: indexPath)
         cell.contentConfiguration = UIHostingConfiguration {

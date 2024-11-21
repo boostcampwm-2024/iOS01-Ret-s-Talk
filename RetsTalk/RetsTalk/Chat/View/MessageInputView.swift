@@ -17,9 +17,7 @@ protocol MessageInputViewDelegate: AnyObject {
 final class MessageInputView: UIView {
     weak var delegate: MessageInputViewDelegate?
     private var isRequestInProgress = false {
-        didSet {
-            updateSendButtonState()
-        }
+        didSet { updateSendButtonState() }
     }
     private var isPlaceholderDeactivated = false
 

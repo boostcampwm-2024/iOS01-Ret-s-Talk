@@ -11,5 +11,4 @@ extension String {
     var charWrapping: String {
         String(self.reduce("") { $0 + String($1) + "\u{200B}" }.dropLast())
     }
-        
 }
