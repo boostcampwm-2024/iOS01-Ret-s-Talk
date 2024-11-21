@@ -13,6 +13,7 @@ final class CreateRetrospectButton: UIButton {
         
         layer.cornerRadius = bounds.width / 2
         guard let imageView = imageView else { return }
+        
         let imageSize = bounds.width * Metrics.imageScale
         imageView.frame.size = CGSize(width: imageSize, height: imageSize)
         imageView.center = CGPoint(x: bounds.midX, y: bounds.midY)

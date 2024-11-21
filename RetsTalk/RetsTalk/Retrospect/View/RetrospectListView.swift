@@ -73,7 +73,6 @@ final class RetrospectListView: UIView {
             ),
         ])
         sendSubviewToBack(retrospectListTableView)
-
         bringSubviewToFront(createRetrospectButton)
     }
     

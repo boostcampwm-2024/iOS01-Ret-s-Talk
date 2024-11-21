@@ -37,8 +37,8 @@ final class RetrospectListViewController: UIViewController {
         retrospectListView.setTableViewDelegate(self)
         
         // 회고생성버튼 임시 액션
-        retrospectListView.addCreateButtonAction(UIAction(handler: { _ in
-            self.navigationController?.pushViewController(ChattingViewController(), animated: true)
+        retrospectListView.addCreateButtonAction(UIAction(handler: { [weak self] _ in
+            self?.navigationController?.pushViewController(ChattingViewController(), animated: true)
         }))
     }
     
