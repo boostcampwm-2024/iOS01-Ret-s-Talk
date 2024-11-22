@@ -112,9 +112,10 @@ final class ChatView: UIView {
     }
 
     func insertMessages(at indexPaths: [IndexPath]) {
-        chattingTableView.performBatchUpdates {
-            chattingTableView.insertRows(at: indexPaths, with: .bottom)
-        }
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        chattingTableView.insertRows(at: indexPaths, with: .none)
+        CATransaction.commit()
     }
 
     func updateRequestInProgressState(_ state: Bool) {
