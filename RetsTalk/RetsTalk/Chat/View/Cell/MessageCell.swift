@@ -15,30 +15,30 @@ struct MessageCell: View {
         Text(message)
             .font(.appFont(.body))
             .padding(Metrics.textPadding)
-            .background(isUser ? Color.appColor(.blueberry) : Color.appColor(.backgroundRetrospect))
-            .foregroundColor(isUser ? .white : Color.appColor(.blueberry))
+            .background(isUser ? .blueBerry : .backgroundRetrospect)
+            .foregroundColor(isUser ? .white : .blueBerry)
             .cornerRadius(Metrics.cornerRadius)
             .overlay(
                 RoundedRectangle(cornerRadius: Metrics.cornerRadius)
-                    .stroke(
-                        isUser ? Color.appColor(.blueberry): Color.appColor(.strokeRetrospect),
-                        lineWidth: Metrics.RectangleStrokeWidth
-                    )
+                    .stroke(isUser ? .blueBerry : .strokeRetrospect, lineWidth: Metrics.RectangleStrokeWidth)
             )
-            .frame(
-                maxWidth: .infinity,
-                alignment: isUser ? .trailing : .leading
-            )
+            .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
             .padding(isUser ? .leading : .trailing, Metrics.sidePadding)
     }
-    
-    private enum Metrics {
+}
+
+// MARK: - Constants
+
+private extension MessageCell {
+    enum Metrics {
         static let textPadding = 8.0
         static let cornerRadius = 10.0
         static let RectangleStrokeWidth = 1.0
         static let sidePadding = 80.0
     }
 }
+
+// MARK: - Preview
 
 struct ChatView_Previews: PreviewProvider {
     static var previews: some View {
