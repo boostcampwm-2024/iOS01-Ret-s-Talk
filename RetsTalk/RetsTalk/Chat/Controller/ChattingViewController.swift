@@ -170,6 +170,12 @@ final class ChattingViewController: AlertPresentableViewController {
         Task {
             do {
                 try await messageManager.fetchMessages(offset: Numeric.initialOffset, amount: Numeric.amount)
+                switch retrospect.status {
+                case .finished:
+                    chatView.scrollToTop()
+                case .inProgress(let progressStatus):
+                    chatView.scrollToBottom()
+                }
             } catch {
                 
             }
@@ -190,7 +196,7 @@ extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
         cell.contentConfiguration = UIHostingConfiguration {
             MessageCell(message: message.content, isUser: message.role == .user)
         }
-        .margins(.vertical, 4)
+        .margins(.vertical, Numeric.verticalCellMargin)
         cell.backgroundColor = .clear
         return cell
     }
@@ -201,14 +207,12 @@ extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
 extension ChattingViewController: ChatViewDelegate {
     func sendMessage(_ chatView: ChatView, with text: String) {
         let userMessage = Message(retrospectID: retrospect.id, role: .user, content: text, createdAt: Date())
-        // 실제로는 비동기 처리 or 반응형으로 처리가 되어야 함, 아직 미완된 기능이라 일단 넘어가도록 하였음
+
         Task {
             do {
-                messageManagerListener.didChangeStatus(messageManager, to: .inProgress(.waitingForResponse))
                 try await messageManager.send(userMessage)
 
                 chatView.updateRequestInProgressState(false)
-                messageManagerListener.didChangeStatus(messageManager, to: .inProgress(.waitingForUserInput))
             } catch {
                 print("response error")
             }
@@ -222,6 +226,7 @@ private extension ChattingViewController {
     enum Numeric {
         static let initialOffset = 0
         static let amount = 20
+        static let verticalCellMargin = 4.0
     }
 
     enum Texts {
