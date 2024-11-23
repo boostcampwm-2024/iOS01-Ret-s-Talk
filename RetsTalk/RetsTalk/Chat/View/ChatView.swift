@@ -92,13 +92,14 @@ final class ChatView: UIView {
         guard 0 < rows else { return }
         
         let indexPath = IndexPath(row: rows - 1, section: 0)
-        chattingTableView.scrollToRow(
-            at: indexPath,
-            at: .bottom,
-            animated: false
-        )
+        chattingTableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
     }
-    
+
+    func scrollToTop() {
+        let indexPath = IndexPath(row: NSNotFound, section: 0)
+        chattingTableView.scrollToRow(at: indexPath, at: .top, animated: false)
+    }
+
     func setTableViewDelegate(_ delegate: UITableViewDelegate & UITableViewDataSource) {
         chattingTableView.delegate = delegate
         chattingTableView.dataSource = delegate

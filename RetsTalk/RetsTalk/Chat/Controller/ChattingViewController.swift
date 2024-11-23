@@ -124,11 +124,11 @@ final class ChattingViewController: AlertPresentableViewController {
 
         messageManager.retrospectSubject
             .receive(on: RunLoop.main)
-            .sink { [weak self] newMessages in
+            .sink { [weak self] newRetrospect in
                 guard let self = self else { return }
 
                 let oldCount = previousMessageCount
-                let newCount = newMessages.chat.filter({ !$0.content.isEmpty }).count
+                let newCount = newRetrospect.chat.filter({ !$0.content.isEmpty }).count
                 previousMessageCount = newCount
                 guard oldCount < newCount else { return }
 
@@ -140,8 +140,6 @@ final class ChattingViewController: AlertPresentableViewController {
     }
 
     @objc private func backwardButtonTapped() {
-        // navigationController: pop 작업
-        messageManager.messageManagerListener.didChangeStatus(messageManager, to: .inProgress(.waitingForUserInput))
         navigationController?.popViewController(animated: true)
     }
     
@@ -173,7 +171,7 @@ final class ChattingViewController: AlertPresentableViewController {
                 switch retrospect.status {
                 case .finished:
                     chatView.scrollToTop()
-                case .inProgress(let progressStatus):
+                case .inProgress:
                     chatView.scrollToBottom()
                 }
             } catch {
