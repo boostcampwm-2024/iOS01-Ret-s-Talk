@@ -80,6 +80,7 @@ final class MessageInputView: UIView {
             self.delegate?.sendMessage(self, with: self.textInputView.text)
             self.textInputView.text = nil
             self.sendButton.isEnabled = false
+            updateHeight(to: currentTextViewHeight(textView: textInputView))
             self.updateRequestInProgressState(true)
         }), for: .touchUpInside)
     }
@@ -162,8 +163,11 @@ final class MessageInputView: UIView {
         sendButton.isEnabled = !isRequestInProgress && textInputView.text.isNotEmpty && isPlaceholderDeactivated
     }
 
-    private func updateSendButtonState(isEnabled: Bool) {
-        sendButton.isEnabled = isEnabled
+    private func currentTextViewHeight(textView: UITextView) -> Double {
+        let contentSize = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .infinity))
+        let inputViewHeight = contentSize.height + 2 * Metrics.textViewVerticalMargin
+
+        return max(inputViewHeight, Metrics.backgroundHeight)
     }
 
     func updateRequestInProgressState(_ state: Bool) {
@@ -175,14 +179,13 @@ final class MessageInputView: UIView {
 
 extension MessageInputView: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
-        let contentSize = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .infinity))
-        let inputViewHeight = contentSize.height + 2 * Metrics.textViewVerticalMargin
+        let inputViewHeight = currentTextViewHeight(textView: textView)
 
         textView.isScrollEnabled = inputViewHeight > Metrics.textViewMaxHeight
         if textView.isScrollEnabled {
             updateHeight(to: Metrics.textViewMaxHeight)
         } else {
-            updateHeight(to: max(Metrics.backgroundHeight, inputViewHeight))
+            updateHeight(to: inputViewHeight)
         }
         updateSendButtonState()
     }
