@@ -18,6 +18,7 @@ final class ChatView: UIView {
     private let messageInputView = MessageInputView()
     private var messageInputViewHeightConstraint: NSLayoutConstraint?
     private var chatViewBottomConstraint: NSLayoutConstraint?
+    private let retryView = RetryView()
     weak var delegate: ChatViewDelegate?
 
     override init(frame: CGRect) {
@@ -122,6 +123,33 @@ final class ChatView: UIView {
     func updateRequestInProgressState(_ state: Bool) {
         messageInputView.updateRequestInProgressState(state)
     }
+
+    // MARK: Retry button
+
+    func showRetryView(_ completion: @escaping () -> Void) {
+        addSubview(retryView)
+
+        retryView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+                retryView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Metrics.retryButtonPadding),
+                retryView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Metrics.retryButtonPadding),
+                retryView.bottomAnchor
+                    .constraint(
+                        equalTo: messageInputView.topAnchor,
+                        constant: -Metrics.retryButtonBottomMargin
+                    ),
+            ])
+
+        retryView.addAction {
+            completion()
+            self.hideRetryView()
+        }
+    }
+
+    private func hideRetryView() {
+        retryView.removeFromSuperview()
+    }
 }
 
 // MARK: - MessageInputViewDelegate
@@ -149,5 +177,7 @@ private extension ChatView {
     enum Metrics {
         static let messageInputViewHeight = 54.0
         static let chatViewBottomFromBottom = -40.0
+        static let retryButtonPadding = 20.0
+        static let retryButtonBottomMargin = 10.0
     }
 }

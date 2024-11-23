@@ -127,6 +127,16 @@ final class ChattingViewController: AlertPresentableViewController {
             .sink { [weak self] newRetrospect in
                 guard let self = self else { return }
 
+                guard newRetrospect.status != .inProgress(.responseErrorOccurred) else {
+                    chatView.showRetryView({
+                        guard let lastMessage = newRetrospect.chat.last else { return }
+
+                        // 재전송 로직이 들어가야 함
+                        print(lastMessage)
+                    })
+                    return
+                }
+                
                 let oldCount = previousMessageCount
                 let newCount = newRetrospect.chat.filter({ !$0.content.isEmpty }).count
                 previousMessageCount = newCount
