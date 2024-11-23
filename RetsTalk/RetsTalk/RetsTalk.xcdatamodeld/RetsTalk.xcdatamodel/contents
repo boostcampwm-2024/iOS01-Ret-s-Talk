@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23507" systemVersion="24B83" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23507" systemVersion="24A348" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="MessageEntity" representedClassName=".MessageEntity" syncable="YES" codeGenerationType="class">
         <attribute name="content" attributeType="String"/>
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="isUser" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
-        <relationship name="retrospect" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="RetrospectEntity" inverseName="chat" inverseEntity="RetrospectEntity"/>
+        <attribute name="retrospectID" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
     </entity>
     <entity name="RetrospectEntity" representedClassName=".RetrospectEntity" syncable="YES" codeGenerationType="class">
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="isBookmarked" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="isFinished" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isPinned" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="status" optional="YES" attributeType="Integer 16" valueTransformerName="" defaultValueString="0" usesScalarValueType="YES" customClassName="RetrospectStatus"/>
         <attribute name="summary" optional="YES" attributeType="String"/>
-        <relationship name="chat" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MessageEntity" inverseName="retrospect" inverseEntity="MessageEntity"/>
+        <attribute name="userID" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
     </entity>
 </model>
