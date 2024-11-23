@@ -53,7 +53,7 @@ extension CLOVAStudioManager: AssistantMessageProvidable {
         }
         
         var message: Message {
-            Message(role: .assistant, content: result?.message?.content ?? "", createdAt: Date())
+            Message(retrospectID: UUID(), role: .assistant, content: result?.message?.content ?? "", createdAt: Date())
         }
     }
     

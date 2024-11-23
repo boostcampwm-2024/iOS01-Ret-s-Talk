@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-final class MessageManager: MessageManageable {
+final class RetrospectChatManager: RetrospectChatManageable {
     private var retrospect: Retrospect {
         didSet { retrospectSubject.send(retrospect) }
     }
@@ -17,7 +17,7 @@ final class MessageManager: MessageManageable {
     private let messageStorage: Persistable
     private let assistantMessageProvider: AssistantMessageProvidable
     
-    private(set) var messageManagerListener: MessageManagerListener
+    private(set) var retrospectChatManagerListener: RetrospectChatManagerListener
     
     // MARK: Initialization
 
@@ -25,13 +25,13 @@ final class MessageManager: MessageManageable {
         retrospect: Retrospect,
         persistent: Persistable,
         assistantMessageProvider: AssistantMessageProvidable,
-        messageManagerListener: MessageManagerListener
+        retrospectChatManagerListener: RetrospectChatManagerListener
     ) {
         self.retrospect = retrospect
         self.retrospectSubject = CurrentValueSubject(retrospect)
         self.messageStorage = persistent
         self.assistantMessageProvider = assistantMessageProvider
-        self.messageManagerListener = messageManagerListener
+        self.retrospectChatManagerListener = retrospectChatManagerListener
     }
     
     // MARK: MessageManageable conformance
@@ -39,7 +39,7 @@ final class MessageManager: MessageManageable {
     func fetchMessages(offset: Int, amount: Int) async throws {
         let request = recentMessageFetchRequest(offset: offset, amount: amount)
         let fetchedMessages = try await messageStorage.fetch(by: request)
-        retrospect.insertFront(contentsOf: fetchedMessages)
+        retrospect.prepend(contentsOf: fetchedMessages)
     }
     
     func send(_ message: Message) async throws {
@@ -58,7 +58,7 @@ final class MessageManager: MessageManageable {
     }
     
     func endRetrospect() {
-        messageManagerListener.didFinishRetrospect(self)
+        retrospectChatManagerListener.didFinishRetrospect(self)
     }
     
     // MARK: Supporting methods

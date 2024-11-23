@@ -48,9 +48,9 @@
 			membershipExceptions = (
 				Chat/Model/AssistantMessageProvider.swift,
 				Chat/Model/Message.swift,
-				Chat/Model/MessageManageable.swift,
-				Chat/Model/MessageManager.swift,
-				Chat/Model/MessageManagerListener.swift,
+				Chat/Model/RetrospectChatManageable.swift,
+				Chat/Model/RetrospectChatManager.swift,
+				Chat/Model/RetrospectChatManagerListener.swift,
 				Persistent/EntityRepresentable.swift,
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,

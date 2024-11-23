@@ -8,9 +8,9 @@
 import Foundation
 import Combine
 
-protocol MessageManageable {
+protocol RetrospectChatManageable {
     var retrospectSubject: CurrentValueSubject<Retrospect, Never> { get }
-    var messageManagerListener: MessageManagerListener { get }
+    var retrospectChatManagerListener: RetrospectChatManagerListener { get }
     
     func fetchMessages(offset: Int, amount: Int) async throws
     func send(_ message: Message) async throws

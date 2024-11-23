@@ -5,8 +5,10 @@
 //  Created by KimMinSeok on 11/18/24.
 //
 
+import Combine
+
 protocol RetrospectManageable {
-    var retrospects: [Retrospect] { get }
+    var retrospectsSubject: CurrentValueSubject<[Retrospect], Never> { get }
     
     func fetchRetrospects(offset: Int, amount: Int)
     func create()
