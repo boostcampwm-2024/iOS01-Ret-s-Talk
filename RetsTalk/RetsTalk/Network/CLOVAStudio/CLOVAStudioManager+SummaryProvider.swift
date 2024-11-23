@@ -46,7 +46,7 @@ extension CLOVAStudioManager: SummaryProvider {
             let text: String
         }
         
-        var summary: String{
+        var summary: String {
             result?.text ?? ""
         }
     }
