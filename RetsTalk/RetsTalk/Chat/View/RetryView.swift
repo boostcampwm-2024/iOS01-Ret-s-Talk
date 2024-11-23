@@ -81,10 +81,9 @@ final class RetryView: UIView {
     }
 }
 
-private extension RetryView {
-    
-    // MARK: constants
+// MARK: - constants
 
+private extension RetryView {
     enum Metrics {
         static let cornerRadius = 16.0
         static let backgroundBorderWidth = 0.5
