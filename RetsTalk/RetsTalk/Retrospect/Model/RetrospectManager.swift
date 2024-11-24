@@ -28,18 +28,7 @@ final class RetrospectManager: RetrospectManageable {
     }
     
     func fetchRetrospects(offset: Int, amount: Int) async throws {
-        let predicate = NSPredicate(format: "userID = %@", argumentArray: [userID])
-        let sortDescriptors = [
-            NSSortDescriptor(key: "isPinned", ascending: false),
-            NSSortDescriptor(key: "status", ascending: false),
-            NSSortDescriptor(key: "createdAt", ascending: true),
-        ]
-        let request = PersistfetchRequest<Retrospect>(
-            predicate: predicate,
-            sortDescriptors: sortDescriptors,
-            fetchLimit: amount,
-            fetchOffset: offset
-        )
+        let request = createRequest(offset: offset, amount: amount)
         let fetchedEntities = try await retrospectStorage.fetch(by: request)
         
         retrospects.append(contentsOf: fetchedEntities)
@@ -64,6 +53,23 @@ final class RetrospectManager: RetrospectManageable {
     
     func delete(_ retrospect: Retrospect) async throws {
         
+    }
+    
+    private func createRequest(offset: Int, amount: Int) -> PersistfetchRequest<Retrospect> {
+        let predicate = NSPredicate(format: "userID = %@", argumentArray: [userID])
+        let sortDescriptors = [
+            NSSortDescriptor(key: "isPinned", ascending: false),
+            NSSortDescriptor(key: "status", ascending: false),
+            NSSortDescriptor(key: "createdAt", ascending: true),
+        ]
+        let request = PersistfetchRequest<Retrospect>(
+            predicate: predicate,
+            sortDescriptors: sortDescriptors,
+            fetchLimit: amount,
+            fetchOffset: offset
+        )
+        
+        return request
     }
 }
 
