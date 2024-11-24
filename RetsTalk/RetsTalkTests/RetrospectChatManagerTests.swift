@@ -46,7 +46,7 @@ final class RetrospectChatManagerTests: XCTestCase {
         
         try await retrospectChatManager.fetchMessages(offset: 0, amount: 2)
         
-        let messageResult = retrospectChatManager.retrospect.chat
+        let messageResult = retrospectChatManager.retrospectSubject.value.chat
         XCTAssertEqual(messageResult.count, 2)
     }
     
@@ -55,7 +55,7 @@ final class RetrospectChatManagerTests: XCTestCase {
         
         try await retrospectChatManager.fetchMessages(offset: 0, amount: 5)
         
-        let messageResult = retrospectChatManager.retrospect.chat
+        let messageResult = retrospectChatManager.retrospectSubject.value.chat
         XCTAssertEqual(messageResult.count, 5)
     }
     
@@ -64,7 +64,7 @@ final class RetrospectChatManagerTests: XCTestCase {
         
         try await retrospectChatManager.fetchMessages(offset: 0, amount: 10)
         
-        let messageResult = retrospectChatManager.retrospect.chat
+        let messageResult = retrospectChatManager.retrospectSubject.value.chat
         XCTAssertEqual(messageResult.count, 7)
     }
     
@@ -74,7 +74,7 @@ final class RetrospectChatManagerTests: XCTestCase {
         try await retrospectChatManager.fetchMessages(offset: 0, amount: 2)
         try await retrospectChatManager.fetchMessages(offset: 2, amount: 2)
         
-        let messageResult = retrospectChatManager.retrospect.chat
+        let messageResult = retrospectChatManager.retrospectSubject.value.chat
         XCTAssertEqual(messageResult.count, 4)
     }
     
@@ -84,7 +84,7 @@ final class RetrospectChatManagerTests: XCTestCase {
         testableMessages.sort { $0.createdAt < $1.createdAt }
         try await retrospectChatManager.fetchMessages(offset: 0, amount: testableMessages.count)
         
-        let messageResult = retrospectChatManager.retrospect.chat
+        let messageResult = retrospectChatManager.retrospectSubject.value.chat
         for (index, testMessage) in testableMessages.enumerated() {
             XCTAssertEqual(messageResult[index].content, testMessage.content)
             XCTAssertEqual(messageResult[index].createdAt, testMessage.createdAt)
@@ -96,7 +96,7 @@ final class RetrospectChatManagerTests: XCTestCase {
         
         try await retrospectChatManager.fetchMessages(offset: 0, amount: 2)
         
-        let messageResult = retrospectChatManager.retrospect.chat
+        let messageResult = retrospectChatManager.retrospectSubject.value.chat
         XCTAssertEqual(messageResult.first?.content, "Hello")
         XCTAssertEqual(messageResult.last?.content, "영어를 했어요")
     }
@@ -108,7 +108,7 @@ final class RetrospectChatManagerTests: XCTestCase {
         let userMessage = try XCTUnwrap(testableMessages.randomElement())
         let assistantMessage = Message(retrospectID: UUID(), role: .assistant, content: "응답 테스트 메시지", createdAt: Date())
         MockAssistantMessageProvider.requestAssistantMessageHandler = { _ in
-            let retrospect = retrospectChatManager.retrospect
+            let retrospect = retrospectChatManager.retrospectSubject.value
             XCTAssertEqual(retrospect.status, .inProgress(.waitingForResponse))
             return assistantMessage
         }
