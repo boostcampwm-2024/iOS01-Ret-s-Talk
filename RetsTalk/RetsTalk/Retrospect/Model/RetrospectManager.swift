@@ -13,12 +13,18 @@ final class RetrospectManager: RetrospectManageable {
     private(set) var retrospects: [Retrospect]
     private(set) var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
     private let retrospectStorage: Persistable
+    private let assistantMessageProvider: AssistantMessageProvidable
     
-    init(userID: UUID, retrospectStorage: Persistable) {
+    init(
+        userID: UUID,
+        retrospectStorage: Persistable,
+        assistantMessageProvider: AssistantMessageProvidable
+    ) {
         self.userID = userID
         self.retrospects = []
         self.retrospectsSubject = CurrentValueSubject(retrospects)
         self.retrospectStorage = retrospectStorage
+        self.assistantMessageProvider = assistantMessageProvider
     }
     
     func fetchRetrospects(offset: Int, amount: Int) async throws {
@@ -40,7 +46,7 @@ final class RetrospectManager: RetrospectManageable {
         let retrospectChatManager = RetrospectChatManager(
             retrospect: retropsect,
             persistent: retrospectStorage,
-            assistantMessageProvider: CLOVAStudioManager(urlSession: .shared),
+            assistantMessageProvider: assistantMessageProvider,
             retrospectChatManagerListener: self
         )
         retrospects.append(retropsect)
