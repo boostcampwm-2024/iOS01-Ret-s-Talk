@@ -22,16 +22,17 @@ final class RetrospectManager: RetrospectManageable {
         
     }
     
-    func create() {
+    func create() -> RetrospectChatManageable{
         let retropsect = Retrospect(userID: userID)
-        let messageManager = RetrospectChatManager(
+        let retrospectChatManager = RetrospectChatManager(
             retrospect: retropsect,
             persistent: CoreDataManager(name: "RetsTalk", completion: { _ in }),
             assistantMessageProvider: CLOVAStudioManager(urlSession: .shared),
             retrospectChatManagerListener: self
         )
-        
         retrospects.append(retropsect)
+        
+        return retrospectChatManager
     }
     
     func update(_ retrospect: Retrospect) {
