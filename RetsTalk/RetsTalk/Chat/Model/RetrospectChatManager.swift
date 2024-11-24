@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 final class RetrospectChatManager: RetrospectChatManageable {
-    private var retrospect: Retrospect {
+    private(set) var retrospect: Retrospect {
         didSet { retrospectSubject.send(retrospect) }
     }
     private(set) var retrospectSubject: CurrentValueSubject<Retrospect, Never>
