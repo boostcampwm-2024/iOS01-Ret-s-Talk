@@ -12,25 +12,27 @@ final class RetrospectManager: RetrospectManageable {
     private(set) var retrospects: [Retrospect] = []
     private(set) var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
     private let userID: UUID
+    private let retrospectStorage: Persistable
     
-    init(userID: UUID) {
+    init(userID: UUID, retrospectStorage: Persistable) {
         self.userID = userID
         self.retrospectsSubject = CurrentValueSubject(retrospects)
+        self.retrospectStorage = retrospectStorage
     }
     
-    func fetchRetrospects(offset: Int, amount: Int) {
-        let predicate = NSPredicate(format: "retrospectID = %@", argumentArray: [user.id])
+    func fetchRetrospects(offset: Int, amount: Int) async throws {
+        let predicate = NSPredicate(format: "userID = %@", argumentArray: [userID])
         let sortDescriptor = NSSortDescriptor(key: "createdAt", ascending: true)
-        let request = PersistfetchRequest<Message>(
+        let request = PersistfetchRequest<Retrospect>(
             predicate: predicate,
             sortDescriptors: [sortDescriptor],
             fetchLimit: amount,
             fetchOffset: offset
         )
         
-        let fetchedEntities = try await persistent.fetch(by: request)
+        let fetchedEntities = try await retrospectStorage.fetch(by: request)
         
-        retrospects.chat.append(contentsOf: fetchedEntities)
+        retrospects.append(contentsOf: fetchedEntities)
     }
     
     func create() -> RetrospectChatManageable{
@@ -46,11 +48,11 @@ final class RetrospectManager: RetrospectManageable {
         return retrospectChatManager
     }
     
-    func update(_ retrospect: Retrospect) {
+    func update(_ retrospect: Retrospect) async throws {
         
     }
     
-    func delete(_ retrospect: Retrospect) {
+    func delete(_ retrospect: Retrospect) async throws {
         
     }
 }

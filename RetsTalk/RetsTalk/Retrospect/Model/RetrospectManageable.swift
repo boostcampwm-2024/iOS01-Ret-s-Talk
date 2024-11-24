@@ -10,8 +10,8 @@ import Combine
 protocol RetrospectManageable {
     var retrospectsSubject: CurrentValueSubject<[Retrospect], Never> { get }
     
-    func fetchRetrospects(offset: Int, amount: Int)
+    func fetchRetrospects(offset: Int, amount: Int) async throws
     func create() -> RetrospectChatManageable
-    func update(_ retrospect: Retrospect)
-    func delete(_ retrospect: Retrospect)
+    func update(_ retrospect: Retrospect) async throws
+    func delete(_ retrospect: Retrospect) async throws
 }
