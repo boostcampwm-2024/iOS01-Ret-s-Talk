@@ -60,9 +60,9 @@ final class RetrospectManager: RetrospectManageable {
     private func createRequest(offset: Int, amount: Int) -> PersistfetchRequest<Retrospect> {
         let predicate = NSPredicate(format: "userID = %@", argumentArray: [userID])
         let sortDescriptors = [
-            NSSortDescriptor(key: "isPinned", ascending: false),
+            NSSortDescriptor(key: "isPinned", ascending: true),
             NSSortDescriptor(key: "status", ascending: false),
-            NSSortDescriptor(key: "createdAt", ascending: true),
+            NSSortDescriptor(key: "createdAt", ascending: false),
         ]
         let request = PersistfetchRequest<Retrospect>(
             predicate: predicate,
