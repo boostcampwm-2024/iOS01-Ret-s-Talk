@@ -47,7 +47,7 @@ final class RetrospectManager: RetrospectManageable {
         retrospects.append(contentsOf: fetchedEntities)
     }
     
-    func create() -> RetrospectChatManageable {
+    func create() async throws -> RetrospectChatManageable {
         let retropsect = Retrospect(userID: userID)
         let retrospectChatManager = RetrospectChatManager(
             retrospect: retropsect,
@@ -56,6 +56,8 @@ final class RetrospectManager: RetrospectManageable {
             retrospectChatManagerListener: self
         )
         retrospects.append(retropsect)
+        
+        _ = try await retrospectStorage.add(contentsOf: [retropsect])
         
         return retrospectChatManager
     }
