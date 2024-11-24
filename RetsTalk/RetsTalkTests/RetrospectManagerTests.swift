@@ -36,7 +36,7 @@ final class RetrospectManagerTests: XCTestCase {
         
         try await retrospectManager.fetchRetrospects(offset: 0, amount: 2)
         
-        let retrospectResult = retrospectManager.retrospects
+        let retrospectResult = retrospectManager.retrospectsSubject.value
         XCTAssertEqual(retrospectResult.count, 2)
     }
     
@@ -46,7 +46,7 @@ final class RetrospectManagerTests: XCTestCase {
         try await retrospectManager.fetchRetrospects(offset: 0, amount: 2)
         try await retrospectManager.fetchRetrospects(offset: 0, amount: 2)
         
-        let retrospectResult = retrospectManager.retrospects
+        let retrospectResult = retrospectManager.retrospectsSubject.value
         XCTAssertEqual(retrospectResult.count, 4)
     }
     
@@ -55,7 +55,7 @@ final class RetrospectManagerTests: XCTestCase {
         
         try await retrospectManager.fetchRetrospects(offset: 0, amount: 10)
         
-        let retrospectResult = retrospectManager.retrospects
+        let retrospectResult = retrospectManager.retrospectsSubject.value
         XCTAssertEqual(retrospectResult.count, 5)
     }
 }

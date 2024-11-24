@@ -10,7 +10,9 @@ import Combine
 
 final class RetrospectManager: RetrospectManageable {
     private let userID: UUID
-    private(set) var retrospects: [Retrospect]
+    private var retrospects: [Retrospect] {
+        didSet { retrospectsSubject.send(retrospects) }
+    }
     private(set) var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
     private let retrospectStorage: Persistable
     private let assistantMessageProvider: AssistantMessageProvidable
