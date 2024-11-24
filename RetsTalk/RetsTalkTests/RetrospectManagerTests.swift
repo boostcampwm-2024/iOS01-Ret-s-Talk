@@ -39,4 +39,23 @@ final class RetrospectManagerTests: XCTestCase {
         let retrospectResult = retrospectManager.retrospects
         XCTAssertEqual(retrospectResult.count, 2)
     }
+    
+    func test_추가로_회고를_불러올_수_있는가() async throws {
+        let retrospectManager = try XCTUnwrap(retrospectManager)
+        
+        try await retrospectManager.fetchRetrospects(offset: 0, amount: 2)
+        try await retrospectManager.fetchRetrospects(offset: 0, amount: 2)
+        
+        let retrospectResult = retrospectManager.retrospects
+        XCTAssertEqual(retrospectResult.count, 4)
+    }
+    
+    func test_가지고있는_회고보다_많은_요청을_하면_최대로_가져오는가() async throws {
+        let retrospectManager = try XCTUnwrap(retrospectManager)
+        
+        try await retrospectManager.fetchRetrospects(offset: 0, amount: 10)
+        
+        let retrospectResult = retrospectManager.retrospects
+        XCTAssertEqual(retrospectResult.count, 5)
+    }
 }
