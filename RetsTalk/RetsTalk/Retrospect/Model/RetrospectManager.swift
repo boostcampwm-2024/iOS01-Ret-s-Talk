@@ -9,13 +9,14 @@ import Foundation
 import Combine
 
 final class RetrospectManager: RetrospectManageable {
-    private(set) var retrospects: [Retrospect] = []
-    private(set) var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
     private let userID: UUID
+    private(set) var retrospects: [Retrospect]
+    private(set) var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
     private let retrospectStorage: Persistable
     
     init(userID: UUID, retrospectStorage: Persistable) {
         self.userID = userID
+        self.retrospects = []
         self.retrospectsSubject = CurrentValueSubject(retrospects)
         self.retrospectStorage = retrospectStorage
     }
@@ -29,17 +30,16 @@ final class RetrospectManager: RetrospectManageable {
             fetchLimit: amount,
             fetchOffset: offset
         )
-        
         let fetchedEntities = try await retrospectStorage.fetch(by: request)
         
         retrospects.append(contentsOf: fetchedEntities)
     }
     
-    func create() -> RetrospectChatManageable{
+    func create() -> RetrospectChatManageable {
         let retropsect = Retrospect(userID: userID)
         let retrospectChatManager = RetrospectChatManager(
             retrospect: retropsect,
-            persistent: CoreDataManager(name: "RetsTalk", completion: { _ in }),
+            persistent: retrospectStorage,
             assistantMessageProvider: CLOVAStudioManager(urlSession: .shared),
             retrospectChatManagerListener: self
         )
