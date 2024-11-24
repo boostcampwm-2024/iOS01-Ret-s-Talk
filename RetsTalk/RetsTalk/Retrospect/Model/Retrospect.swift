@@ -64,32 +64,36 @@ extension Retrospect: EntityRepresentable {
         ]
     }
     
+    /// - Status
+    /// status를 통해 Value를 가져오고 mapping
+    /// - Chat
+    /// Chat은 CoreData에 존재하지 않음
+    /// 그래서 빈 배열로 만들고 Message.fetch로 들고오게 설정
     init(dictionary: [String: Any]) {
         id = dictionary["id"] as? UUID ?? UUID()
         userID = dictionary["userID"] as? UUID ?? UUID()
         summary = dictionary["summary"] as? String ?? nil
-        /// status를 통해 Value를 가져오고 mapping
+        
         let statusValue = dictionary["status"] as? Int16 ?? 2
         status = Self.mapRawValueToStatus(statusValue)
         isPinned = dictionary["isPinned"] as? Bool ?? false
         createdAt = dictionary["createdAt"] as? Date ?? Date()
-        /// Chat은 CoreData에 존재하지 않음
-        /// 그래서 빈 배열로 만들고 Message.fetch로 들고오게 설정
+        
         chat = []
     }
     
     private func mapStatusToRawValue(_ status: Status) -> Int16 {
         switch status {
         case .finished:
-            return 0
+            0
         case .inProgress(let state):
             switch state {
             case .responseErrorOccurred:
-                return 1
+                1
             case .waitingForUserInput:
-                return 2
+                2
             case .waitingForResponse:
-                return 3
+                3
             }
         }
     }
@@ -97,15 +101,15 @@ extension Retrospect: EntityRepresentable {
     private static func mapRawValueToStatus(_ rawValue: Int16) -> Status {
         switch rawValue {
         case 0:
-            return .finished
+            .finished
         case 1:
-            return .inProgress(.responseErrorOccurred)
+            .inProgress(.responseErrorOccurred)
         case 2:
-            return .inProgress(.waitingForUserInput)
+            .inProgress(.waitingForUserInput)
         case 3:
-            return .inProgress(.waitingForResponse)
+            .inProgress(.waitingForResponse)
         default:
-            return .inProgress(.waitingForUserInput)
+            .inProgress(.waitingForUserInput)
         }
     }
     

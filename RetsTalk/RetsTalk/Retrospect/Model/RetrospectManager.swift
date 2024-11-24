@@ -11,7 +11,7 @@ import Combine
 final class RetrospectManager: RetrospectManageable {
     private(set) var retrospects: [Retrospect] = []
     private(set) var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
-    let userID: UUID
+    private let userID: UUID
     
     init(userID: UUID) {
         self.userID = userID
