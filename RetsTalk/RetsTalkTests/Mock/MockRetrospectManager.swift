@@ -5,8 +5,8 @@
 //  Created by KimMinSeok on 11/20/24.
 //
 
-final class MockRetrospectManager: MessageManagerListener {
-    func didFinishRetrospect(_ messageManager: any MessageManageable) {}
+final class MockRetrospectManager: RetrospectChatManagerListener {
+    func didFinishRetrospect(_ retrospectChatManager: any RetrospectChatManageable) {}
     
-    func didChangeStatus(_ messageManager: any MessageManageable, to status: Retrospect.Status) {}
+    func didChangeStatus(_ retrospectChatManager: any RetrospectChatManageable, to status: Retrospect.Status) {}
 }
