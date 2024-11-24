@@ -10,6 +10,7 @@ import XCTest
 final class RetrospectManagerTests: XCTestCase {
     private var retrospectManager: RetrospectManager?
     private let sharedUserID = UUID()
+    private var retrospectStore: MockRetrospectStore?
     
     private var testableMessages: [Retrospect] = []
     
@@ -24,9 +25,11 @@ final class RetrospectManagerTests: XCTestCase {
             Retrospect(userID: sharedUserID),
         ]
         
+        retrospectStore = MockRetrospectStore(retrospects: testableMessages)
+        
         retrospectManager = RetrospectManager(
             userID: UUID(),
-            retrospectStorage: MockRetrospectStore(retrospects: testableMessages),
+            retrospectStorage: retrospectStore ?? MockRetrospectStore(retrospects: []),
             assistantMessageProvider: MockAssistantMessageProvider()
         )
     }
@@ -57,5 +60,22 @@ final class RetrospectManagerTests: XCTestCase {
         
         let retrospectResult = retrospectManager.retrospectsSubject.value
         XCTAssertEqual(retrospectResult.count, 5)
+    }
+    
+    func test_회고를_추가할_수_있는가() async throws {
+        let retrospectManager = try XCTUnwrap(retrospectManager)
+        
+        _ = try await retrospectManager.create()
+        
+        XCTAssertEqual(retrospectManager.retrospectsSubject.value.count, 1)
+    }
+    
+    func test_회고를_추가하면_persistent에_추가가_되는지() async throws {
+        let retrospectManager = try XCTUnwrap(retrospectManager)
+        let retrospectStore = try XCTUnwrap(retrospectStore)
+        
+        _ = try await retrospectManager.create()
+        
+        XCTAssertEqual(retrospectStore.retrospects.count, 6)
     }
 }

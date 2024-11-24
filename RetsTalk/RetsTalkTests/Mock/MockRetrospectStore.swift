@@ -5,6 +5,8 @@
 //  Created by KimMinSeok on 11/24/24.
 //
 
+import Foundation
+
 final class MockRetrospectStore: Persistable {
     var retrospects: [Retrospect] = []
     
@@ -13,7 +15,9 @@ final class MockRetrospectStore: Persistable {
     }
     
     func add<Entity>(contentsOf entities: [Entity]) async throws -> [Entity] {
-        entities
+        retrospects.append(Retrospect(userID: UUID()))
+        
+        return entities
     }
     
     func fetch<Entity>(by request: any PersistFetchRequestable<Entity>) async throws -> [Entity] {
