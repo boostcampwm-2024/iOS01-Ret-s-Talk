@@ -7,60 +7,145 @@
 
 import SwiftUI
 
+protocol UserSettingViewDelegate: AnyObject {
+    func didChangeNickname(_ userSettingView: UserSettingView, nickname: String)
+    func didToggleCloudSync(_ userSettingView: UserSettingView, isOn: Bool)
+    func didToggleNotification(_ userSettingView: UserSettingView, isOn: Bool, selectedDate: Date)
+}
+
 struct UserSettingView: View {
-    @State private var isOn = true
+    var delegate: UserSettingViewDelegate?
+    
+    @State private var isCloudSyncOn = true
+    @State private var isNotificationOn = false
     @State private var selectedDate = Date()
+    
+    @State private var cloudAddress: String = "example@apple.com"
+    @State private var nickname: String = "폭식하는 부덕이"
     
     var body: some View {
         List {
-            Section("사용자 정보") {
-                HStack {
-                    Text("폭식하는 부덕이")
-                    Spacer()
-                    Button(action: {}, label: {
-                        Image(systemName: "pencil")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)  // 비율 유지
-                            .foregroundColor(.blazingOrange)
-                            .frame(width: 18)
-                    })
+            Section(Texts.firstSectionTitle) {
+                NicknameView(nickname: $nickname) {
+                    delegate?.didChangeNickname(self, nickname: nickname)
                 }
             }
             
-            Section("클라우드") {
-                HStack {
-                    Text("클라우드 동기화")
-                    Spacer()
-                    Toggle(isOn: $isOn) {}
-                        .toggleStyle(SwitchToggleStyle(tint: .blazingOrange))
-                }
-                Text("example@apple.com")
-                    .foregroundStyle(.gray)
-            }
-            
-            Section("알림") {
-                HStack {
-                    Text("회고 작성 알림")
-                    Spacer()
-                    Toggle(isOn: $isOn) {}
-                        .toggleStyle(SwitchToggleStyle(tint: .blazingOrange))
-                }
-                
-                if isOn {
-                    DatePicker("시간", selection: $selectedDate, displayedComponents: .hourAndMinute)
-                        .tint(.blazingOrange)
+            Section(Texts.secondSectionTitle) {
+                CloudView(isCloudSyncOn: $isCloudSyncOn, cloudAddress: $cloudAddress) {
+                    delegate?.didToggleCloudSync(self, isOn: isCloudSyncOn)
                 }
             }
             
-            Section("앱 정보") {
-                HStack {
-                    Text("앱 버전")
-                    Spacer()
-                    Text("1.1")
-                        .foregroundStyle(.secondary)
-                }
+            Section(Texts.thirdSectionTitle) {
+                NotificationView(isNotificationOn: $isNotificationOn, selectedDate: $selectedDate, action: {
+                    delegate?.didToggleNotification(self, isOn: isNotificationOn, selectedDate: selectedDate)
+                })
+            }
+            
+            Section(Texts.fourthSectionTitle) {
+                AppVersionView()
             }
         }
+    }
+}
+
+private extension UserSettingView {
+    struct NicknameView: View {
+        @Binding var nickname: String
+        var action: () -> Void
+
+        var body: some View {
+            HStack {
+                Text(nickname)
+                Spacer()
+                Button(action: action,
+                       label: {
+                    Image(systemName: Texts.editButtonImageName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)  // 비율 유지
+                        .foregroundColor(.blazingOrange)
+                        .frame(width: Metrics.editButtonSize)
+                })
+            }
+        }
+    }
+    
+    struct CloudView: View {
+        @Binding var isCloudSyncOn: Bool
+        @Binding var cloudAddress: String
+        var action: () -> Void
+
+        var body: some View {
+            HStack {
+                Text("클라우드 동기화")
+                Spacer()
+                Toggle(isOn: $isCloudSyncOn) {}
+                    .toggleStyle(SwitchToggleStyle(tint: .blazingOrange))
+            }
+            
+            if isCloudSyncOn {
+                Text(cloudAddress)
+                    .foregroundStyle(.gray)
+            }
+        }
+    }
+    
+    struct NotificationView: View {
+        @Binding var isNotificationOn: Bool
+        @Binding var selectedDate: Date
+        var action: () -> Void
+
+
+        var body: some View {
+            HStack {
+                Text("회고 작성 알림")
+                Spacer()
+                Toggle(isOn: $isNotificationOn) {}
+                    .toggleStyle(SwitchToggleStyle(tint: .blazingOrange))
+                    .onChange(of: isNotificationOn) { _ in
+                        action()
+                    }
+            }
+            
+            if isNotificationOn {
+                DatePicker("시간", selection: $selectedDate, displayedComponents: .hourAndMinute)
+                    .tint(.blazingOrange)
+                    .onChange(of: selectedDate) { _ in
+                        action()
+                    }
+            }
+        }
+    }
+    
+    struct AppVersionView: View {
+        private var appVersion: String? =  Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+        
+        var body: some View {
+            HStack {
+                Text("앱 버전")
+                Spacer()
+                Text(appVersion ?? "1.0")
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+// MARK: - Constants
+
+private extension UserSettingView {
+    enum Metrics {
+        static let editButtonSize = 18.0
+    }
+    
+    enum Texts {
+        static let editButtonImageName = "pencil"
+        
+        static let firstSectionTitle = "사용자 정보"
+        static let secondSectionTitle = "클라우드"
+        static let thirdSectionTitle = "알림"
+        static let fourthSectionTitle = "앱 정보"
     }
 }
 
