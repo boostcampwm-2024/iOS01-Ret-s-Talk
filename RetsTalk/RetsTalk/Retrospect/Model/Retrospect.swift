@@ -73,40 +73,38 @@ extension Retrospect: EntityRepresentable {
         id = dictionary["id"] as? UUID ?? UUID()
         userID = dictionary["userID"] as? UUID ?? UUID()
         summary = dictionary["summary"] as? String ?? nil
-        
-        let statusValue = dictionary["status"] as? Int16 ?? 2
+        let statusValue = dictionary["status"] as? String ?? Texts.waitingForUserInput
         status = Self.mapRawValueToStatus(statusValue)
         isPinned = dictionary["isPinned"] as? Bool ?? false
         createdAt = dictionary["createdAt"] as? Date ?? Date()
-        
         chat = []
     }
     
-    private func mapStatusToRawValue(_ status: Status) -> Int16 {
+    private func mapStatusToRawValue(_ status: Status) -> String {
         switch status {
         case .finished:
-            0
+            Texts.retrospectFinished
         case .inProgress(let state):
             switch state {
             case .responseErrorOccurred:
-                1
+                Texts.responseErrorOccurred
             case .waitingForUserInput:
-                2
+                Texts.waitingForUserInput
             case .waitingForResponse:
-                3
+                Texts.waitingForResponse
             }
         }
     }
     
-    private static func mapRawValueToStatus(_ rawValue: Int16) -> Status {
+    private static func mapRawValueToStatus(_ rawValue: String) -> Status {
         switch rawValue {
-        case 0:
+        case Texts.retrospectFinished:
             .finished
-        case 1:
+        case Texts.responseErrorOccurred:
             .inProgress(.responseErrorOccurred)
-        case 2:
+        case Texts.waitingForUserInput:
             .inProgress(.waitingForUserInput)
-        case 3:
+        case Texts.waitingForResponse:
             .inProgress(.waitingForResponse)
         default:
             .inProgress(.waitingForUserInput)
@@ -114,4 +112,15 @@ extension Retrospect: EntityRepresentable {
     }
     
     static let entityName = "MessageEntity"
+}
+
+// MARK: - Constants
+
+private extension Retrospect {
+    enum Texts {
+        static let retrospectFinished = "retrospectFinished"
+        static let responseErrorOccurred = "responseErrorOccurred"
+        static let waitingForUserInput = "waitingForUserInput"
+        static let waitingForResponse = "waitingForResponse"
+    }
 }
