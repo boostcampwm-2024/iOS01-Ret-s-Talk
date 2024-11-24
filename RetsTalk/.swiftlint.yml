@@ -27,6 +27,7 @@ force_cast:
     
 identifier_name:
     allowed_symbols: "_"
+
   
 opt_in_rules:
     - force_unwrapping

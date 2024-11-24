@@ -9,6 +9,7 @@ import XCTest
 
 final class MessageManagerTests: XCTestCase {
     private var messageManager: MessageManageable?
+    
     private var testableMessages: [Message] = [
         Message(role: .user, content: "수능 공부를 했습니다.", createdAt: Date() + 3),
         Message(role: .user, content: "오늘은 공부를 했어요", createdAt: Date() + 5),
@@ -26,12 +27,19 @@ final class MessageManagerTests: XCTestCase {
         
         messageManager = MessageManager(
             retrospect: Retrospect(user: User(nickname: "testUser")),
-            messageManagerListener: MockRetrospectManager(),
-            persistent: MockMessageStore(messages: testableMessages)
+            persistent: MockMessageStore(messages: testableMessages),
+            assistantMessageProvider: MockAssistantMessageProvider(),
+            messageManagerListener: MockRetrospectManager()
         )
     }
     
-    // MARK: Test
+    override func tearDown() {
+        MockAssistantMessageProvider.requestAssistantMessageHandler = nil
+        
+        super.tearDown()
+    }
+    
+    // MARK: Test for fetch
     
     func test_fetchMessage_메시지를_불러올_수_있는가() async throws {
         let messageManager = try XCTUnwrap(messageManager)
@@ -91,5 +99,47 @@ final class MessageManagerTests: XCTestCase {
         let messageResult = messageManager.retrospectSubject.value.chat
         XCTAssertEqual(messageResult.first?.content, "Hello")
         XCTAssertEqual(messageResult.last?.content, "영어를 했어요")
+    }
+    
+    // MARK: Test for send
+    
+    func test_회고_도움_메시지를_받아왔을때_상태_반영을_하는지() async throws {
+        let messageManager = try XCTUnwrap(messageManager)
+        let userMessage = try XCTUnwrap(testableMessages.randomElement())
+        let assistantMessage = Message(role: .assistant, content: "응답 테스트 메시지", createdAt: Date())
+        MockAssistantMessageProvider.requestAssistantMessageHandler = { _ in
+            let retrospect = messageManager.retrospectSubject.value
+            XCTAssertEqual(retrospect.status, .inProgress(.waitingForResponse))
+            return assistantMessage
+        }
+        
+        try await messageManager.send(userMessage)
+        
+        let retrospect = messageManager.retrospectSubject.value
+        XCTAssertEqual(retrospect.status, .inProgress(.waitingForUserInput))
+        XCTAssertEqual(retrospect.chat.count, 2)
+    }
+    
+    func test_회고_도움_메시지를_받아오는데_실패한_경우_상태_반영을_하는지() async throws {
+        let messageManager = try XCTUnwrap(messageManager)
+        let userMessage = try XCTUnwrap(testableMessages.randomElement())
+        MockAssistantMessageProvider.requestAssistantMessageHandler = { _ in
+            throw CustomError.custom
+        }
+        
+        do {
+            try await messageManager.send(userMessage)
+            XCTFail("반드시 오류가 전달되어야 합니다.")
+        } catch {
+            let retrospect = messageManager.retrospectSubject.value
+            XCTAssertEqual(retrospect.status, .inProgress(.responseErrorOccurred))
+            XCTAssertEqual(retrospect.chat.count, 1)
+        }
+    }
+    
+    // MARK: Error for test
+    
+    enum CustomError: Error {
+        case custom
     }
 }

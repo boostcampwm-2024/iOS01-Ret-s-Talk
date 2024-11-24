@@ -9,17 +9,13 @@ import Foundation
 import Combine
 
 final class RetrospectManager: RetrospectManageable {
-    private(set) var user: User
-    private var retrospects: [Retrospect] {
-        didSet { retrospectsSubject.send(retrospects) }
-    }
+    private(set) var retrospects: [Retrospect] = []
     private(set) var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
-    fileprivate var messageManagerMapping: [UUID: MessageManageable]
+    private let userID: UUID
     
-    init(retrospects: [Retrospect]) {
-        self.retrospects = retrospects
+    init(userID: UUID) {
+        self.userID = userID
         self.retrospectsSubject = CurrentValueSubject(retrospects)
-        self.messageManagerMapping = [:]
     }
     
     func fetchRetrospects(offset: Int, amount: Int) {
@@ -37,16 +33,17 @@ final class RetrospectManager: RetrospectManageable {
         retrospects.chat.append(contentsOf: fetchedEntities)
     }
     
-    func create() {
-        let retropsect = Retrospect(user: User(nickname: "alstjr"))
-        let messageManager = MessageManager(
+    func create() -> RetrospectChatManageable{
+        let retropsect = Retrospect(userID: userID)
+        let retrospectChatManager = RetrospectChatManager(
             retrospect: retropsect,
-            messageManagerListener: self,
-            persistent: CoreDataManager(name: "RetsTalk", completion: { _ in })
+            persistent: CoreDataManager(name: "RetsTalk", completion: { _ in }),
+            assistantMessageProvider: CLOVAStudioManager(urlSession: .shared),
+            retrospectChatManagerListener: self
         )
-        
         retrospects.append(retropsect)
-        messageManagerMapping[retropsect.id] = messageManager
+        
+        return retrospectChatManager
     }
     
     func update(_ retrospect: Retrospect) {
@@ -60,16 +57,19 @@ final class RetrospectManager: RetrospectManageable {
 
 // MARK: - MessageManagerListener conformance
 
-extension RetrospectManager: MessageManagerListener {
-    func didFinishRetrospect(_ messageManager: MessageManageable) {
-        guard let index = retrospects.firstIndex(where: { $0.id == messageManager.retrospectSubject.value.id })
+extension RetrospectManager: RetrospectChatManagerListener {
+    func didFinishRetrospect(_ retrospectChatManager: RetrospectChatManageable) {
+        guard let index = retrospects.firstIndex(where: { $0.id == retrospectChatManager.retrospectSubject.value.id })
         else { return }
         
         retrospects[index].status = .finished
     }
     
-    func didChangeStatus(_ messageManager: MessageManageable, to status: Retrospect.Status) {
-        guard let index = retrospects.firstIndex(where: { $0.id == messageManager.retrospectSubject.value.id })
+    func didChangeStatus(
+        _ retrospectChatManager: RetrospectChatManageable,
+        to status: Retrospect.Status
+    ) {
+        guard let index = retrospects.firstIndex(where: { $0.id == retrospectChatManager.retrospectSubject.value.id })
         else { return }
         
         retrospects[index].status = status

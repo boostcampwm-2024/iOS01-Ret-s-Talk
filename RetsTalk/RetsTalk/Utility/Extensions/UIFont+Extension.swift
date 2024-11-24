@@ -9,6 +9,6 @@ import UIKit
 
 extension UIFont {
     static func appFont(_ appFont: FontSet) -> UIFont {
-        return UIFont.systemFont(ofSize: appFont.size)
+        return UIFont.systemFont(ofSize: appFont.size, weight: appFont.weight)
     }
 }
