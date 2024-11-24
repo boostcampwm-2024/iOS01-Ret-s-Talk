@@ -81,7 +81,7 @@ final class RetryView: UIView {
     }
 }
 
-// MARK: - constants
+// MARK: - Constants
 
 private extension RetryView {
     enum Metrics {

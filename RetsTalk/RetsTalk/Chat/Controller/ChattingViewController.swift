@@ -177,7 +177,7 @@ final class ChattingViewController: AlertPresentableViewController {
     private func initialMessageFetch() {
         Task {
             do {
-                try await messageManager.fetchMessages(offset: Numeric.initialOffset, amount: Numeric.amount)
+                try await messageManager.fetchMessages(offset: Numerics.initialOffset, amount: Numerics.amount)
                 switch retrospect.status {
                 case .finished:
                     chatView.scrollToTop()
@@ -204,7 +204,7 @@ extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
         cell.contentConfiguration = UIHostingConfiguration {
             MessageCell(message: message.content, isUser: message.role == .user)
         }
-        .margins(.vertical, Numeric.verticalCellMargin)
+        .margins(.vertical, Numerics.verticalCellMargin)
         cell.backgroundColor = .clear
         return cell
     }
@@ -231,7 +231,7 @@ extension ChattingViewController: ChatViewDelegate {
 // MARK: - Constants
 
 private extension ChattingViewController {
-    enum Numeric {
+    enum Numerics {
         static let initialOffset = 0
         static let amount = 20
         static let verticalCellMargin = 4.0
