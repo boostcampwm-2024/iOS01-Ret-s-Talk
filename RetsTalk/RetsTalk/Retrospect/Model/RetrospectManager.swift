@@ -30,23 +30,22 @@ final class RetrospectManager: RetrospectManageable {
     }
     
     func fetchRetrospects(offset: Int, amount: Int) async throws {
-        let finishedRecentRequest = finishedRecentRetrospectFetchRequest(offset: offset, amount: amount)
-        let finishedRecentEntities = try await retrospectStorage.fetch(by: finishedRecentRequest)
-        retrospects.append(contentsOf: finishedRecentEntities)
+        let recentFinishedRequest = recentFinishedRetrospectFetchRequest(offset: offset, amount: amount)
+        let recentFinishedEntities = try await retrospectStorage.fetch(by: recentFinishedRequest)
+        retrospects.append(contentsOf: recentFinishedEntities)
     }
     
     func fetchinitRetrospects(offset: Int, amount: Int) async throws {
-        let isPinnedRequest = isPinnedRetrospectFetchRequest()
-        let isPinnedEntities = try await retrospectStorage.fetch(by: isPinnedRequest)
+        let pinnedRequest = pinnedRetrospectFetchRequest()
+        let pinnedEntities = try await retrospectStorage.fetch(by: pinnedRequest)
         
-        let isProgressRequest = isProgressRetrospectFetchRequest()
-        let isProgressEntities = try await retrospectStorage.fetch(by: isProgressRequest)
+        let inProgressRequest = inProgressRetrospectFetchRequest()
+        let inProgressEntities = try await retrospectStorage.fetch(by: inProgressRequest)
         
-        let finishedRecentRequest = finishedRecentRetrospectFetchRequest(offset: offset, amount: amount)
-        let finishedRecentEntities = try await retrospectStorage.fetch(by: finishedRecentRequest)
+        let recentFinishedRequest = recentFinishedRetrospectFetchRequest(offset: offset, amount: amount)
+        let recentFinishedEntities = try await retrospectStorage.fetch(by: recentFinishedRequest)
         
-        let resultRetrospects = [isPinnedEntities, isProgressEntities, finishedRecentEntities]
-            .flatMap { $0 }
+        let resultRetrospects = pinnedEntities + inProgressEntities + recentFinishedEntities
         retrospects.append(contentsOf: resultRetrospects)
     }
     
@@ -75,7 +74,7 @@ final class RetrospectManager: RetrospectManageable {
 // MARK: - ChatManager Create FetchRequest
 
 extension RetrospectManager {
-    private func isPinnedRetrospectFetchRequest() -> PersistfetchRequest<Retrospect> {
+    private func pinnedRetrospectFetchRequest() -> PersistfetchRequest<Retrospect> {
         let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
             NSPredicate(format: "userID = %@", argumentArray: [userID]),
             NSPredicate(format: "isPinned = %@", argumentArray: [true]),
@@ -91,7 +90,7 @@ extension RetrospectManager {
         return request
     }
     
-    private func isProgressRetrospectFetchRequest() -> PersistfetchRequest<Retrospect> {
+    private func inProgressRetrospectFetchRequest() -> PersistfetchRequest<Retrospect> {
         let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
             NSPredicate(format: "userID = %@", argumentArray: [userID]),
             NSPredicate(format: "status != %@", argumentArray: [Texts.finishedStatus]),
@@ -107,7 +106,7 @@ extension RetrospectManager {
         return request
     }
     
-    private func finishedRecentRetrospectFetchRequest(offset: Int, amount: Int) -> PersistfetchRequest<Retrospect> {
+    private func recentFinishedRetrospectFetchRequest(offset: Int, amount: Int) -> PersistfetchRequest<Retrospect> {
         let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
             NSPredicate(format: "userID = %@", argumentArray: [userID]),
             NSPredicate(format: "status = %@", argumentArray: [Texts.finishedStatus]),
