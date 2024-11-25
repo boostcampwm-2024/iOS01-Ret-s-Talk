@@ -19,28 +19,28 @@ struct UserSettingView: View {
     @State private var isCloudSyncOn = true
     @State private var isNotificationOn = false
     @State private var selectedDate = Date()
-    
-    @State private var cloudAddress: String = "example@apple.com"
-    @State private var nickname: String = "폭식하는 부덕이"
+    @State private var cloudAddress: String = "example@apple.com" // 모델 연결 전
+    @State private var nickname: String = "폭식하는 부덕이" // 모델 연결 전
     
     var body: some View {
         List {
             Section(Texts.firstSectionTitle) {
-                NicknameView(nickname: $nickname) {
+                NicknameSettingView(nickname: $nickname) {
+                    // Alert 구현 전
                     delegate?.didChangeNickname(self, nickname: nickname)
                 }
             }
             
             Section(Texts.secondSectionTitle) {
-                CloudView(isCloudSyncOn: $isCloudSyncOn, cloudAddress: $cloudAddress) {
+                CloudSettingView(isCloudSyncOn: $isCloudSyncOn, cloudAddress: $cloudAddress) {
                     delegate?.didToggleCloudSync(self, isOn: isCloudSyncOn)
                 }
             }
             
             Section(Texts.thirdSectionTitle) {
-                NotificationView(isNotificationOn: $isNotificationOn, selectedDate: $selectedDate, action: {
+                NotificationSettingView(isNotificationOn: $isNotificationOn, selectedDate: $selectedDate) {
                     delegate?.didToggleNotification(self, isOn: isNotificationOn, selectedDate: selectedDate)
-                })
+                }
             }
             
             Section(Texts.fourthSectionTitle) {
@@ -51,10 +51,10 @@ struct UserSettingView: View {
 }
 
 private extension UserSettingView {
-    struct NicknameView: View {
+    struct NicknameSettingView: View {
         @Binding var nickname: String
         var action: () -> Void
-
+        
         var body: some View {
             HStack {
                 Text(nickname)
@@ -63,7 +63,7 @@ private extension UserSettingView {
                        label: {
                     Image(systemName: Texts.editButtonImageName)
                         .resizable()
-                        .aspectRatio(contentMode: .fit)  // 비율 유지
+                        .aspectRatio(contentMode: .fit)
                         .foregroundColor(.blazingOrange)
                         .frame(width: Metrics.editButtonSize)
                 })
@@ -71,11 +71,11 @@ private extension UserSettingView {
         }
     }
     
-    struct CloudView: View {
+    struct CloudSettingView: View {
         @Binding var isCloudSyncOn: Bool
         @Binding var cloudAddress: String
         var action: () -> Void
-
+        
         var body: some View {
             HStack {
                 Text("클라우드 동기화")
@@ -91,12 +91,11 @@ private extension UserSettingView {
         }
     }
     
-    struct NotificationView: View {
+    struct NotificationSettingView: View {
         @Binding var isNotificationOn: Bool
         @Binding var selectedDate: Date
         var action: () -> Void
-
-
+        
         var body: some View {
             HStack {
                 Text("회고 작성 알림")
