@@ -47,7 +47,7 @@ private extension RetrospectCell {
                     .truncationMode(.tail)
                 Spacer()
             }
-            .frame(height: Numerics.summaryTextHeight, alignment: .topLeading)
+            .frame(height: Metrics.summaryTextHeight, alignment: .topLeading)
         }
     }
     
