@@ -7,13 +7,17 @@
 
 import Foundation
 
-struct UserData: EntityRepresentable {
+struct UserData {
     var isCloudSyncOn: Bool
     var isNotificationOn: Bool
     var notificationTime: Date
     var cloudAddress: String
     var nickname: String
-    
+}
+
+// MARK: - EntityRepresentable conformance
+
+extension UserData: EntityRepresentable {
     var mappingDictionary: [String : Any] {
         [
             "isCloudSyncOn": isCloudSyncOn,
@@ -32,5 +36,5 @@ struct UserData: EntityRepresentable {
         nickname = dictionary["nickname"] as? String ?? ""
     }
     
-    static let entityName: String = "UserData"
+    static let entityName: String = "UserDataEntity"
 }
