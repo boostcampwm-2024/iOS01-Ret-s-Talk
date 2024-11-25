@@ -22,7 +22,7 @@ final class RetrospectManager: RetrospectManageable {
         
     }
     
-    func create() -> RetrospectChatManageable{
+    func create() -> RetrospectChatManageable {
         let retropsect = Retrospect(userID: userID)
         let retrospectChatManager = RetrospectChatManager(
             retrospect: retropsect,

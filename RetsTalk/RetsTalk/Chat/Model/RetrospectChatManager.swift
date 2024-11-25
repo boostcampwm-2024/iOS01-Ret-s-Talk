@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-final class RetrospectChatManager: RetrospectChatManageable {
+final class RetrospectChatManager: RetrospectChatManageable, @unchecked Sendable {
     private var retrospect: Retrospect {
         didSet { retrospectSubject.send(retrospect) }
     }

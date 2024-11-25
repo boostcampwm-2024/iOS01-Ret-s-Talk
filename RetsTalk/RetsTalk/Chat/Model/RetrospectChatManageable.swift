@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-protocol RetrospectChatManageable {
+protocol RetrospectChatManageable: Sendable {
     var retrospectSubject: CurrentValueSubject<Retrospect, Never> { get }
     var retrospectChatManagerListener: RetrospectChatManagerListener { get }
     
