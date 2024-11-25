@@ -13,7 +13,7 @@ actor MockRetrospectStore: Persistable {
     }
     
     func add<Entity>(contentsOf entities: [Entity]) async throws -> [Entity] {
-        entities
+        return entities
     }
     
     func fetch<Entity>(by request: any PersistFetchRequestable<Entity>) async throws -> [Entity] {
