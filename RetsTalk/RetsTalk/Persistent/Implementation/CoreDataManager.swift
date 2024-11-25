@@ -116,8 +116,8 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
     ) -> NSFetchRequest<NSFetchRequestResult> where Entity: EntityRepresentable {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: Entity.entityName)
         fetchRequest.resultType = .dictionaryResultType
-        fetchRequest.predicate = request.predicate
-        fetchRequest.sortDescriptors = request.sortDescriptors
+        fetchRequest.predicate = request.predicate?.nsPredicate
+        fetchRequest.sortDescriptors = request.sortDescriptors.map { $0.nsSortDescriptor }
         fetchRequest.fetchLimit = request.fetchLimit
         fetchRequest.fetchOffset = request.fetchOffset
         return fetchRequest
