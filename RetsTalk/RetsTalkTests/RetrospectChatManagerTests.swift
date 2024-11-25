@@ -107,7 +107,7 @@ final class RetrospectChatManagerTests: XCTestCase {
         let retrospectChatManager = try XCTUnwrap(retrospectChatManager)
         let userMessage = try XCTUnwrap(testableMessages.randomElement())
         let assistantMessage = Message(
-            retrospectID: messageManager.retrospectSubject.value.id,
+            retrospectID: retrospectChatManager.retrospectSubject.value.id,
             role: .assistant,
             content: "응답 테스트 메시지",
             createdAt: Date()
