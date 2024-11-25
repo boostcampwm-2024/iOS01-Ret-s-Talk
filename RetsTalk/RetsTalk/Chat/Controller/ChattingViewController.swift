@@ -11,13 +11,13 @@ import Combine
 
 final class ChattingViewController: UIViewController {
     private let chatView = ChatView()
-    private let messageManager: RetrospectChatManageable
+    private let retrospectChatManager: RetrospectChatManageable
     private var cancellables: Set<AnyCancellable>
     
     // MARK: Initialization
     
-    init(messageManager: RetrospectChatManageable) {
-        self.messageManager = messageManager
+    init(retrospectChatManager: RetrospectChatManageable) {
+        self.retrospectChatManager = retrospectChatManager
         cancellables = []
         
         super.init(nibName: nil, bundle: nil)
@@ -40,7 +40,7 @@ final class ChattingViewController: UIViewController {
         addKeyboardObservers()
         
         Task {
-            try await messageManager.fetchMessages(offset: Numeric.initialOffset, amount: Numeric.amount)
+            try await retrospectChatManager.fetchMessages(offset: Numeric.initialOffset, amount: Numeric.amount)
         }
 
         observeMessages()
@@ -109,9 +109,9 @@ final class ChattingViewController: UIViewController {
     }
 
     private func observeMessages() {
-        var previousMessageCount = messageManager.retrospectSubject.value.chat.count
+        var previousMessageCount = retrospectChatManager.retrospectSubject.value.chat.count
 
-        messageManager.retrospectSubject
+        retrospectChatManager.retrospectSubject
             .receive(on: RunLoop.main)
             .sink { [weak self] newMessages in
                 guard let self = self else { return }
@@ -140,11 +140,11 @@ final class ChattingViewController: UIViewController {
 
 extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return messageManager.retrospectSubject.value.chat.count
+        return retrospectChatManager.retrospectSubject.value.chat.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let message = messageManager.retrospectSubject.value.chat[indexPath.row]
+        let message = retrospectChatManager.retrospectSubject.value.chat[indexPath.row]
 
         let cell = tableView.dequeueReusableCell(withIdentifier: "MessageCell", for: indexPath)
         cell.contentConfiguration = UIHostingConfiguration {
@@ -162,7 +162,7 @@ extension ChattingViewController: ChatViewDelegate {
         let userMessage = Message(retrospectID: UUID(), role: .user, content: text, createdAt: Date())
         Task {
             do {
-                try await messageManager.send(userMessage)
+                try await retrospectChatManager.send(userMessage)
 
                 chatView.updateRequestInProgressState(false)
             } catch {
