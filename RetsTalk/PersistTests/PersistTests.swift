@@ -50,11 +50,8 @@ final class PersistTests: XCTestCase {
         try await addMultipleEntities(ofContents: testableContents)
         let targetContent = try XCTUnwrap(testableContents.randomElement())
         
-        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-            NSPredicate(format: "content = %@", argumentArray: [targetContent]),
-            NSPredicate(format: "integer = %@", argumentArray: [0]),
-        ])
-        let request = PersistfetchRequest<TestEntity>(predicate: predicate, fetchLimit: 5)
+        let predicate = CustomPredicate(format: "content = %@ AND integer = %@", argumentArray: [targetContent, 0])
+        let request = PersistFetchRequest<TestEntity>(predicate: predicate, fetchLimit: 5)
         let fetchedEntities = try await persistentManager.fetch(by: request)
         
         XCTAssertEqual(fetchedEntities.count, 1)
@@ -81,7 +78,7 @@ final class PersistTests: XCTestCase {
         
         try await persistentManager.delete(contentsOf: [targetEntity])
         
-        let allEntities = try await persistentManager.fetch(by: PersistfetchRequest<TestEntity>(fetchLimit: 5))
+        let allEntities = try await persistentManager.fetch(by: PersistFetchRequest<TestEntity>(fetchLimit: 5))
         XCTAssertEqual(allEntities.count, testableContents.count - 1)
         XCTAssertFalse(allEntities.contains(where: { $0.content == targetContent }))
     }

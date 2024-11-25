@@ -76,14 +76,11 @@ final class RetrospectManager: RetrospectManageable {
 // MARK: - ChatManager Create FetchRequest
 
 extension RetrospectManager {
-    private func pinnedRetrospectFetchRequest() -> PersistfetchRequest<Retrospect> {
-        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-            NSPredicate(format: "userID = %@", argumentArray: [userID]),
-            NSPredicate(format: "isPinned = %@", argumentArray: [true]),
-        ])
-        let sortDescriptors = NSSortDescriptor(key: "createdAt", ascending: false)
+    private func pinnedRetrospectFetchRequest() -> PersistFetchRequest<Retrospect> {
+        let predicate = CustomPredicate(format: "userID = %@ AND isPinned = %@", argumentArray: [userID, true])
+        let sortDescriptors = CustomSortDescriptor(key: "createdAt", ascending: false)
         
-        let request = PersistfetchRequest<Retrospect>(
+        let request = PersistFetchRequest<Retrospect>(
             predicate: predicate,
             sortDescriptors: [sortDescriptors],
             fetchLimit: Numerics.isPinnedFetchAmount
@@ -92,14 +89,14 @@ extension RetrospectManager {
         return request
     }
     
-    private func inProgressRetrospectFetchRequest() -> PersistfetchRequest<Retrospect> {
-        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-            NSPredicate(format: "userID = %@", argumentArray: [userID]),
-            NSPredicate(format: "status != %@", argumentArray: [Texts.finishedStatus]),
-        ])
-        let sortDescriptors = NSSortDescriptor(key: "createdAt", ascending: false)
+    private func inProgressRetrospectFetchRequest() -> PersistFetchRequest<Retrospect> {
+        let predicate = CustomPredicate(
+            format: "userID = %@ AND status != %@",
+            argumentArray: [userID, Texts.finishedStatus]
+        )
+        let sortDescriptors = CustomSortDescriptor(key: "createdAt", ascending: false)
         
-        let request = PersistfetchRequest<Retrospect>(
+        let request = PersistFetchRequest<Retrospect>(
             predicate: predicate,
             sortDescriptors: [sortDescriptors],
             fetchLimit: Numerics.isProgressFetchAmount
@@ -108,15 +105,14 @@ extension RetrospectManager {
         return request
     }
     
-    private func recentFinishedRetrospectFetchRequest(offset: Int, amount: Int) -> PersistfetchRequest<Retrospect> {
-        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-            NSPredicate(format: "userID = %@", argumentArray: [userID]),
-            NSPredicate(format: "status = %@", argumentArray: [Texts.finishedStatus]),
-            NSPredicate(format: "isPinned = %@", argumentArray: [false]),
-        ])
-        let sortDescriptors = NSSortDescriptor(key: "createdAt", ascending: false)
+    private func recentFinishedRetrospectFetchRequest(offset: Int, amount: Int) -> PersistFetchRequest<Retrospect> {
+        let predicate = CustomPredicate(
+            format: "userID = %@ AND status = %@ AND isPinned = %@",
+            argumentArray: [userID, Texts.finishedStatus, false]
+        )
+        let sortDescriptors = CustomSortDescriptor(key: "createdAt", ascending: false)
         
-        let request = PersistfetchRequest<Retrospect>(
+        let request = PersistFetchRequest<Retrospect>(
             predicate: predicate,
             sortDescriptors: [sortDescriptors],
             fetchLimit: amount,
