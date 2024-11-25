@@ -56,6 +56,7 @@
 				Persistent/PersistFetchRequestable.swift,
 				Retrospect/Model/Retrospect.swift,
 				User/Model/User.swift,
+				User/Model/UserData.swift,
 			);
 			target = 21759C532CD8AE0F0033EA52 /* RetsTalkTests */;
 		};
@@ -91,6 +92,7 @@
 			membershipExceptions = (
 				Persistent/EntityRepresentable.swift,
 				Persistent/Implementation/CoreDataManager.swift,
+				Persistent/Implementation/UserDefaultsManager.swift,
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,
 				"Utility/Extensions/Collection+Extension.swift",
