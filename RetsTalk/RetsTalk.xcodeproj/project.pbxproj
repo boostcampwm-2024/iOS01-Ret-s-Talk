@@ -56,9 +56,9 @@
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,
 				Retrospect/Model/Retrospect.swift,
-				Retrospect/Model/RetrospectManageable.swift,
-				Retrospect/Model/RetrospectManager.swift,
 				User/Model/User.swift,
+				User/Model/UserSettingManageable.swift,
+				User/Model/UserSettingManager.swift,
 				User/Model/UserData.swift,
 			);
 			target = 21759C532CD8AE0F0033EA52 /* RetsTalkTests */;

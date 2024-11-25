@@ -18,17 +18,17 @@ struct UserData {
 // MARK: - EntityRepresentable conformance
 
 extension UserData: EntityRepresentable {
-    var mappingDictionary: [String : Any] {
+    var mappingDictionary: [String: Any] {
         [
             "isCloudSyncOn": isCloudSyncOn,
             "isNotificationOn": isNotificationOn,
             "notificationTime": notificationTime,
             "cloudAddress": cloudAddress,
-            "nickname": nickname
+            "nickname": nickname,
         ]
     }
     
-    init(dictionary: [String : Any]) {
+    init(dictionary: [String: Any]) {
         isCloudSyncOn = dictionary["isCloudSyncOn"] as? Bool ?? false
         isNotificationOn = dictionary["isNotificationOn"] as? Bool ?? false
         notificationTime = dictionary["notificationTime"] as? Date ?? Date()
