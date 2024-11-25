@@ -78,7 +78,7 @@ private extension UserSettingView {
         
         var body: some View {
             HStack {
-                Text("클라우드 동기화")
+                Text(Texts.cloudSettingViewTitle)
                 Spacer()
                 Toggle(isOn: $isCloudSyncOn) {}
                     .toggleStyle(SwitchToggleStyle(tint: .blazingOrange))
@@ -98,7 +98,7 @@ private extension UserSettingView {
         
         var body: some View {
             HStack {
-                Text("회고 작성 알림")
+                Text(Texts.notificationSettingViewToggleTitle)
                 Spacer()
                 Toggle(isOn: $isNotificationOn) {}
                     .toggleStyle(SwitchToggleStyle(tint: .blazingOrange))
@@ -108,7 +108,11 @@ private extension UserSettingView {
             }
             
             if isNotificationOn {
-                DatePicker("시간", selection: $selectedDate, displayedComponents: .hourAndMinute)
+                DatePicker(
+                    Texts.notificationSettingViewDatePickerTitle,
+                    selection: $selectedDate,
+                    displayedComponents: .hourAndMinute
+                )
                     .tint(.blazingOrange)
                     .onChange(of: selectedDate) { _ in
                         action()
@@ -118,13 +122,13 @@ private extension UserSettingView {
     }
     
     struct AppVersionView: View {
-        private var appVersion: String? =  Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+        private var appVersion: String? =  Bundle.main.infoDictionary?[Texts.appVersionViewBundleKey] as? String
         
         var body: some View {
             HStack {
-                Text("앱 버전")
+                Text(Texts.appVersionViewTitle)
                 Spacer()
-                Text(appVersion ?? "1.0")
+                Text(appVersion ?? Texts.appVersionDefaultValue)
                     .foregroundStyle(.secondary)
             }
         }
@@ -145,8 +149,17 @@ private extension UserSettingView {
         static let secondSectionTitle = "클라우드"
         static let thirdSectionTitle = "알림"
         static let fourthSectionTitle = "앱 정보"
+        
+        static let cloudSettingViewTitle = "클라우드 동기화"
+        static let notificationSettingViewToggleTitle = "회고 작성 알림"
+        static let notificationSettingViewDatePickerTitle = "회고 작성 알림"
+        static let appVersionViewTitle = "앱 버전"
+        static let appVersionViewBundleKey = "CFBundleShortVersionString"
+        static let appVersionDefaultValue = "1.0"
     }
 }
+
+// MARK: - Preview
 
 #Preview {
     UserSettingView()
