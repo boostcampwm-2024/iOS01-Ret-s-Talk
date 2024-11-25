@@ -49,16 +49,18 @@ final class RetrospectManager: RetrospectManageable {
         retrospects.append(contentsOf: resultRetrospects)
     }
     
-    func create() -> RetrospectChatManageable {
-        let retropsect = Retrospect(userID: userID)
+    func create() async throws -> RetrospectChatManageable {
+        let retrospect = Retrospect(userID: userID)
+        _ = try await retrospectStorage.add(contentsOf: [retrospect])
+        retrospects.append(retrospect)
+        
         let retrospectChatManager = RetrospectChatManager(
-            retrospect: retropsect,
+            retrospect: retrospect,
             persistent: retrospectStorage,
             assistantMessageProvider: assistantMessageProvider,
             retrospectChatManagerListener: self
         )
-        retrospects.append(retropsect)
-        
+ 
         return retrospectChatManager
     }
     
@@ -81,7 +83,7 @@ extension RetrospectManager {
         let request = PersistFetchRequest<Retrospect>(
             predicate: predicate,
             sortDescriptors: [sortDescriptors],
-            fetchLimit: Metrics.isPinnedFetchAmount
+            fetchLimit: Numerics.isPinnedFetchAmount
         )
         
         return request
@@ -97,7 +99,7 @@ extension RetrospectManager {
         let request = PersistFetchRequest<Retrospect>(
             predicate: predicate,
             sortDescriptors: [sortDescriptors],
-            fetchLimit: Metrics.isProgressFetchAmount
+            fetchLimit: Numerics.isProgressFetchAmount
         )
         
         return request
@@ -145,7 +147,7 @@ extension RetrospectManager: RetrospectChatManagerListener {
 // MARK: - Constant
 
 extension RetrospectManager {
-    enum Metrics {
+    enum Numerics {
         static let isPinnedFetchAmount = 2
         static let isProgressFetchAmount = 2
     }
