@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 protocol UserSettingViewDelegate: AnyObject {
     func didChangeNickname(_ userSettingView: UserSettingView, nickname: String)
     func didToggleCloudSync(_ userSettingView: UserSettingView, isOn: Bool)
