@@ -30,10 +30,24 @@ final class RetrospectManager: RetrospectManageable {
     }
     
     func fetchRetrospects(offset: Int, amount: Int) async throws {
-        let request = createRequest(offset: offset, amount: amount)
-        let fetchedEntities = try await retrospectStorage.fetch(by: request)
+        let finishedRecentRequest = finishedRecentRetrospectFetchRequest(offset: offset, amount: amount)
+        let finishedRecentEntities = try await retrospectStorage.fetch(by: finishedRecentRequest)
+        retrospects.append(contentsOf: finishedRecentEntities)
+    }
+    
+    func fetchinitRetrospects(offset: Int, amount: Int) async throws {
+        let isPinnedRequest = isPinnedRetrospectFetchRequest()
+        let isPinnedEntities = try await retrospectStorage.fetch(by: isPinnedRequest)
         
-        retrospects.append(contentsOf: fetchedEntities)
+        let isProgressRequest = isProgressRetrospectFetchRequest()
+        let isProgressEntities = try await retrospectStorage.fetch(by: isProgressRequest)
+        
+        let finishedRecentRequest = finishedRecentRetrospectFetchRequest(offset: offset, amount: amount)
+        let finishedRecentEntities = try await retrospectStorage.fetch(by: finishedRecentRequest)
+        
+        let resultRetrospects = [isPinnedEntities, isProgressEntities, finishedRecentEntities]
+            .flatMap { $0 }
+        retrospects.append(contentsOf: resultRetrospects)
     }
     
     func create() -> RetrospectChatManageable {
@@ -56,17 +70,53 @@ final class RetrospectManager: RetrospectManageable {
     func delete(_ retrospect: Retrospect) async throws {
         
     }
-    
-    private func createRequest(offset: Int, amount: Int) -> PersistfetchRequest<Retrospect> {
-        let predicate = NSPredicate(format: "userID = %@", argumentArray: [userID])
-        let sortDescriptors = [
-            NSSortDescriptor(key: "isPinned", ascending: true),
-            NSSortDescriptor(key: "status", ascending: false),
-            NSSortDescriptor(key: "createdAt", ascending: false),
-        ]
+}
+
+// MARK: - ChatManager Create FetchRequest
+
+extension RetrospectManager {
+    private func isPinnedRetrospectFetchRequest() -> PersistfetchRequest<Retrospect> {
+        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            NSPredicate(format: "userID = %@", argumentArray: [userID]),
+            NSPredicate(format: "isPinned = %@", argumentArray: [true]),
+        ])
+        let sortDescriptors = NSSortDescriptor(key: "createdAt", ascending: false)
+        
         let request = PersistfetchRequest<Retrospect>(
             predicate: predicate,
-            sortDescriptors: sortDescriptors,
+            sortDescriptors: [sortDescriptors],
+            fetchLimit: Metrics.isPinnedFetchAmount
+        )
+        
+        return request
+    }
+    
+    private func isProgressRetrospectFetchRequest() -> PersistfetchRequest<Retrospect> {
+        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            NSPredicate(format: "userID = %@", argumentArray: [userID]),
+            NSPredicate(format: "status != %@", argumentArray: [Texts.finishedStatus]),
+        ])
+        let sortDescriptors = NSSortDescriptor(key: "createdAt", ascending: false)
+        
+        let request = PersistfetchRequest<Retrospect>(
+            predicate: predicate,
+            sortDescriptors: [sortDescriptors],
+            fetchLimit: Metrics.isProgressFetchAmount
+        )
+        
+        return request
+    }
+    
+    private func finishedRecentRetrospectFetchRequest(offset: Int, amount: Int) -> PersistfetchRequest<Retrospect> {
+        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            NSPredicate(format: "userID = %@", argumentArray: [userID]),
+            NSPredicate(format: "status = %@", argumentArray: [Texts.finishedStatus]),
+        ])
+        let sortDescriptors = NSSortDescriptor(key: "createdAt", ascending: false)
+        
+        let request = PersistfetchRequest<Retrospect>(
+            predicate: predicate,
+            sortDescriptors: [sortDescriptors],
             fetchLimit: amount,
             fetchOffset: offset
         )
@@ -74,6 +124,7 @@ final class RetrospectManager: RetrospectManageable {
         return request
     }
 }
+
 
 // MARK: - MessageManagerListener conformance
 
@@ -93,5 +144,18 @@ extension RetrospectManager: RetrospectChatManagerListener {
         else { return }
         
         retrospects[index].status = status
+    }
+}
+
+// MARK: - Constant
+
+extension RetrospectManager {
+    enum Metrics {
+        static let isPinnedFetchAmount = 2
+        static let isProgressFetchAmount = 2
+    }
+    
+    enum Texts {
+        static let finishedStatus = "retrospectFinished"
     }
 }
