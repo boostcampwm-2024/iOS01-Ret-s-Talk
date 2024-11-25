@@ -15,7 +15,7 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable {
     private let userDataStorage: Persistable
     
     // MARK: Init method
-
+    
     init(userData: UserData, persistent: Persistable) {
         self.userData = userData
         self.userDataSubject = CurrentValueSubject(userData)
@@ -24,13 +24,32 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable {
     
     // MARK: UserSettingManageable conformance
     
-    func fetch() async throws {
-        // request 임시 생성
-        let request = PersistfetchRequest<UserData>(fetchLimit: 1)
-        userData = try await userDataStorage.fetch(by: request)[0]
+    func fetch() {
+        let request = PersistFetchRequest<UserData>(fetchLimit: 1)
+        
+        Task {
+            let fetchedData = try await userDataStorage.fetch(by: request)
+            guard fetchedData.isNotEmpty, let fetchedData = fetchedData.first else {
+                initiateUserData()
+                return
+            }
+            
+            userData = fetchedData
+        }
     }
     
-    func update(to: UserData) async throws {
-        userData = try await userDataStorage.update(from: userData, to: userData)
+    func update(to userData: UserData) {
+        Task {
+            self.userData = try await userDataStorage.update(from: userData, to: userData)
+        }
+    }
+
+    private func initiateUserData() {
+        Task {
+            let addedData = try await userDataStorage.add(contentsOf: [UserData(dictionary: [:])])
+            guard let addedData = addedData.first else { return }
+            
+            userData = addedData
+        }
     }
 }

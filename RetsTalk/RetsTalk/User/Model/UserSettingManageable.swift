@@ -5,12 +5,12 @@
 //  Created by HanSeung on 11/25/24.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 protocol UserSettingManageable: Sendable {
     var userDataSubject: CurrentValueSubject<UserData, Never> { get }
 
-    func fetch() async throws
-    func update(to: UserData) async throws
+    func fetch()
+    func update(to userData: UserData)
 }

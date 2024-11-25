@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class UserDefaultsManager: Persistable {
+actor UserDefaultsManager: Persistable {
     private let userDefaultsContainer: UserDefaults
 
     init(container: UserDefaults = .standard) {
@@ -16,20 +16,16 @@ final class UserDefaultsManager: Persistable {
     
     // MARK: Persistable conformance
 
-    func add<Entity>(contentsOf entities: [Entity]) -> [Entity] where Entity : EntityRepresentable {
-        let initializingEntity = Entity.init(dictionary: [:])
-        let dictionary = initializingEntity.mappingDictionary
+    func add<Entity>(contentsOf entities: [Entity]) -> [Entity] where Entity: EntityRepresentable {
+        guard let firstEntity = entities.first else { return [] }
         
-        for dictionaryKey in dictionary.keys {
-            userDefaultsContainer.set(dictionary[dictionaryKey], forKey: dictionaryKey)
-        }
-        return [initializingEntity]
+        let entityDictionary = firstEntity.mappingDictionary
+        userDefaultsContainer.set(entityDictionary, forKey: Entity.entityName)
+        return [firstEntity]
     }
     
-    func fetch<Entity>(by request: any PersistFetchRequestable<Entity>) -> [Entity] where Entity : EntityRepresentable {
-        guard let entityDictionary = userDefaultsContainer.dictionary(forKey: Entity.entityName) else {
-            return []
-        }
+    func fetch<Entity>(by request: any PersistFetchRequestable<Entity>) -> [Entity] where Entity: EntityRepresentable {
+        guard let entityDictionary = userDefaultsContainer.dictionary(forKey: Entity.entityName) else { return [] }
         
         return [Entity(dictionary: entityDictionary)]
     }
@@ -37,13 +33,11 @@ final class UserDefaultsManager: Persistable {
     func update<Entity>(
         from sourceEntity: Entity,
         to updatingEntity: Entity
-    ) -> Entity where Entity : EntityRepresentable {
+    ) -> Entity where Entity: EntityRepresentable {
         let dictionary = updatingEntity.mappingDictionary
-        for dictionaryKey in dictionary.keys {
-            userDefaultsContainer.set(dictionary[dictionaryKey], forKey: dictionaryKey)
-        }
+        userDefaultsContainer.set(dictionary, forKey: Entity.entityName)
         return updatingEntity
     }
     
-    func delete<Entity>(contentsOf entities: [Entity]) where Entity : EntityRepresentable {}
+    func delete<Entity>(contentsOf entities: [Entity]) where Entity: EntityRepresentable {}
 }
