@@ -50,17 +50,17 @@ final class RetrospectManager: RetrospectManageable {
     }
     
     func create() async throws -> RetrospectChatManageable {
-        let retropsect = Retrospect(userID: userID)
+        let retrospect = Retrospect(userID: userID)
+        _ = try await retrospectStorage.add(contentsOf: [retrospect])
+        retrospects.append(retrospect)
+        
         let retrospectChatManager = RetrospectChatManager(
-            retrospect: retropsect,
+            retrospect: retrospect,
             persistent: retrospectStorage,
             assistantMessageProvider: assistantMessageProvider,
             retrospectChatManagerListener: self
         )
-        retrospects.append(retropsect)
-        
-        _ = try await retrospectStorage.add(contentsOf: [retropsect])
-        
+ 
         return retrospectChatManager
     }
     
@@ -126,7 +126,6 @@ extension RetrospectManager {
         return request
     }
 }
-
 
 // MARK: - MessageManagerListener conformance
 
