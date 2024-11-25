@@ -5,7 +5,7 @@
 //  Created by KimMinSeok on 11/24/24.
 //
 
-final class MockRetrospectStore: Persistable {
+actor MockRetrospectStore: Persistable {
     var retrospects: [Retrospect] = []
     
     init(retrospects: [Retrospect]) {
