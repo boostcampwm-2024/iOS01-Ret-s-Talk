@@ -86,7 +86,7 @@ extension RetrospectManager {
         let request = PersistfetchRequest<Retrospect>(
             predicate: predicate,
             sortDescriptors: [sortDescriptors],
-            fetchLimit: Metrics.isPinnedFetchAmount
+            fetchLimit: Numerics.isPinnedFetchAmount
         )
         
         return request
@@ -102,7 +102,7 @@ extension RetrospectManager {
         let request = PersistfetchRequest<Retrospect>(
             predicate: predicate,
             sortDescriptors: [sortDescriptors],
-            fetchLimit: Metrics.isProgressFetchAmount
+            fetchLimit: Numerics.isProgressFetchAmount
         )
         
         return request
@@ -151,7 +151,7 @@ extension RetrospectManager: RetrospectChatManagerListener {
 // MARK: - Constant
 
 extension RetrospectManager {
-    enum Metrics {
+    enum Numerics {
         static let isPinnedFetchAmount = 2
         static let isProgressFetchAmount = 2
     }

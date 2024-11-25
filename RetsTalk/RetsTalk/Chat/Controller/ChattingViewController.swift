@@ -40,7 +40,7 @@ final class ChattingViewController: UIViewController {
         addKeyboardObservers()
         
         Task {
-            try await retrospectChatManager.fetchMessages(offset: Numeric.initialOffset, amount: Numeric.amount)
+            try await retrospectChatManager.fetchMessages(offset: Numerics.initialOffset, amount: Numerics.amount)
         }
 
         observeMessages()
@@ -175,7 +175,7 @@ extension ChattingViewController: ChatViewDelegate {
 // MARK: - Constants
 
 private extension ChattingViewController {
-    enum Numeric {
+    enum Numerics {
         static let initialOffset = 0
         static let amount = 10
     }
