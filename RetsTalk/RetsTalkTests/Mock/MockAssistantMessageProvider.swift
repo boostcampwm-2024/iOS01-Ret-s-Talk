@@ -7,8 +7,8 @@
 
 import XCTest
 
-struct MockAssistantMessageProvider: AssistantMessageProvidable {
-    nonisolated(unsafe) static var requestAssistantMessageHandler: (([Message]) throws -> Message)?
+actor MockAssistantMessageProvider: AssistantMessageProvidable {
+    static var requestAssistantMessageHandler: (([Message]) throws -> Message)?
 
     func requestAssistantMessage(for chat: [Message]) async throws -> Message {
         guard let handler = MockAssistantMessageProvider.requestAssistantMessageHandler

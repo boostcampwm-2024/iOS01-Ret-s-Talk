@@ -52,6 +52,7 @@
 				Chat/Model/RetrospectChatManager.swift,
 				Chat/Model/RetrospectChatManagerListener.swift,
 				Persistent/EntityRepresentable.swift,
+				Persistent/Implementation/PersistFetchRequest.swift,
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,
 				Retrospect/Model/Retrospect.swift,
@@ -93,6 +94,7 @@
 			membershipExceptions = (
 				Persistent/EntityRepresentable.swift,
 				Persistent/Implementation/CoreDataManager.swift,
+				Persistent/Implementation/PersistFetchRequest.swift,
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,
 				"Utility/Extensions/Collection+Extension.swift",

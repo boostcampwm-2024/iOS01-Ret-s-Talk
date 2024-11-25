@@ -5,7 +5,7 @@
 //  Created by KimMinSeok on 11/24/24.
 //
 
-final class MockRetrospectStore: Persistable {
+actor MockRetrospectStore: Persistable {
     var retrospects: [Retrospect] = []
     
     init(retrospects: [Retrospect]) {
@@ -13,7 +13,7 @@ final class MockRetrospectStore: Persistable {
     }
     
     func add<Entity>(contentsOf entities: [Entity]) async throws -> [Entity] {
-        entities
+        return entities
     }
     
     func fetch<Entity>(by request: any PersistFetchRequestable<Entity>) async throws -> [Entity] {

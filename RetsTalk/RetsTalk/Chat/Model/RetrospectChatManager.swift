@@ -63,10 +63,10 @@ final class RetrospectChatManager: RetrospectChatManageable, @unchecked Sendable
     
     // MARK: Supporting methods
     
-    private func recentMessageFetchRequest(offset: Int, amount: Int) -> PersistfetchRequest<Message> {
-        let matchingRetorspect = NSPredicate(format: "retrospectID = %@", argumentArray: [retrospect.id])
-        let recentDateSorting = NSSortDescriptor(key: "createdAt", ascending: false)
-        let request = PersistfetchRequest<Message>(
+    private func recentMessageFetchRequest(offset: Int, amount: Int) -> PersistFetchRequest<Message> {
+        let matchingRetorspect = CustomPredicate(format: "retrospectID = %@", argumentArray: [retrospect.id])
+        let recentDateSorting = CustomSortDescriptor(key: "createdAt", ascending: false)
+        let request = PersistFetchRequest<Message>(
             predicate: matchingRetorspect,
             sortDescriptors: [recentDateSorting],
             fetchLimit: amount,
