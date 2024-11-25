@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol Persistable {
+protocol Persistable: Actor {
     /// 로컬 저장소에 엔티티 데이터를 추가합니다.
     /// - Parameter entities: 추가할 엔티티 배열.
     /// - Returns: 추가된 데이터.

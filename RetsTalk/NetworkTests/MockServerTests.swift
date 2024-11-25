@@ -31,7 +31,7 @@ final class MockServerTests: XCTestCase {
     
     func test_URLRequest생성결과_URL이_기댓값과_동일() async throws {
         // given
-        let urlString = "https://clovastudio.stream.ntruss.com/testapp/v1/chat-completions/HCX-DASH-001"
+        let urlString = "https://clovastudio.apigw.ntruss.com/testapp/v1/chat-completions/HCX-DASH-001"
         let expectedURL = try XCTUnwrap(URL(string: urlString))
         
         // when
