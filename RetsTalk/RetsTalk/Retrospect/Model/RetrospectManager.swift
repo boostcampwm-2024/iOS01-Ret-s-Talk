@@ -111,6 +111,7 @@ extension RetrospectManager {
         let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
             NSPredicate(format: "userID = %@", argumentArray: [userID]),
             NSPredicate(format: "status = %@", argumentArray: [Texts.finishedStatus]),
+            NSPredicate(format: "isPinned = %@", argumentArray: [false]),
         ])
         let sortDescriptors = NSSortDescriptor(key: "createdAt", ascending: false)
         
