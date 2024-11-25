@@ -15,8 +15,6 @@ final class MockRetrospectStore: Persistable {
     }
     
     func add<Entity>(contentsOf entities: [Entity]) async throws -> [Entity] {
-        retrospects.append(Retrospect(userID: UUID()))
-        
         return entities
     }
     

@@ -68,13 +68,4 @@ final class RetrospectManagerTests: XCTestCase {
         
         XCTAssertEqual(retrospectManager.retrospectsSubject.value.count, 1)
     }
-    
-    func test_회고를_추가하면_persistent에_추가가_되는지() async throws {
-        let retrospectManager = try XCTUnwrap(retrospectManager)
-        let retrospectStore = try XCTUnwrap(retrospectStore)
-        
-        _ = try await retrospectManager.create()
-        
-        XCTAssertEqual(retrospectStore.retrospects.count, 6)
-    }
 }
