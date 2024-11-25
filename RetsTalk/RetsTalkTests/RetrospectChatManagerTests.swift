@@ -106,7 +106,12 @@ final class RetrospectChatManagerTests: XCTestCase {
     func test_회고_도움_메시지를_받아왔을때_상태_반영을_하는지() async throws {
         let retrospectChatManager = try XCTUnwrap(retrospectChatManager)
         let userMessage = try XCTUnwrap(testableMessages.randomElement())
-        let assistantMessage = Message(retrospectID: UUID(), role: .assistant, content: "응답 테스트 메시지", createdAt: Date())
+        let assistantMessage = Message(
+            retrospectID: retrospectChatManager.retrospectSubject.value.id,
+            role: .assistant,
+            content: "응답 테스트 메시지",
+            createdAt: Date()
+        )
         MockAssistantMessageProvider.requestAssistantMessageHandler = { _ in
             let retrospect = retrospectChatManager.retrospectSubject.value
             XCTAssertEqual(retrospect.status, .inProgress(.waitingForResponse))

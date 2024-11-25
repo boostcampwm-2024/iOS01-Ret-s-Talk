@@ -11,13 +11,12 @@ final class RetrospectManagerTests: XCTestCase {
     private var retrospectManager: RetrospectManager?
     private let sharedUserID = UUID()
     private var retrospectStore: MockRetrospectStore?
-    
-    private var testableMessages: [Retrospect] = []
+    private var testableRetrospects: [Retrospect] = []
     
     override func setUp() {
         super.setUp()
         
-        testableMessages = [
+        testableRetrospects = [
             Retrospect(userID: sharedUserID),
             Retrospect(userID: sharedUserID),
             Retrospect(userID: sharedUserID),

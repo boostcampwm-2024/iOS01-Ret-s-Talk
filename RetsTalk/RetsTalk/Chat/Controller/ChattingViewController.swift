@@ -11,11 +11,22 @@ import Combine
 
 final class ChattingViewController: UIViewController {
     private let chatView = ChatView()
-    private let messageManager: MockMessageManager = MockMessageManager(
-        messageManagerListener: MockMessageManagerListener()
-    )
-    private var cancellables: Set<AnyCancellable> = []
-
+    private let messageManager: RetrospectChatManageable
+    private var cancellables: Set<AnyCancellable>
+    
+    // MARK: Initialization
+    
+    init(messageManager: RetrospectChatManageable) {
+        self.messageManager = messageManager
+        cancellables = []
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: ViewController lifecycle method
   
     override func viewDidLoad() {
@@ -28,7 +39,9 @@ final class ChattingViewController: UIViewController {
         addTapGestureOfDismissingKeyboard()
         addKeyboardObservers()
         
-        messageManager.fetchMessages(offset: Numeric.initialOffset, amount: Numeric.amount)
+        Task {
+            try await messageManager.fetchMessages(offset: Numeric.initialOffset, amount: Numeric.amount)
+        }
 
         observeMessages()
     }
@@ -146,8 +159,7 @@ extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
 
 extension ChattingViewController: ChatViewDelegate {
     func sendMessage(_ chatView: ChatView, with text: String) {
-        let userMessage = Message(role: .user, content: text, createdAt: Date())
-        // 실제로는 비동기 처리 or 반응형으로 처리가 되어야 함, 아직 미완된 기능이라 일단 넘어가도록 하였음
+        let userMessage = Message(retrospectID: UUID(), role: .user, content: text, createdAt: Date())
         Task {
             do {
                 try await messageManager.send(userMessage)
