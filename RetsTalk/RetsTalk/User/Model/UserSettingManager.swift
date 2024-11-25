@@ -18,8 +18,8 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable {
     
     init(userData: UserData, persistent: Persistable) {
         self.userData = userData
-        self.userDataSubject = CurrentValueSubject(userData)
-        self.userDataStorage = persistent
+        userDataSubject = CurrentValueSubject(userData)
+        userDataStorage = persistent
     }
     
     // MARK: UserSettingManageable conformance
