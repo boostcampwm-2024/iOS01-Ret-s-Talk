@@ -57,6 +57,7 @@
 				Retrospect/Model/Retrospect.swift,
 				User/Model/User.swift,
 				User/Model/UserSettingManageable.swift,
+				User/Model/UserSettingManager.swift,
 			);
 			target = 21759C532CD8AE0F0033EA52 /* RetsTalkTests */;
 		};

@@ -11,6 +11,6 @@ import Combine
 protocol UserSettingManageable: Sendable {
     var userDataSubject: CurrentValueSubject<UserData, Never> { get }
 
-    func fetch()
-    func update()
+    func fetch() async throws
+    func update(to: UserData) async throws
 }
