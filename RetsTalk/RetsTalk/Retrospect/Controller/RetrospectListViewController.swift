@@ -35,11 +35,6 @@ final class RetrospectListViewController: UIViewController {
         
         setUpNavigationBar()
         retrospectListView.setTableViewDelegate(self)
-        
-        // 회고생성버튼 임시 액션
-        retrospectListView.addCreateButtonAction(UIAction(handler: { [weak self] _ in
-            self?.navigationController?.pushViewController(ChattingViewController(), animated: true)
-        }))
     }
     
     // MARK: Custom method

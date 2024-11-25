@@ -50,7 +50,7 @@ final class MessageInputView: UIView {
             withConfiguration: UIImage.SymbolConfiguration(pointSize: Metrics.sendButtonSideLength, weight: .light)
         )
         button.setImage(icon, for: .normal)
-        button.tintColor = UIColor.appColor(.blazingOrange)
+        button.tintColor = .blazingOrange
         button.isEnabled = false
         return button
     }()
