@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class MockMessageStore: Persistable {
+actor MockMessageStore: Persistable {
     var messages: [Message]
     
     init(messages: [Message]) {
