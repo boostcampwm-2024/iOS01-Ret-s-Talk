@@ -24,7 +24,7 @@ final class RetrospectManagerTests: XCTestCase {
             Retrospect(userID: sharedUserID),
         ]
         
-        retrospectStore = MockRetrospectStore(retrospects: testableMessages)
+        retrospectStore = MockRetrospectStore(retrospects: testableRetrospects)
         
         retrospectManager = RetrospectManager(
             userID: UUID(),

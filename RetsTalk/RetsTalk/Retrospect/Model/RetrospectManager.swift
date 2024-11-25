@@ -49,7 +49,7 @@ final class RetrospectManager: RetrospectManageable {
         retrospects.append(contentsOf: resultRetrospects)
     }
     
-    func create() -> RetrospectChatManageable {
+    func create() async throws -> RetrospectChatManageable {
         let retropsect = Retrospect(userID: userID)
         let retrospectChatManager = RetrospectChatManager(
             retrospect: retropsect,
