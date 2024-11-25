@@ -45,7 +45,5 @@ final class UserDefaultsManager: Persistable {
         return updatingEntity
     }
     
-    func delete<Entity>(contentsOf entities: [Entity]) where Entity : EntityRepresentable {
-        
-    }
+    func delete<Entity>(contentsOf entities: [Entity]) where Entity : EntityRepresentable {}
 }
