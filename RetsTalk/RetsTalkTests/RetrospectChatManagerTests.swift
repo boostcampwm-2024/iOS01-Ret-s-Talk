@@ -8,25 +8,27 @@
 import XCTest
 
 final class RetrospectChatManagerTests: XCTestCase {
-    private var retrospectChatManager: RetrospectChatManager?
+    private var retrospectChatManager: RetrospectChatManageable?
     
     // MARK: Set up
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         
-        retrospectChatManager = RetrospectChatManager(
-            retrospect: Retrospect(userID: UUID()),
-            messageStorage: MockMessageStore(),
-            assistantMessageProvider: MockAssistantMessageProvider(),
-            retrospectChatManagerListener: MockRetrospectManager()
-        )
+        retrospectChatManager = await RetrospectActor.run {
+            RetrospectChatManager(
+                retrospect: Retrospect(userID: UUID()),
+                messageStorage: MockMessageStore(),
+                assistantMessageProvider: MockAssistantMessageProvider(),
+                retrospectChatManagerListener: MockRetrospectManager()
+            )
+        }
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         MockAssistantMessageProvider.requestAssistantMessageHandler = nil
         
-        super.tearDown()
+        try await super.tearDown()
     }
     
     // MARK: Send

@@ -5,7 +5,8 @@
 //  Created by KimMinSeok on 11/18/24.
 //
 
-protocol RetrospectManageable: Actor {
+@RetrospectActor
+protocol RetrospectManageable: Sendable {
     var retrospects: [Retrospect] { get }
     
     func fetchRetrospects(offset: Int, amount: Int) async throws

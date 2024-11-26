@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-actor RetrospectManager: RetrospectManageable {
+final class RetrospectManager: RetrospectManageable {
     private let userID: UUID
     
     private(set) var retrospects: [Retrospect]
@@ -16,7 +16,7 @@ actor RetrospectManager: RetrospectManageable {
     private let retrospectStorage: Persistable
     private let assistantMessageProvider: AssistantMessageProvidable
     
-    init(
+    nonisolated init(
         userID: UUID,
         retrospectStorage: Persistable,
         assistantMessageProvider: AssistantMessageProvidable
@@ -120,14 +120,14 @@ extension RetrospectManager {
 // MARK: - MessageManagerListener conformance
 
 extension RetrospectManager: RetrospectChatManagerListener {
-    func didUpdateRetrospect(_ retrospectChatManageable: any RetrospectChatManageable, retrospect: Retrospect) {
+    func didUpdateRetrospect(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) {
         guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id })
         else { return }
         
         retrospects[matchingIndex] = retrospect
     }
     
-    func shouldTogglePin(_ retrospectChatManageable: any RetrospectChatManageable, retrospect: Retrospect) -> Bool {
+    func shouldTogglePin(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) -> Bool {
         true
     }
 }

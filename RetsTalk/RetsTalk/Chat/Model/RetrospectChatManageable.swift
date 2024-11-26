@@ -5,7 +5,8 @@
 //  Created by KimMinSeok on 11/18/24.
 //
 
-protocol RetrospectChatManageable: Actor {
+@RetrospectActor
+protocol RetrospectChatManageable: Sendable {
     var retrospect: Retrospect { get }
     var errorOccurred: Error? { get }
     
