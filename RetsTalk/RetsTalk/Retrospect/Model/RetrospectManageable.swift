@@ -5,10 +5,8 @@
 //  Created by KimMinSeok on 11/18/24.
 //
 
-import Combine
-
-protocol RetrospectManageable {
-    var retrospectsSubject: CurrentValueSubject<[Retrospect], Never> { get }
+protocol RetrospectManageable: Actor {
+    var retrospects: [Retrospect] { get }
     
     func fetchRetrospects(offset: Int, amount: Int) async throws
     func create() async throws -> RetrospectChatManageable

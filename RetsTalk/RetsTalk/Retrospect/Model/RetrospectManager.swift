@@ -8,12 +8,11 @@
 import Foundation
 import Combine
 
-final class RetrospectManager: RetrospectManageable, @unchecked Sendable {
+actor RetrospectManager: RetrospectManageable {
     private let userID: UUID
-    private var retrospects: [Retrospect] {
-        didSet { retrospectsSubject.send(retrospects) }
-    }
-    private(set) var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
+    
+    private(set) var retrospects: [Retrospect]
+    
     private let retrospectStorage: Persistable
     private let assistantMessageProvider: AssistantMessageProvidable
     
@@ -23,10 +22,9 @@ final class RetrospectManager: RetrospectManageable, @unchecked Sendable {
         assistantMessageProvider: AssistantMessageProvidable
     ) {
         self.userID = userID
-        self.retrospects = []
-        self.retrospectsSubject = CurrentValueSubject(retrospects)
         self.retrospectStorage = retrospectStorage
         self.assistantMessageProvider = assistantMessageProvider
+        retrospects = []
     }
     
     func fetchRetrospects(offset: Int, amount: Int) async throws {
@@ -64,13 +62,9 @@ final class RetrospectManager: RetrospectManageable, @unchecked Sendable {
         return retrospectChatManager
     }
     
-    func update(_ retrospect: Retrospect) async throws {
-        
-    }
+    func update(_ retrospect: Retrospect) async throws {}
     
-    func delete(_ retrospect: Retrospect) async throws {
-        
-    }
+    func delete(_ retrospect: Retrospect) async throws {}
 }
 
 // MARK: - ChatManager Create FetchRequest
