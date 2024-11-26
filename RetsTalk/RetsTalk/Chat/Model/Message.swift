@@ -13,6 +13,13 @@ struct Message {
     var content: String
     let createdAt: Date
     
+    init(retrospectID: UUID, role: Role, content: String, createdAt: Date = Date()) {
+        self.retrospectID = retrospectID
+        self.role = role
+        self.content = content
+        self.createdAt = createdAt
+    }
+    
     enum Role: String {
         case user
         case assistant
