@@ -5,14 +5,14 @@
 //  Created by KimMinSeok on 11/18/24.
 //
 
-import Foundation
-import Combine
-
+@RetrospectActor
 protocol RetrospectChatManageable: Sendable {
-    var retrospectSubject: CurrentValueSubject<Retrospect, Never> { get }
-    var retrospectChatManagerListener: RetrospectChatManagerListener { get }
+    var retrospect: Retrospect { get }
+    var errorOccurred: Error? { get }
     
-    func fetchMessages(offset: Int, amount: Int) async throws
-    func send(_ message: Message) async throws
+    func sendMessage(_ text: String) async
+    func resendLastMessage() async
+    func fetchPreviousMessages() async
     func endRetrospect()
+    func toggleRetrospectPin()
 }

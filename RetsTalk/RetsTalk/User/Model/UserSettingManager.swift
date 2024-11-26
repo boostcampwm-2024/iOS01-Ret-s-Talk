@@ -7,26 +7,20 @@
 
 import Combine
 
-final class UserSettingManager: UserSettingManageable, @unchecked Sendable {
-    private var userData: UserData {
-        didSet { userDataSubject.send(userData) }
-    }
-    private(set) var userDataSubject: CurrentValueSubject<UserData, Never>
+final class UserSettingManager: UserSettingManageable, @unchecked Sendable, ObservableObject {
+    @Published var userData: UserData = .init(dictionary: [:])
     private let userDataStorage: Persistable
     
     // MARK: Init method
     
-    init(userData: UserData, persistent: Persistable) {
-        self.userData = userData
-        userDataSubject = CurrentValueSubject(userData)
-        userDataStorage = persistent
+    init(userDataStorage: Persistable) {
+        self.userDataStorage = userDataStorage
     }
     
     // MARK: UserSettingManageable conformance
     
     func fetch() {
         let request = PersistFetchRequest<UserData>(fetchLimit: 1)
-        
         Task {
             let fetchedData = try await userDataStorage.fetch(by: request)
             guard fetchedData.isNotEmpty, let fetchedData = fetchedData.first else {
@@ -34,16 +28,21 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable {
                 return
             }
             
-            userData = fetchedData
+            await MainActor.run {
+                userData = fetchedData
+            }
         }
     }
     
-    func update(to userData: UserData) {
+    func update(to updatingData: UserData) {
         Task {
-            self.userData = try await userDataStorage.update(from: userData, to: userData)
+            let updatedData = try await userDataStorage.update(from: updatingData, to: updatingData)
+            await MainActor.run {
+                userData = updatedData
+            }
         }
     }
-
+    
     private func initiateUserData() {
         Task {
             let addedData = try await userDataStorage.add(contentsOf: [UserData(dictionary: [:])])

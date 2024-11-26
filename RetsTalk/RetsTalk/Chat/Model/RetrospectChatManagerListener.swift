@@ -5,7 +5,8 @@
 //  Created by KimMinSeok on 11/18/24.
 //
 
+@RetrospectActor
 protocol RetrospectChatManagerListener {
-    func didFinishRetrospect(_ retrospectChatManageable: RetrospectChatManageable)
-    func didChangeStatus(_ retrospectChatManageable: RetrospectChatManageable, to status: Retrospect.Status)
+    func didUpdateRetrospect(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect)
+    func shouldTogglePin(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) -> Bool
 }

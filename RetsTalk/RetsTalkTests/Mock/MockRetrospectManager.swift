@@ -6,7 +6,9 @@
 //
 
 final class MockRetrospectManager: RetrospectChatManagerListener {
-    func didFinishRetrospect(_ retrospectChatManager: any RetrospectChatManageable) {}
+    func didUpdateRetrospect(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) {}
     
-    func didChangeStatus(_ retrospectChatManager: any RetrospectChatManageable, to status: Retrospect.Status) {}
+    func shouldTogglePin(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) -> Bool {
+        true
+    }
 }
