@@ -42,8 +42,13 @@ struct UserSettingView: View {
                 AppVersionView()
             }
         }
+        .onAppear {
+            userSettingManager.fetch()
+        }
     }
 }
+
+// MARK: - Subviews
 
 private extension UserSettingView {
     struct NicknameSettingView: View {
@@ -96,20 +101,24 @@ private extension UserSettingView {
                     .padding(.horizontal, Metrics.horizontalPadding)
                     .padding(.vertical, Metrics.verticalPadding)
                 
-                Button(action: {
-                    action(nickname)
-                    dismiss()
-                }, label: {
-                    Text(Texts.nicknameModalDoneButtonTitle)
-                        .foregroundStyle(.white)
-                        .font(.headline)
-                })
-                .frame(maxWidth: .infinity)
-                .frame(height: Metrics.nicknameModalDoneButtonHeight)
-                .background(Color.blazingOrange)
-                .clipShape(RoundedRectangle(cornerRadius: Metrics.nicknameModalCornerRadius))
-                .padding(.horizontal, Metrics.horizontalPadding)
-                .padding(.vertical, Metrics.verticalPadding)
+                Button(
+                    action: {
+                        action(nickname)
+                        dismiss()
+                    },
+                    label: {
+                        ZStack {
+                            Color.blazingOrange
+                                .clipShape(RoundedRectangle(cornerRadius: Metrics.nicknameModalCornerRadius))
+                            Text(Texts.nicknameModalDoneButtonTitle)
+                                .foregroundStyle(.white)
+                                .font(.headline)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: Metrics.nicknameModalDoneButtonHeight)
+                        .padding(.horizontal, Metrics.horizontalPadding)
+                        .padding(.vertical, Metrics.verticalPadding)
+                    })
                 .disabled(nickname.isEmpty)
                 .opacity(nickname.isEmpty ? Numerics.doneButtonDisabledOpaque : Numerics.doneButtonDefaultOpaque)
             }

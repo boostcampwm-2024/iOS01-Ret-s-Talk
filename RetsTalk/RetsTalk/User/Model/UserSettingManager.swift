@@ -8,13 +8,12 @@
 import Combine
 
 final class UserSettingManager: UserSettingManageable, @unchecked Sendable, ObservableObject {
-    @Published var userData: UserData
+    @Published var userData: UserData = .init(dictionary: [:])
     private let userDataStorage: Persistable
     
     // MARK: Init method
     
-    init(userData: UserData, persistent: Persistable) {
-        self.userData = userData
+    init(persistent: Persistable) {
         userDataStorage = persistent
     }
     
@@ -22,13 +21,13 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
     
     func fetch() {
         let request = PersistFetchRequest<UserData>(fetchLimit: 1)
-        
         Task {
             let fetchedData = try await userDataStorage.fetch(by: request)
             guard fetchedData.isNotEmpty, let fetchedData = fetchedData.first else {
                 initiateUserData()
                 return
             }
+            
             await MainActor.run {
                 userData = fetchedData
             }

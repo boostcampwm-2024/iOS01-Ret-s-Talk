@@ -11,24 +11,23 @@ import UIKit
 
 final class UserSettingViewController: UIHostingController<UserSettingView> {
     private let userSettingManager: UserSettingManageable
-    private var cancellables: Set<AnyCancellable> = []
     
     // MARK: Init method
     
     init(userSettingManager: UserSettingManageable) {
         self.userSettingManager = userSettingManager
-        
         guard let userSettingManager = userSettingManager as? UserSettingManager else {
             fatalError()
         }
         
         let userSettingView = UserSettingView(userSettingManager: userSettingManager)
+        
         super.init(rootView: userSettingView)
     }
 
     required init?(coder: NSCoder) {
         let persistable: Persistable = UserDefaultsManager()
-        self.userSettingManager = UserSettingManager(userData: UserData(dictionary: [:]), persistent: persistable)
+        self.userSettingManager = UserSettingManager(persistent: persistable)
         
         super.init(coder: coder)
     }
@@ -39,7 +38,6 @@ final class UserSettingViewController: UIHostingController<UserSettingView> {
         super.viewDidLoad()
         
         setUpNavigationBar()
-        userSettingManager.fetch()
     }
     
     // MARK: Custom method
