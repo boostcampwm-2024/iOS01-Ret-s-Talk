@@ -8,7 +8,7 @@
 import XCTest
 
 actor MockAssistantMessageProvider: AssistantMessageProvidable {
-    static var requestAssistantMessageHandler: (([Message]) throws -> Message)?
+    static var requestAssistantMessageHandler: (([Message]) async throws -> Message)?
 
     func requestAssistantMessage(for chat: [Message]) async throws -> Message {
         guard let handler = MockAssistantMessageProvider.requestAssistantMessageHandler
@@ -17,6 +17,6 @@ actor MockAssistantMessageProvider: AssistantMessageProvidable {
             return Message(retrospectID: UUID(), role: .assistant, content: "", createdAt: Date())
         }
         
-        return try handler(chat)
+        return try await handler(chat)
     }
 }

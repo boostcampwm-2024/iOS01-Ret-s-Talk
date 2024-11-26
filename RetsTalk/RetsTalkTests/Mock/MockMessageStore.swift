@@ -10,7 +10,11 @@ import Foundation
 actor MockMessageStore: Persistable {
     var messages: [Message]
     
-    init(messages: [Message]) {
+    init() {
+        let retrospectID = UUID()
+        let messages = (0..<100).map {
+            Message(retrospectID: retrospectID, role: $0 % 2 == 0 ? .assistant : .user, content: UUID().uuidString)
+        }
         self.messages = messages
     }
     
@@ -21,15 +25,10 @@ actor MockMessageStore: Persistable {
     func fetch<Entity>(
         by request: any PersistFetchRequestable<Entity>
     ) async throws -> [Entity] where Entity: EntityRepresentable {
-
-        messages.sort { $0.createdAt < $1.createdAt }
-        let firstIndex = request.fetchOffset
-        let lastIndex = min(request.fetchOffset + request.fetchLimit, messages.count)
-        let fetchMessages = Array(messages[firstIndex..<lastIndex])
-        
-        guard let result = fetchMessages as? [Entity] else {
-            return []
-        }
+        let startIndex = request.fetchOffset
+        let endIndex = min(request.fetchOffset + request.fetchLimit, messages.count)
+        let fetchMessages = Array(messages[startIndex..<endIndex])
+        guard let result = fetchMessages as? [Entity] else { return [] }
         
         return result
     }
