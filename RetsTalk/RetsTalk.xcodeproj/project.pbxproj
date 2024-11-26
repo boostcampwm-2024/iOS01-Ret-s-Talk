@@ -58,6 +58,7 @@
 				Retrospect/Model/Retrospect.swift,
 				Retrospect/Model/RetrospectManageable.swift,
 				Retrospect/Model/RetrospectManager.swift,
+				Retrospect/Model/SummaryProvider.swift,
 				User/Model/User.swift,
 				User/Model/UserData.swift,
 				User/Model/UserSettingManageable.swift,
