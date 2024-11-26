@@ -13,12 +13,17 @@ actor CoreDataManager: Persistable {
     
     // MARK: Initialization
     
-    init(inMemory: Bool = false, name: String, completion: @escaping (Result<Void, Swift.Error>) -> Void) {
+    init(
+        inMemory: Bool = false,
+        isiCloudSynced: Bool,
+        name: String,
+        completion: @escaping (Result<Void, Swift.Error>) -> Void
+    ) {
         persistentContainer = NSPersistentContainer(name: name)
         lastHistoryDate = Date()
         
         do {
-            try setUpPersistentContainer(inMemory: inMemory)
+            try setUpPersistentContainer(inMemory: inMemory, isiCloudSynced: isiCloudSynced)
             persistentContainer.loadPersistentStores { [weak self] (_, error) in
                 if error != nil {
                     completion(.failure(Error.storeSetUpFailed))
@@ -32,13 +37,17 @@ actor CoreDataManager: Persistable {
         }
     }
     
-    private nonisolated func setUpPersistentContainer(inMemory: Bool) throws {
+    private nonisolated func setUpPersistentContainer(inMemory: Bool, isiCloudSynced: Bool) throws {
         guard let description = persistentContainer.persistentStoreDescriptions.first
         else { throw Error.storeSetUpFailed }
         
         if inMemory {
             description.url = URL(fileURLWithPath: "/dev/null")
         }
+        if !isiCloudSynced {
+            description.cloudKitContainerOptions = nil
+        }
+        
         description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
         
         persistentContainer.viewContext.automaticallyMergesChangesFromParent = false
