@@ -7,40 +7,34 @@
 
 import SwiftUI
 
-@MainActor
-protocol UserSettingViewDelegate: AnyObject {
-    func didChangeNickname(_ userSettingView: UserSettingView, nickname: String)
-    func didToggleCloudSync(_ userSettingView: UserSettingView, isOn: Bool)
-    func didToggleNotification(_ userSettingView: UserSettingView, isOn: Bool, selectedDate: Date)
-}
-
 struct UserSettingView: View {
-    var delegate: UserSettingViewDelegate?
-    
-    @State private var isCloudSyncOn = true
-    @State private var isNotificationOn = false
-    @State private var selectedDate = Date()
-    @State private var cloudAddress: String = "example@apple.com" // 모델 연결 전
-    @State private var nickname: String = "폭식하는 부덕이" // 모델 연결 전
+    @StateObject var userSettingManager: UserSettingManager
     
     var body: some View {
         List {
             Section(Texts.firstSectionTitle) {
-                NicknameSettingView(nickname: $nickname) {
-                    // Alert 구현 전
-                    delegate?.didChangeNickname(self, nickname: nickname)
+                NicknameSettingView(nickname: $userSettingManager.userData.nickname) { updatingNickname in
+                    var updatingUserData = userSettingManager.userData
+                    updatingUserData.nickname = updatingNickname
+                    userSettingManager.update(to: updatingUserData)
                 }
             }
             
             Section(Texts.secondSectionTitle) {
-                CloudSettingView(isCloudSyncOn: $isCloudSyncOn, cloudAddress: $cloudAddress) {
-                    delegate?.didToggleCloudSync(self, isOn: isCloudSyncOn)
+                CloudSettingView(
+                    isCloudSyncOn: $userSettingManager.userData.isCloudSyncOn,
+                    cloudAddress: $userSettingManager.userData.cloudAddress
+                ) {
+                    
                 }
             }
             
             Section(Texts.thirdSectionTitle) {
-                NotificationSettingView(isNotificationOn: $isNotificationOn, selectedDate: $selectedDate) {
-                    delegate?.didToggleNotification(self, isOn: isNotificationOn, selectedDate: selectedDate)
+                NotificationSettingView(
+                    isNotificationOn: $userSettingManager.userData.isNotificationOn,
+                    selectedDate: $userSettingManager.userData.notificationTime
+                ) {
+                    
                 }
             }
             
@@ -54,20 +48,70 @@ struct UserSettingView: View {
 private extension UserSettingView {
     struct NicknameSettingView: View {
         @Binding var nickname: String
-        var action: () -> Void
+        @State private var isShowingModal = false
+        var action: (_ nickname: String) -> Void
         
         var body: some View {
             HStack {
                 Text(nickname)
                 Spacer()
-                Button(action: action,
-                       label: {
-                    Image(systemName: Texts.editButtonImageName)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .foregroundColor(.blazingOrange)
-                        .frame(width: Metrics.editButtonSize)
+                Button(
+                    action: {
+                        isShowingModal = true
+                    },
+                    label: {
+                        Image(systemName: Texts.editButtonImageName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundColor(.blazingOrange)
+                            .frame(width: Metrics.editButtonSize)
+                    })
+                .buttonStyle(PlainButtonStyle())
+            }
+            .sheet(isPresented: $isShowingModal) {
+                NicknameModalView(action: { updatingNickname in
+                    action(updatingNickname)
                 })
+                .presentationDetents([.fraction(Numerics.modalFraction)])
+            }
+        }
+    }
+    
+    struct NicknameModalView: View {
+        @State var nickname: String = ""
+        @Environment(\.dismiss) var dismiss
+        var action: (_ nickname: String) -> Void
+        
+        var body: some View {
+            VStack {
+                Text(Texts.nicknameModalTitle)
+                    .font(.headline)
+                    .padding(.vertical, Metrics.verticalPadding)
+                
+                TextField(Texts.nicknameModalPlaceholder, text: $nickname)
+                    .padding(Metrics.horizontalPadding)
+                    .frame(height: Metrics.nicknameModalDoneButtonHeight)
+                    .background(Color.backgroundMain)
+                    .clipShape(RoundedRectangle(cornerRadius: Metrics.nicknameModalCornerRadius))
+                    .padding(.horizontal, Metrics.horizontalPadding)
+                    .padding(.vertical, Metrics.verticalPadding)
+                
+                Button(action: {
+                    action(nickname)
+                    dismiss()
+                }, label: {
+                    Text(Texts.nicknameModalDoneButtonTitle)
+                        .foregroundStyle(.white)
+                        .font(.headline)
+                })
+                .frame(maxWidth: .infinity)
+                .frame(height: Metrics.nicknameModalDoneButtonHeight)
+                .background(Color.blazingOrange)
+                .clipShape(RoundedRectangle(cornerRadius: Metrics.nicknameModalCornerRadius))
+                .padding(.horizontal, Metrics.horizontalPadding)
+                .padding(.vertical, Metrics.verticalPadding)
+                .disabled(nickname.isEmpty)
+                .opacity(nickname.isEmpty ? Numerics.doneButtonDisabledOpaque : Numerics.doneButtonDefaultOpaque)
             }
         }
     }
@@ -114,10 +158,10 @@ private extension UserSettingView {
                     selection: $selectedDate,
                     displayedComponents: .hourAndMinute
                 )
-                    .tint(.blazingOrange)
-                    .onChange(of: selectedDate) { _ in
-                        action()
-                    }
+                .tint(.blazingOrange)
+                .onChange(of: selectedDate) { _ in
+                    action()
+                }
             }
         }
     }
@@ -141,6 +185,17 @@ private extension UserSettingView {
 private extension UserSettingView {
     enum Metrics {
         static let editButtonSize = 18.0
+        static let horizontalPadding = 16.0
+        static let verticalPadding = 8.0
+        
+        static let nicknameModalDoneButtonHeight = 52.0
+        static let nicknameModalCornerRadius = nicknameModalDoneButtonHeight / 2
+    }
+    
+    enum Numerics {
+        static let modalFraction = 0.3
+        static let doneButtonDisabledOpaque =  0.5
+        static let doneButtonDefaultOpaque = 1.0
     }
     
     enum Texts {
@@ -157,11 +212,9 @@ private extension UserSettingView {
         static let appVersionViewTitle = "앱 버전"
         static let appVersionViewBundleKey = "CFBundleShortVersionString"
         static let appVersionDefaultValue = "1.0"
+        
+        static let nicknameModalTitle = "닉네임 변경"
+        static let nicknameModalPlaceholder = "새로운 닉네임을 입력하세요"
+        static let nicknameModalDoneButtonTitle = "완료"
     }
-}
-
-// MARK: - Preview
-
-#Preview {
-    UserSettingView()
 }
