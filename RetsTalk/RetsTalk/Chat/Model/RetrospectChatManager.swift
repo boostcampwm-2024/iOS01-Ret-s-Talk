@@ -9,7 +9,11 @@ import Foundation
 
 actor RetrospectChatManager: RetrospectChatManageable {
     private(set) var retrospect: Retrospect {
-        didSet { retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect) }
+        didSet {
+            Task {
+                await retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect)
+            }
+        }
     }
     private(set) var errorOccurred: Swift.Error?
     
@@ -66,13 +70,15 @@ actor RetrospectChatManager: RetrospectChatManageable {
     }
     
     func toggleRetrospectPin() {
-        guard retrospectChatManagerListener.shouldTogglePin(self, retrospect: retrospect)
-        else {
-            errorOccurred = Error.pinUnavailable
-            return
+        Task {
+            guard await retrospectChatManagerListener.shouldTogglePin(self, retrospect: retrospect)
+            else {
+                errorOccurred = Error.pinUnavailable
+                return
+            }
+            
+            retrospect.isPinned.toggle()
         }
-        
-        retrospect.isPinned.toggle()
     }
     
     // MARK: Supporting methods

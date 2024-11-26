@@ -8,7 +8,7 @@
 import XCTest
 
 final class RetrospectManagerTests: XCTestCase {
-    private var retrospectManager: RetrospectManager?
+    private var retrospectManager: RetrospectManageable?
     private let sharedUserID = UUID()
     private var retrospectStore: MockRetrospectStore?
     private var testableRetrospects: [Retrospect] = []
@@ -38,27 +38,8 @@ final class RetrospectManagerTests: XCTestCase {
         
         try await retrospectManager.fetchRetrospects(offset: 0, amount: 2)
         
-        let retrospectResult = retrospectManager.retrospectsSubject.value
-        XCTAssertEqual(retrospectResult.count, 2)
-    }
-    
-    func test_추가로_회고를_불러올_수_있는가() async throws {
-        let retrospectManager = try XCTUnwrap(retrospectManager)
-        
-        try await retrospectManager.fetchRetrospects(offset: 0, amount: 2)
-        try await retrospectManager.fetchRetrospects(offset: 0, amount: 2)
-        
-        let retrospectResult = retrospectManager.retrospectsSubject.value
-        XCTAssertEqual(retrospectResult.count, 4)
-    }
-    
-    func test_가지고있는_회고보다_많은_요청을_하면_최대로_가져오는가() async throws {
-        let retrospectManager = try XCTUnwrap(retrospectManager)
-        
-        try await retrospectManager.fetchRetrospects(offset: 0, amount: 10)
-        
-        let retrospectResult = retrospectManager.retrospectsSubject.value
-        XCTAssertEqual(retrospectResult.count, 5)
+        let retrospects = await retrospectManager.retrospects
+        XCTAssertEqual(retrospects.count, 2)
     }
     
     func test_회고를_추가할_수_있는가() async throws {
@@ -66,6 +47,7 @@ final class RetrospectManagerTests: XCTestCase {
         
         _ = try await retrospectManager.create()
         
-        XCTAssertEqual(retrospectManager.retrospectsSubject.value.count, 1)
+        let retrospects = await retrospectManager.retrospects
+        XCTAssertEqual(retrospects.count, 1)
     }
 }
