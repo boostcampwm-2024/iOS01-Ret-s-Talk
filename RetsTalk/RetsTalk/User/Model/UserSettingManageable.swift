@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 protocol UserSettingManageable: Sendable {
-    var userDataSubject: CurrentValueSubject<UserData, Never> { get }
+    var userData: UserData { get }
 
     func fetch()
     func update(to userData: UserData)

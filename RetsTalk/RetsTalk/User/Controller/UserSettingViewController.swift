@@ -5,16 +5,45 @@
 //  Created by KimMinSeok on 11/19/24.
 //
 
-import UIKit
+import Combine
 import SwiftUI
+import UIKit
 
 final class UserSettingViewController: UIHostingController<UserSettingView> {
+    private let userSettingManager: UserSettingManageable
+    private var cancellables: Set<AnyCancellable> = []
+    
+    // MARK: Init method
+    
+    init(userSettingManager: UserSettingManageable) {
+        self.userSettingManager = userSettingManager
+        
+        guard let userSettingManager = userSettingManager as? UserSettingManager else {
+            fatalError()
+        }
+        
+        let userSettingView = UserSettingView(userSettingManager: userSettingManager)
+        super.init(rootView: userSettingView)
+    }
+
+    required init?(coder: NSCoder) {
+        let persistable: Persistable = UserDefaultsManager()
+        self.userSettingManager = UserSettingManager(userData: UserData(dictionary: [:]), persistent: persistable)
+        
+        super.init(coder: coder)
+    }
+
+    // MARK: ViewController lifecycle method
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setUpNavigationBar()
+        userSettingManager.fetch()
     }
     
+    // MARK: Custom method
+
     private func setUpNavigationBar() {
         title = Texts.navigationBarTitle
         
@@ -31,22 +60,6 @@ final class UserSettingViewController: UIHostingController<UserSettingView> {
     }
     
     @objc private func backwardButtonTapped() {}
-}
-
-// MARK: - UserSettingViewDelegate conformance
-
-extension UserSettingViewController: UserSettingViewDelegate {
-    func didChangeNickname(_ userSettingView: UserSettingView, nickname: String) {
-        
-    }
-    
-    func didToggleCloudSync(_ userSettingView: UserSettingView, isOn: Bool) {
-        
-    }
-    
-    func didToggleNotification(_ userSettingView: UserSettingView, isOn: Bool, selectedDate: Date) {
-        
-    }
 }
 
 // MARK: - Constants
