@@ -48,7 +48,9 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
             let addedData = try await userDataStorage.add(contentsOf: [UserData(dictionary: [:])])
             guard let addedData = addedData.first else { return }
             
-            userData = addedData
+            await MainActor.run {
+                userData = addedData
+            }
         }
     }
 }
