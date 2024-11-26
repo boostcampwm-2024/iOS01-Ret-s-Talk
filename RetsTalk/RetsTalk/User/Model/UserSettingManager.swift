@@ -13,8 +13,8 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
     
     // MARK: Init method
     
-    init(persistent: Persistable) {
-        userDataStorage = persistent
+    init(userDataStorage: Persistable) {
+        self.userDataStorage = userDataStorage
     }
     
     // MARK: UserSettingManageable conformance

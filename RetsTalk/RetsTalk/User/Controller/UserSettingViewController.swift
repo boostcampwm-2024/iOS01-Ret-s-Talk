@@ -26,8 +26,8 @@ final class UserSettingViewController: UIHostingController<UserSettingView> {
     }
 
     required init?(coder: NSCoder) {
-        let persistable: Persistable = UserDefaultsManager()
-        self.userSettingManager = UserSettingManager(persistent: persistable)
+        let userDefaultsManager = UserDefaultsManager()
+        self.userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
         
         super.init(coder: coder)
     }
