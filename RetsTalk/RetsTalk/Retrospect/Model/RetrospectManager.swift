@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-final class RetrospectManager: RetrospectManageable {
+final class RetrospectManager: RetrospectManageable, @unchecked Sendable {
     private let userID: UUID
     private var retrospects: [Retrospect] {
         didSet { retrospectsSubject.send(retrospects) }
@@ -53,7 +53,7 @@ final class RetrospectManager: RetrospectManageable {
         let retropsect = Retrospect(userID: userID)
         let retrospectChatManager = RetrospectChatManager(
             retrospect: retropsect,
-            persistent: retrospectStorage,
+            messageStorage: retrospectStorage,
             assistantMessageProvider: assistantMessageProvider,
             retrospectChatManagerListener: self
         )
@@ -124,21 +124,15 @@ extension RetrospectManager {
 // MARK: - MessageManagerListener conformance
 
 extension RetrospectManager: RetrospectChatManagerListener {
-    func didFinishRetrospect(_ retrospectChatManager: RetrospectChatManageable) {
-        guard let index = retrospects.firstIndex(where: { $0.id == retrospectChatManager.retrospectSubject.value.id })
+    func didUpdateRetrospect(_ retrospectChatManageable: any RetrospectChatManageable, retrospect: Retrospect) {
+        guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id })
         else { return }
         
-        retrospects[index].status = .finished
+        retrospects[matchingIndex] = retrospect
     }
     
-    func didChangeStatus(
-        _ retrospectChatManager: RetrospectChatManageable,
-        to status: Retrospect.Status
-    ) {
-        guard let index = retrospects.firstIndex(where: { $0.id == retrospectChatManager.retrospectSubject.value.id })
-        else { return }
-        
-        retrospects[index].status = status
+    func shouldTogglePin(_ retrospectChatManageable: any RetrospectChatManageable, retrospect: Retrospect) -> Bool {
+        true
     }
 }
 

@@ -5,20 +5,29 @@
 //  Created by KimMinSeok on 11/13/24.
 //
 
-import UIKit
-import SwiftUI
 import Combine
+import SwiftUI
+import UIKit
 
 final class ChattingViewController: UIViewController {
-    private let chatView = ChatView()
     private let messageManager: RetrospectChatManageable
-    private var cancellables: Set<AnyCancellable>
+    
+    private var subscriptionSet: Set<AnyCancellable>
+    private let retrospectSubject: CurrentValueSubject<Retrospect, Never>
+    private let errorSubject: CurrentValueSubject<Error?, Never>
+    
+    private let chatView: ChatView
     
     // MARK: Initialization
     
     init(messageManager: RetrospectChatManageable) {
         self.messageManager = messageManager
-        cancellables = []
+        
+        subscriptionSet = []
+        retrospectSubject = CurrentValueSubject(Retrospect(userID: UUID()))
+        errorSubject = CurrentValueSubject(nil)
+        
+        chatView = ChatView()
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -27,8 +36,12 @@ final class ChattingViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: ViewController lifecycle method
-  
+    // MARK: ViewController lifecycle
+    
+    override func loadView() {
+        view = chatView
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -40,17 +53,14 @@ final class ChattingViewController: UIViewController {
         addKeyboardObservers()
         
         Task {
-            try await messageManager.fetchMessages(offset: Numeric.initialOffset, amount: Numeric.amount)
+            await messageManager.fetchPreviousMessages()
+            retrospectSubject.send(await messageManager.retrospect)
         }
 
         observeMessages()
     }
     
-    override func loadView() {
-        view = chatView
-    }
-    
-    // MARK: custom method
+    // MARK: Custom method
 
     private func addTapGestureOfDismissingKeyboard() {
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
@@ -58,7 +68,7 @@ final class ChattingViewController: UIViewController {
     }
     
     private func setUpNavigationBar() {
-        title = "2024년 11월 19일" // 모델 연결 전 임시 하드코딩
+        title = "2024년 11월 29일" // 모델 연결 전 임시 하드코딩
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemImage: .leftChevron),
@@ -109,9 +119,9 @@ final class ChattingViewController: UIViewController {
     }
 
     private func observeMessages() {
-        var previousMessageCount = messageManager.retrospectSubject.value.chat.count
+        var previousMessageCount = retrospectSubject.value.chat.count
 
-        messageManager.retrospectSubject
+        retrospectSubject
             .receive(on: RunLoop.main)
             .sink { [weak self] newMessages in
                 guard let self = self else { return }
@@ -124,7 +134,7 @@ final class ChattingViewController: UIViewController {
                 let newIndexPaths = (oldCount..<newCount).map { IndexPath(row: $0, section: 0) }
                 chatView.insertMessages(at: newIndexPaths)
             }
-            .store(in: &cancellables)
+            .store(in: &subscriptionSet)
     }
 
     @objc private func backwardButtonTapped() {
@@ -140,11 +150,11 @@ final class ChattingViewController: UIViewController {
 
 extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return messageManager.retrospectSubject.value.chat.count
+        retrospectSubject.value.chat.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let message = messageManager.retrospectSubject.value.chat[indexPath.row]
+        let message = retrospectSubject.value.chat[indexPath.row]
 
         let cell = tableView.dequeueReusableCell(withIdentifier: "MessageCell", for: indexPath)
         cell.contentConfiguration = UIHostingConfiguration {
@@ -159,15 +169,11 @@ extension ChattingViewController: UITableViewDelegate, UITableViewDataSource {
 
 extension ChattingViewController: ChatViewDelegate {
     func sendMessage(_ chatView: ChatView, with text: String) {
-        let userMessage = Message(retrospectID: UUID(), role: .user, content: text, createdAt: Date())
         Task {
-            do {
-                try await messageManager.send(userMessage)
-
-                chatView.updateRequestInProgressState(false)
-            } catch {
-                print("response error")
-            }
+            await messageManager.sendMessage(text)
+            retrospectSubject.send(await messageManager.retrospect)
+            
+            chatView.updateRequestInProgressState(false)
         }
     }
 }
@@ -175,11 +181,6 @@ extension ChattingViewController: ChatViewDelegate {
 // MARK: - Constants
 
 private extension ChattingViewController {
-    enum Numeric {
-        static let initialOffset = 0
-        static let amount = 10
-    }
-
     enum Texts {
         static let leftBarButtonImageName = "chevron.left"
         static let rightBarButtonTitle = "끝내기"
