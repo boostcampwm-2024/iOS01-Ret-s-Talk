@@ -32,7 +32,7 @@ extension Message: EntityRepresentable {
     var mappingDictionary: [String: Any] {
         [
             "retrospectID": retrospectID,
-            "role": role,
+            "isUser": role == .user,
             "content": content,
             "createdAt": createdAt,
         ]
@@ -40,7 +40,8 @@ extension Message: EntityRepresentable {
     
     init(dictionary: [String: Any]) {
         retrospectID = dictionary["retrospectID"] as? UUID ?? UUID()
-        role = dictionary["role"] as? Role ?? .user
+        let isUser = dictionary["isUser"] as? Bool ?? true
+        role = isUser ? .user : .assistant
         content = dictionary["content"] as? String ?? ""
         createdAt = dictionary["createdAt"] as? Date ?? Date()
     }

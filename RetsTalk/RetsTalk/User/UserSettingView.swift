@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 protocol UserSettingViewDelegate: AnyObject {
     func didChangeNickname(_ userSettingView: UserSettingView, nickname: String)
     func didToggleCloudSync(_ userSettingView: UserSettingView, isOn: Bool)
@@ -152,7 +153,7 @@ private extension UserSettingView {
         
         static let cloudSettingViewTitle = "클라우드 동기화"
         static let notificationSettingViewToggleTitle = "회고 작성 알림"
-        static let notificationSettingViewDatePickerTitle = "회고 작성 알림"
+        static let notificationSettingViewDatePickerTitle = "시간"
         static let appVersionViewTitle = "앱 버전"
         static let appVersionViewBundleKey = "CFBundleShortVersionString"
         static let appVersionDefaultValue = "1.0"

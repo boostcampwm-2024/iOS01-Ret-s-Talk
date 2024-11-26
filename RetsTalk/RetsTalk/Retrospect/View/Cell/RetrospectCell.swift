@@ -47,7 +47,7 @@ private extension RetrospectCell {
                     .truncationMode(.tail)
                 Spacer()
             }
-            .frame(height: Numerics.summaryTextHeight, alignment: .topLeading)
+            .frame(height: Metrics.summaryTextHeight, alignment: .topLeading)
         }
     }
     
@@ -75,11 +75,11 @@ private extension RetrospectCell {
         static let padding = 10.0
         static let cornerRadius = 12.0
         static let RectangleStrokeWidth = 1.0
+        static let summaryTextHeight = 40.0
     }
     
     enum Numerics {
         static let summaryTextLineLimit = 2
-        static let summaryTextHeight = 40.0
     }
     
     enum Texts {

@@ -60,7 +60,6 @@ extension Retrospect: EntityRepresentable {
             "status": mapStatusToRawValue(status),
             "isPinned": isPinned,
             "createdAt": createdAt,
-            "chat": chat,
         ]
     }
     
@@ -111,7 +110,7 @@ extension Retrospect: EntityRepresentable {
         }
     }
     
-    static let entityName = "MessageEntity"
+    static let entityName = "RetrospectEntity"
 }
 
 // MARK: - Constants
