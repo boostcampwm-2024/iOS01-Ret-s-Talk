@@ -55,6 +55,7 @@
 				Persistent/Implementation/PersistFetchRequest.swift,
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,
+				Retrospect/Model/MockRetrospectManager.swift,
 				Retrospect/Model/Retrospect.swift,
 				Retrospect/Model/RetrospectActor.swift,
 				Retrospect/Model/RetrospectManageable.swift,
