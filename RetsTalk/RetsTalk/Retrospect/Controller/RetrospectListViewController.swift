@@ -5,24 +5,36 @@
 //  Created by KimMinSeok on 11/18/24.
 //
 
-import UIKit
+import Combine
 import SwiftUI
+import UIKit
 
-final class RetrospectListViewController: UIViewController {
+final class RetrospectListViewController: BaseViewController {
+    private let retrospectManager: RetrospectManageable
+    private let persistentStorage: Persistable
+    
+    private var subscriptionSet: Set<AnyCancellable>
+    private var retrospectsSubject: CurrentValueSubject<[[Retrospect]], Never>
+    private let errorSubject: CurrentValueSubject<Error?, Never>
+    
+    // MARK: UI Components
+    
     let retrospectListView = RetrospectListView()
     
-    private let dataSource = [
-        ("해야할 일의 절반밖에 못했지만, 속도보다 방향이 더 중요하다는 걸 배운 날이었다.", Date()),
-        ("회고의 중요성을 깨닫고, 혼자만이 아닌 함께 성장하기 위해 남은 시간 동안 성실히 임할 것을 다짐.", Date()),
-        ("계획을 계속 수정했지만, 그 과정 속에서 나의 우선순위를 다시 생각해볼 수 있었다.", Date()),
-        ("혼자서는 막막했던 문제도 함께 고민하니 쉽게 풀리며, 협업의 힘을 실감한 하루였다.", Date()),
-        ("코드 리뷰를 통해 생각지도 못한 개선점을 알게 되었고, 내 자신을 돌아볼 수 있는 계기가 되었다.", Date()),
-        ("해야할 일의 절반밖에 못했지만, 속도보다 방향이 더 중요하다는 걸 배운 날이었다.", Date()),
-        ("회고의 중요성을 깨닫고, 혼자만이 아닌 함께 성장하기 위해 남은 시간 동안 성실히 임할 것을 다짐.", Date()),
-        ("계획을 계속 수정했지만, 그 과정 속에서 나의 우선순위를 다시 생각해볼 수 있었다.", Date()),
-        ("혼자서는 막막했던 문제도 함께 고민하니 쉽게 풀리며, 협업의 힘을 실감한 하루였다.", Date()),
-        ("코드 리뷰를 통해 생각지도 못한 개선점을 알게 되었고, 내 자신을 돌아볼 수 있는 계기가 되었다.", Date()),
-    ]
+    init(retrospectManager: RetrospectManageable, persistentStorage: Persistable) {
+        self.retrospectManager = retrospectManager
+        self.persistentStorage = persistentStorage
+        
+        subscriptionSet = []
+        retrospectsSubject = CurrentValueSubject([])
+        errorSubject = CurrentValueSubject(nil)
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: ViewController lifecycle method
     
@@ -33,46 +45,114 @@ final class RetrospectListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        view.backgroundColor = .backgroundMain
         setUpNavigationBar()
         retrospectListView.setTableViewDelegate(self)
+        observeRetrospects()
+        addCreateButtonTapAction()
+        
+        Task {
+            await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
+            let sortedRetrospects = await RetrospectSortingHelper.execute(retrospectManager.retrospects)
+            retrospectsSubject.send(sortedRetrospects)
+        }
     }
     
     // MARK: Custom method
     
+    private func observeRetrospects() {
+        retrospectsSubject
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                retrospectListView.reloadData()
+            }
+            .store(in: &subscriptionSet)
+    }
+    
     private func setUpNavigationBar() {
         title = Texts.titleLabelText
         navigationController?.navigationBar.prefersLargeTitles = true
+        
+        let settingsButton = UIBarButtonItem(
+            image: UIImage(systemName: Texts.settingButtonImageName),
+            style: .plain,
+            target: self,
+            action: #selector(didTapSettings)
+        )
+        
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.rightBarButtonItem = settingsButton
+        navigationItem.rightBarButtonItem?.tintColor = .black
+    }
+    
+    @objc func didTapSettings() {
+        let userSettingViewController = UserSettingViewController(
+            userSettingManager: UserSettingManager(userDataStorage: UserDefaultsManager())
+        )
+        navigationController?.pushViewController(userSettingViewController, animated: true)
+    }
+    
+    private func addCreateButtonTapAction() {
+        retrospectListView.addCreateButtonAction(UIAction(handler: { [weak self] _ in
+            guard let self = self else { return }
+            
+            Task {
+                let assistantMessageProvider = CLOVAStudioManager(urlSession: .shared)
+                let retrospectChatManager = await RetrospectChatManager(
+                    retrospect: Retrospect(id: UUID(), userID: retrospectManager.sharedUserID),
+                    messageStorage: persistentStorage,
+                    assistantMessageProvider: assistantMessageProvider,
+                    retrospectChatManagerListener: retrospectManager
+                )
+                let chattingViewController = ChattingViewController(messageManager: retrospectChatManager)
+                navigationController?.pushViewController(chattingViewController, animated: true)
+            }
+        }))
     }
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource conformance
 
 extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSource {
+    
+    // MARK: Datasource handling
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dataSource.count
+        retrospectsSubject.value[section].count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let data = dataSource[indexPath.row]
+        let data = retrospectsSubject.value[indexPath.section][indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: Constants.retrospectCellIdentifier, for: indexPath)
-        
+        cell.selectionStyle = .none
         cell.backgroundColor = .clear
         cell.contentConfiguration = UIHostingConfiguration {
-            RetrospectCell(summary: data.0, createdAt: data.1)
+            RetrospectCell(summary: data.summary ?? Texts.defaultSummaryText,
+                           createdAt: data.createdAt,
+                           isPinned: data.isPinned
+            )
         }
         .margins(.vertical, Metrics.cellVerticalMargin)
         
         return cell
     }
     
-    // MARK: Section 임시 생성 코드
+    // MARK: Section handling
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        1
+        retrospectsSubject.value.count
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        "11월"
+        switch section {
+        case 0:
+            return Texts.firstSectionTitle
+        case 1:
+            return Texts.secondSectionTitle
+        default:
+            return Texts.thirdSectionTitle
+        }
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -82,9 +162,65 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         if let header = view as? UITableViewHeaderFooterView {
             header.textLabel?.font = UIFont.appFont(.title)
-            header.textLabel?.textColor = UIColor.black
+            header.textLabel?.textColor = .black
             header.contentView.backgroundColor = .clear
         }
+    }
+    
+    // MARK: SelectRow handling
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        Task {
+            let assistantMessageProvider = CLOVAStudioManager(urlSession: URLSession.shared)
+            let retrospectChatManager = await RetrospectChatManager(
+                retrospect: retrospectsSubject.value[indexPath.section][indexPath.row],
+                messageStorage: persistentStorage,
+                assistantMessageProvider: assistantMessageProvider,
+                retrospectChatManagerListener: retrospectManager
+            )
+            
+            let chattingViewController = ChattingViewController(messageManager: retrospectChatManager)
+            navigationController?.pushViewController(chattingViewController, animated: true)
+        }
+    }
+    
+    // MARK: SwipeAction handling
+    
+    func tableView(_ tableView: UITableView,
+                   trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath)
+    -> UISwipeActionsConfiguration?
+    {
+        let isPinned = retrospectsSubject.value[indexPath.section][indexPath.row].isPinned
+        
+        let configuration = UISwipeActionsConfiguration(actions: retrospectSwipeAction(isPinned))
+        configuration.performsFirstActionWithFullSwipe = false
+        
+        return configuration
+    }
+    
+    private func retrospectSwipeAction(_ isPinned: Bool) -> [UIContextualAction] {
+        let deleteAction = UIContextualAction.actionWithSystemImage(
+            named: Texts.deleteIconImageName,
+            tintColor: .red,
+            action: { },
+            completionHandler: {_ in}
+        )
+
+        let pinAction = UIContextualAction.actionWithSystemImage(
+            named: Texts.pinIconImageName,
+            tintColor: .blazingOrange,
+            action: { },
+            completionHandler: {_ in}
+        )
+        
+        let unpinAction = UIContextualAction.actionWithSystemImage(
+            named: Texts.unpinIconImageName,
+            tintColor: .blazingOrange,
+            action: { },
+            completionHandler: {_ in}
+        )
+        
+        return isPinned ? [deleteAction, unpinAction] : [deleteAction, pinAction]
     }
 }
 
@@ -92,11 +228,24 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
 
 private extension RetrospectListViewController {
     enum Metrics {
-        static let cellVerticalMargin = 4.0
+        static let cellVerticalMargin = 6.0
         static let tableViewHeaderHeight = 36.0
     }
     
     enum Texts {
         static let titleLabelText = "회고"
+        
+        static let settingButtonImageName = "gearshape"
+        static let deleteIconImageName = "trash.fill"
+        static let pinIconImageName = "pin.fill"
+        static let unpinIconImageName = "pin.slash.fill"
+        
+        
+        
+        static let firstSectionTitle = "고정됨"
+        static let secondSectionTitle = "진행 중인 회고"
+        static let thirdSectionTitle = "지난 날의 회고"
+        
+        static let defaultSummaryText = "대화를 종료해 요약을 확인하세요"
     }
 }

@@ -15,7 +15,6 @@ final class RetrospectListView: UIView {
         let tableView = UITableView()
         tableView.separatorStyle = .none
         tableView.backgroundColor = .backgroundMain
-        tableView.allowsSelection = false
         tableView.rowHeight = UITableView.automaticDimension
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: Constants.retrospectCellIdentifier)
         return tableView
@@ -83,6 +82,10 @@ final class RetrospectListView: UIView {
     
     func addCreateButtonAction(_ action: UIAction) {
         createRetrospectButton.addAction(action, for: .touchUpInside)
+    }
+
+    func reloadData() {
+        retrospectListTableView.reloadData()
     }
 }
 
