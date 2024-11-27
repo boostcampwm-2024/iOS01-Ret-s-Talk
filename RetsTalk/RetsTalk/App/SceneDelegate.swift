@@ -17,10 +17,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        let navigationController = customedNavigationController(rootViewController: RetrospectListViewController())
-        window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = navigationController
-        window?.makeKeyAndVisible()
+        let retrospectManager = MockRetrospectManager()
+        
+        Task {
+            await MainActor.run {
+                let coreDataStorage = CoreDataManager(inMemory: false, name: "RetsTalk") { _ in }
+                let navigationController = customedNavigationController(
+                    rootViewController: RetrospectListViewController(
+                        retrospectManager: retrospectManager,
+                        persistentStorage: coreDataStorage
+                    )
+                )
+                window = UIWindow(windowScene: windowScene)
+                window?.rootViewController = navigationController
+                window?.makeKeyAndVisible()
+            }
+        }
     }
 }
 
@@ -33,6 +45,7 @@ extension SceneDelegate {
         appearance.configureWithOpaqueBackground()
         navigationController.navigationBar.scrollEdgeAppearance = appearance
         navigationController.navigationBar.backgroundColor = .systemBackground
+        navigationController.navigationBar.tintColor = .orange
         return navigationController
     }
 }
