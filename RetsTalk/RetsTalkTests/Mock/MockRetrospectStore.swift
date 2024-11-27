@@ -5,28 +5,23 @@
 //  Created by KimMinSeok on 11/24/24.
 //
 
+import XCTest
+
 actor MockRetrospectStore: Persistable {
-    var retrospects: [Retrospect] = []
-    
-    init(retrospects: [Retrospect]) {
-        self.retrospects = retrospects
-    }
+    static var fetchHadler: ((any PersistFetchRequestable) -> [Retrospect])?
     
     func add<Entity>(contentsOf entities: [Entity]) async throws -> [Entity] {
-        return entities
+        entities
     }
     
     func fetch<Entity>(by request: any PersistFetchRequestable<Entity>) async throws -> [Entity] {
-        retrospects.sort { $0.createdAt < $1.createdAt }
-        let firstIndex = request.fetchOffset
-        let lastIndex = min(request.fetchOffset + request.fetchLimit, retrospects.count)
-        let fetchMessages = Array(retrospects[firstIndex..<lastIndex])
-        
-        guard let result = fetchMessages as? [Entity] else {
+        guard let fetchHadler = MockRetrospectStore.fetchHadler
+        else {
+            XCTFail("fetchHadler가 설정되지 않았습니다.")
             return []
         }
         
-        return result
+        return (fetchHadler(request) as? [Entity]) ?? []
     }
     
     func update<Entity>(from sourceEntity: Entity, to updatingEntity: Entity) async throws -> Entity {

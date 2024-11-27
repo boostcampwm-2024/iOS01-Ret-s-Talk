@@ -19,14 +19,14 @@ final class RetrospectChatManagerTests: XCTestCase {
             RetrospectChatManager(
                 retrospect: Retrospect(userID: UUID()),
                 messageStorage: MockMessageStore(),
-                assistantMessageProvider: MockAssistantMessageProvider(),
+                assistantMessageProvider: MockRetrospectAssistantProvider(),
                 retrospectChatManagerListener: MockRetrospectManager()
             )
         }
     }
     
     override func tearDown() async throws {
-        MockAssistantMessageProvider.requestAssistantMessageHandler = nil
+        MockRetrospectAssistantProvider.requestAssistantMessageHandler = nil
         
         try await super.tearDown()
     }
@@ -35,7 +35,7 @@ final class RetrospectChatManagerTests: XCTestCase {
     
     func test_회고_도움_메시지를_받아왔을때_상태_반영을_하는지() async throws {
         let retrospectChatManager = try XCTUnwrap(retrospectChatManager)
-        MockAssistantMessageProvider.requestAssistantMessageHandler = { _ in
+        MockRetrospectAssistantProvider.requestAssistantMessageHandler = { _ in
             let retrospect = await retrospectChatManager.retrospect
             XCTAssertEqual(retrospect.status, .inProgress(.waitingForResponse))
             return Message(retrospectID: retrospect.id, role: .assistant, content: "응답 테스트 메시지")
@@ -50,8 +50,8 @@ final class RetrospectChatManagerTests: XCTestCase {
     
     func test_회고_도움_메시지를_받아오는데_실패한_경우_상태_반영을_하는지() async throws {
         let retrospectChatManager = try XCTUnwrap(retrospectChatManager)
-        MockAssistantMessageProvider.requestAssistantMessageHandler = { _ in
-            throw CustomError.custom
+        MockRetrospectAssistantProvider.requestAssistantMessageHandler = { _ in
+            throw TestError.custom
         }
 
         await retrospectChatManager.sendMessage("실패 !")
@@ -93,11 +93,5 @@ final class RetrospectChatManagerTests: XCTestCase {
         
         let retrospect = await retrospectChatManager.retrospect
         XCTAssertNotEqual(retrospect.isPinned, previousPinState)
-    }
-    
-    // MARK: Error for test
-    
-    enum CustomError: Error {
-        case custom
     }
 }

@@ -9,45 +9,170 @@ import XCTest
 
 final class RetrospectManagerTests: XCTestCase {
     private var retrospectManager: RetrospectManageable?
-    private let sharedUserID = UUID()
-    private var retrospectStore: MockRetrospectStore?
-    private var testableRetrospects: [Retrospect] = []
+    
+    // MARK: Set up
     
     override func setUp() {
         super.setUp()
         
-        testableRetrospects = [
-            Retrospect(userID: sharedUserID),
-            Retrospect(userID: sharedUserID),
-            Retrospect(userID: sharedUserID),
-            Retrospect(userID: sharedUserID),
-            Retrospect(userID: sharedUserID),
-        ]
-        
-        retrospectStore = MockRetrospectStore(retrospects: testableRetrospects)
-        
         retrospectManager = RetrospectManager(
             userID: UUID(),
-            retrospectStorage: retrospectStore ?? MockRetrospectStore(retrospects: []),
-            assistantMessageProvider: MockAssistantMessageProvider()
+            retrospectStorage: MockRetrospectStore(),
+            retrospectAssistantProvider: MockRetrospectAssistantProvider()
         )
     }
     
-    func test_회고를_불러올_수_있는가() async throws {
-        let retrospectManager = try XCTUnwrap(retrospectManager)
+    override func tearDown() {
+        MockRetrospectStore.fetchHadler = nil
+        MockRetrospectAssistantProvider.requestAssistantMessageHandler = nil
+        MockRetrospectAssistantProvider.requestSummaryHandler = nil
         
-        try await retrospectManager.fetchRetrospects(offset: 0, amount: 2)
-        
-        let retrospects = await retrospectManager.retrospects
-        XCTAssertEqual(retrospects.count, 2)
+        super.tearDown()
     }
     
-    func test_회고를_추가할_수_있는가() async throws {
+    // MARK: Creation tests
+    
+    func test_회고_생성_성공으로_회고_대화_매니저를_생성하는지() async throws {
         let retrospectManager = try XCTUnwrap(retrospectManager)
+        MockRetrospectAssistantProvider.requestAssistantMessageHandler = { _ in
+            Message(retrospectID: UUID(), role: .assistant, content: "회고 도움 메시지")
+        }
         
-        _ = try await retrospectManager.create()
+        await retrospectManager.createRetrospect()
+        
+        let newRetrospectChatManager = await retrospectManager.newRetrospectsManager
+        let errorOccured = await retrospectManager.errorOccurred
+        XCTAssertNotNil(newRetrospectChatManager)
+        XCTAssertNil(errorOccured)
+    }
+    
+    func test_회고_진행중인_회고_한도로_생성_에러를_생성하는지() async throws {
+        let retrospectManager = try XCTUnwrap(retrospectManager)
+        MockRetrospectStore.fetchHadler = { _ in
+            [
+                Retrospect(userID: UUID(), status: .inProgress(.waitingForUserInput)),
+                Retrospect(userID: UUID(), status: .inProgress(.waitingForUserInput)),
+            ]
+        }
+        await retrospectManager.fetchRetrospects(of: [.unfinished])
+        
+        await retrospectManager.createRetrospect()
+        
+        let newRetrospectChatManager = await retrospectManager.newRetrospectsManager
+        let errorOccured = await retrospectManager.errorOccurred
+        XCTAssertNil(newRetrospectChatManager)
+        XCTAssertNotNil(errorOccured)
+    }
+    
+    // MARK: Fetch tests
+    
+    func test_연속해서_회고를_가져와서_잘_저장하는지() async throws {
+        let retrospectManager = try XCTUnwrap(retrospectManager)
+        MockRetrospectStore.fetchHadler = { _ in
+            [Retrospect(userID: UUID(), status: .finished)]
+        }
+        
+        await retrospectManager.fetchRetrospects(of: [.finished])
+        await retrospectManager.fetchRetrospects(of: [.finished])
         
         let retrospects = await retrospectManager.retrospects
+        let errorOccured = await retrospectManager.errorOccurred
+        XCTAssertEqual(retrospects.count, 2)
+        XCTAssertNil(errorOccured)
+    }
+    
+    func test_중복되는_회고를_포함하지_않도록_처리하는지() async throws {
+        let retrospectManager = try XCTUnwrap(retrospectManager)
+        let uniqueRetrospect = Retrospect(userID: UUID(), status: .finished)
+        MockRetrospectStore.fetchHadler = { _ in
+            [uniqueRetrospect, uniqueRetrospect]
+        }
+        
+        await retrospectManager.fetchRetrospects(of: [.finished])
+        
+        let retrospects = await retrospectManager.retrospects
+        let errorOccured = await retrospectManager.errorOccurred
         XCTAssertEqual(retrospects.count, 1)
+        XCTAssertNil(errorOccured)
+    }
+    
+    // MARK: Update tests
+    
+    func test_회고_고정_가능한_경우_상태_변경이_반영되는지() async throws {
+        let retrospectManager = try XCTUnwrap(retrospectManager)
+        let sourceRetrospect = Retrospect(userID: UUID(), status: .finished, isPinned: false)
+        MockRetrospectStore.fetchHadler = { _ in
+            [sourceRetrospect]
+        }
+        await retrospectManager.fetchRetrospects(of: [.finished])
+        
+        await retrospectManager.togglePinRetrospect(sourceRetrospect)
+        
+        let retrospects = await retrospectManager.retrospects
+        let errorOccured = await retrospectManager.errorOccurred
+        XCTAssertNotEqual(retrospects.first?.isPinned, sourceRetrospect.isPinned)
+        XCTAssertNil(errorOccured)
+    }
+    
+    func test_회고_고정_한도에_걸려_상태_변경이_안되게_막는지() async throws {
+        let retrospectManager = try XCTUnwrap(retrospectManager)
+        let unpinnedRetrospect = Retrospect(userID: UUID(), status: .finished, isPinned: false)
+        MockRetrospectStore.fetchHadler = { _ in
+            [
+                Retrospect(userID: UUID(), status: .finished, isPinned: true),
+                Retrospect(userID: UUID(), status: .finished, isPinned: true),
+                unpinnedRetrospect,
+            ]
+        }
+        await retrospectManager.fetchRetrospects(of: [.finished])
+        
+        await retrospectManager.togglePinRetrospect(unpinnedRetrospect)
+        
+        let errorOccured = await retrospectManager.errorOccurred
+        XCTAssertNotNil(errorOccured)
+    }
+    
+    func test_회고_끝내는_경우_상태_변경이_반영되는지() async throws {
+        let retrospectManager = try XCTUnwrap(retrospectManager)
+        let inProgressRetrospect = Retrospect(userID: UUID(), status: .inProgress(.waitingForUserInput))
+        let retrospectSummary = "회고 요약"
+        MockRetrospectStore.fetchHadler = { _ in
+            [inProgressRetrospect]
+        }
+        MockRetrospectAssistantProvider.requestSummaryHandler = { _ in
+            retrospectSummary
+        }
+        await retrospectManager.fetchRetrospects(of: [.finished])
+        
+        await retrospectManager.finishRetrospect(inProgressRetrospect)
+        
+        let retrospects = await retrospectManager.retrospects
+        let errorOccured = await retrospectManager.errorOccurred
+        XCTAssertEqual(retrospects.first?.status, .finished)
+        XCTAssertEqual(retrospects.first?.summary, retrospectSummary)
+        XCTAssertNil(errorOccured)
+    }
+    
+    // MARK: Deletion test
+    
+    func test_회고_삭제를_성공적으로_수행하는지() async throws {
+        let retrospectManager = try XCTUnwrap(retrospectManager)
+        let targetRetrospect = Retrospect(userID: UUID(), status: .finished)
+        MockRetrospectStore.fetchHadler = { _ in
+            [
+                Retrospect(userID: UUID(), status: .finished, isPinned: true),
+                Retrospect(userID: UUID(), status: .inProgress(.waitingForUserInput)),
+                targetRetrospect,
+                Retrospect(userID: UUID(), status: .finished),
+            ]
+        }
+        await retrospectManager.fetchRetrospects(of: [.pinned, .unfinished, .finished])
+        
+        await retrospectManager.deleteRetrospect(targetRetrospect)
+        
+        let retrospects = await retrospectManager.retrospects
+        let errorOccured = await retrospectManager.errorOccurred
+        XCTAssertFalse(retrospects.contains(targetRetrospect))
+        XCTAssertNil(errorOccured)
     }
 }
