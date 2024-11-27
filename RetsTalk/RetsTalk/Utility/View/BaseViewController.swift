@@ -8,6 +8,43 @@
 import UIKit
 
 class BaseViewController: UIViewController, UINavigationControllerDelegate {
+    override func loadView() {
+        super.loadView()
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+    }
+    
+    override func viewIsAppearing(_ animated: Bool) {
+        super.viewIsAppearing(animated)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+    }
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+    }
+
+
     /// 현재 네비게이션 컨트롤러 상태에 따라 뷰 컨트롤러를 pop 또는 dismiss합니다.
     func didTapNavigationBackButton() {
         if let navigationController = self.navigationController,
