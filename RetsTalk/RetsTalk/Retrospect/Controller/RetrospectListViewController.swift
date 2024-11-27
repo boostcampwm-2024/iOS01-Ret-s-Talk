@@ -53,12 +53,18 @@ final class RetrospectListViewController: BaseViewController {
         
         Task {
             await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
-            let sortedRetrospects = await RetrospectSortingHelper.execute(retrospectManager.retrospects)
-            retrospectsSubject.send(sortedRetrospects)
+            sortAndSendRetrospects()
         }
     }
     
     // MARK: Custom method
+    
+    private func sortAndSendRetrospects() {
+        Task {
+            let sortedRetrospects = RetrospectSortingHelper.execute(await retrospectManager.retrospects)
+            retrospectsSubject.send(sortedRetrospects)
+        }
+    }
     
     private func observeRetrospects() {
         retrospectsSubject
@@ -145,13 +151,19 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        guard retrospectsSubject.value[section].isNotEmpty else {
+            return nil
+        }
+        
         switch section {
         case 0:
             return Texts.firstSectionTitle
         case 1:
             return Texts.secondSectionTitle
-        default:
+        case 2:
             return Texts.thirdSectionTitle
+        default:
+            return nil
         }
     }
     
@@ -187,40 +199,58 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
     // MARK: SwipeAction handling
     
     func tableView(_ tableView: UITableView,
-                   trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath)
-    -> UISwipeActionsConfiguration?
+                   trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
+    ) -> UISwipeActionsConfiguration?
     {
-        let isPinned = retrospectsSubject.value[indexPath.section][indexPath.row].isPinned
+        let selectedRetrospect = retrospectsSubject.value[indexPath.section][indexPath.row]
         
-        let configuration = UISwipeActionsConfiguration(actions: retrospectSwipeAction(isPinned))
+        let configuration = UISwipeActionsConfiguration(actions: retrospectSwipeAction(selectedRetrospect))
         configuration.performsFirstActionWithFullSwipe = false
         
         return configuration
     }
     
-    private func retrospectSwipeAction(_ isPinned: Bool) -> [UIContextualAction] {
+    private func retrospectSwipeAction(_ retrospect: Retrospect) -> [UIContextualAction] {
         let deleteAction = UIContextualAction.actionWithSystemImage(
             named: Texts.deleteIconImageName,
             tintColor: .red,
-            action: { },
+            action: { [weak self] in
+                guard let self = self else { return }
+                Task {
+                    await self.retrospectManager.deleteRetrospect(retrospect)
+                    sortAndSendRetrospects()
+                }
+            },
             completionHandler: {_ in}
         )
-
+        
         let pinAction = UIContextualAction.actionWithSystemImage(
             named: Texts.pinIconImageName,
             tintColor: .blazingOrange,
-            action: { },
+            action: { [weak self] in
+                guard let self = self else { return }
+                Task {
+                    await self.retrospectManager.togglePinRetrospect(retrospect)
+                    sortAndSendRetrospects()
+                }
+            },
             completionHandler: {_ in}
         )
         
         let unpinAction = UIContextualAction.actionWithSystemImage(
             named: Texts.unpinIconImageName,
             tintColor: .blazingOrange,
-            action: { },
+            action: { [weak self] in
+                guard let self = self else { return }
+                Task {
+                    await self.retrospectManager.togglePinRetrospect(retrospect)
+                    sortAndSendRetrospects()
+                }
+            },
             completionHandler: {_ in}
         )
         
-        return isPinned ? [deleteAction, unpinAction] : [deleteAction, pinAction]
+        return retrospect.isPinned ? [deleteAction, unpinAction] : [deleteAction, pinAction]
     }
 }
 
