@@ -45,13 +45,6 @@ final class UserSettingViewController: UIHostingController<UserSettingView> {
     private func setUpNavigationBar() {
         title = Texts.navigationBarTitle
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemImage: .leftChevron),
-            style: .plain,
-            target: self,
-            action: #selector(backwardButtonTapped)
-        )
-        
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.leftBarButtonItem?.tintColor = .blazingOrange
         navigationItem.rightBarButtonItem?.tintColor = .blazingOrange
