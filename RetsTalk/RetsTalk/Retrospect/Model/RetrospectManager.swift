@@ -146,10 +146,9 @@ final class RetrospectManager: RetrospectManageable {
     }
     
     private func updateRetrospects(by retrospect: Retrospect) {
-        guard let targetIndex = retrospects.firstIndex(where: { $0.id == retrospect.id }) else { return }
+        guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id }) else { return }
         
-        retrospects.remove(at: targetIndex)
-        retrospects.insert(retrospect, at: targetIndex)
+        retrospects[matchingIndex] = retrospect
     }
 }
 
