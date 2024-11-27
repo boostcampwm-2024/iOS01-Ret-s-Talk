@@ -16,12 +16,21 @@ struct Retrospect {
     let createdAt: Date
     private(set) var chat: [Message]
     
-    init(userID: UUID, chat: [Message] = []) {
-        self.id = UUID()
+    init(
+        id: UUID = UUID(),
+        userID: UUID,
+        summary: String? = nil,
+        status: Status = .inProgress(.waitingForUserInput),
+        isPinned: Bool = false,
+        createdAt: Date = Date(),
+        chat: [Message] = []
+    ) {
+        self.id = id
         self.userID = userID
-        self.status = .inProgress(.waitingForUserInput)
-        self.isPinned = false
-        self.createdAt = Date()
+        self.summary = summary
+        self.status = status
+        self.isPinned = isPinned
+        self.createdAt = createdAt
         self.chat = chat
     }
     
@@ -49,7 +58,19 @@ extension Retrospect {
     }
 }
 
-// MARK: - EntityRepresentable
+// MARK: - Hashable conformance
+
+extension Retrospect: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: Retrospect, rhs: Retrospect) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
+// MARK: - EntityRepresentable conformance
 
 extension Retrospect: EntityRepresentable {
     var mappingDictionary: [String: Any] {
@@ -111,6 +132,42 @@ extension Retrospect: EntityRepresentable {
     }
     
     static let entityName = "RetrospectEntity"
+}
+
+// MARK: - Retrospect kind
+
+extension Retrospect {
+    enum Kind {
+        case pinned
+        case unfinished
+        case finished
+        
+        func predicate(for userID: UUID) -> CustomPredicate {
+            switch self {
+            case .pinned:
+                CustomPredicate(format: "userID = %@ AND isPinned = %@", argumentArray: [userID, true])
+            case .unfinished:
+                CustomPredicate(
+                    format: "userID = %@ AND status != %@",
+                    argumentArray: [userID, Texts.retrospectFinished]
+                )
+            case .finished:
+                CustomPredicate(
+                    format: "userID = %@ AND status = %@ AND isPinned = %@",
+                    argumentArray: [userID, Texts.retrospectFinished, false]
+                )
+            }
+        }
+        
+        var fetchLimit: Int {
+            switch self {
+            case .pinned, .unfinished:
+                2
+            case .finished:
+                30
+            }
+        }
+    }
 }
 
 // MARK: - Constants

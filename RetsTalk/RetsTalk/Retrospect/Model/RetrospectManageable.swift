@@ -8,9 +8,14 @@
 @RetrospectActor
 protocol RetrospectManageable: Sendable {
     var retrospects: [Retrospect] { get }
+    var newRetrospectsManager: RetrospectChatManageable? { get }
+    var errorOccurred: Error? { get }
     
-    func fetchRetrospects(offset: Int, amount: Int) async throws
-    func create() async throws -> RetrospectChatManageable
-    func update(_ retrospect: Retrospect) async throws
-    func delete(_ retrospect: Retrospect) async throws
+    func createRetrospect() async
+    func fetchRetrospects(of kindSet: Set<Retrospect.Kind>) async
+    func togglePinRetrospect(_ retrospect: Retrospect) async
+    func finishRetrospect(_ retrospect: Retrospect) async
+    func deleteRetrospect(_ retrospect: Retrospect) async
+    
+    func syncWithRetrospectStorage() async
 }
