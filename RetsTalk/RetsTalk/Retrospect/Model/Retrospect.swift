@@ -139,14 +139,14 @@ extension Retrospect: EntityRepresentable {
 extension Retrospect {
     enum Kind {
         case pinned
-        case unfinished
+        case inProgress
         case finished
         
         func predicate(for userID: UUID) -> CustomPredicate {
             switch self {
             case .pinned:
                 CustomPredicate(format: "userID = %@ AND isPinned = %@", argumentArray: [userID, true])
-            case .unfinished:
+            case .inProgress:
                 CustomPredicate(
                     format: "userID = %@ AND status != %@",
                     argumentArray: [userID, Texts.retrospectFinished]
@@ -161,7 +161,7 @@ extension Retrospect {
         
         var fetchLimit: Int {
             switch self {
-            case .pinned, .unfinished:
+            case .pinned, .inProgress:
                 2
             case .finished:
                 30

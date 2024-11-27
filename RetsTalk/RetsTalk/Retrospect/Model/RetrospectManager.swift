@@ -14,8 +14,6 @@ final class RetrospectManager: RetrospectManageable {
     private let retrospectStorage: Persistable
     private let retrospectAssistantProvider: RetrospectAssistantProvidable
     
-    private var previousRetrospects: Set<Retrospect>
-    
     private(set) var retrospects: [Retrospect]
     private(set) var newRetrospectsManager: RetrospectChatManageable?
     private(set) var errorOccurred: Swift.Error?
@@ -31,7 +29,6 @@ final class RetrospectManager: RetrospectManageable {
         self.retrospectStorage = retrospectStorage
         self.retrospectAssistantProvider = retrospectAssistantProvider
         
-        previousRetrospects = []
         retrospects = []
     }
     
@@ -107,19 +104,6 @@ final class RetrospectManager: RetrospectManageable {
         }
     }
     
-    func syncWithRetrospectStorage() async {
-        do {
-            for previousRetrospect in previousRetrospects {
-                if let updatingRetrospect = retrospects.first(where: { $0.id == previousRetrospect.id }) {
-                    _ = try await retrospectStorage.update(from: previousRetrospect, to: updatingRetrospect)
-                }
-            }
-            errorOccurred = nil
-        } catch {
-            errorOccurred = error
-        }
-    }
-    
     // MARK: Support retrospect creation
     
     private func createNewRetrospect() async throws -> Retrospect {
@@ -177,7 +161,9 @@ extension RetrospectManager: RetrospectChatManagerListener {
         guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id })
         else { return }
         
-        previousRetrospects.insert(retrospects[matchingIndex])
+        Task {
+            try await retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+        }
         retrospects[matchingIndex] = retrospect
     }
     

@@ -54,7 +54,7 @@ final class RetrospectManagerTests: XCTestCase {
                 Retrospect(userID: UUID(), status: .inProgress(.waitingForUserInput)),
             ]
         }
-        await retrospectManager.fetchRetrospects(of: [.unfinished])
+        await retrospectManager.fetchRetrospects(of: [.inProgress])
         
         await retrospectManager.createRetrospect()
         
@@ -166,7 +166,7 @@ final class RetrospectManagerTests: XCTestCase {
                 Retrospect(userID: UUID(), status: .finished),
             ]
         }
-        await retrospectManager.fetchRetrospects(of: [.pinned, .unfinished, .finished])
+        await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
         
         await retrospectManager.deleteRetrospect(targetRetrospect)
         
