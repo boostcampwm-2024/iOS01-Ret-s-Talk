@@ -19,7 +19,7 @@ enum FontSet {
         case .largeTitle:
             return 34
         case .title:
-            return 20
+            return 22
         case .semiTitle:
             return 16
         case .body:
@@ -34,7 +34,7 @@ enum FontSet {
         case .largeTitle:
             return .bold
         case .title:
-            return .semibold
+            return .bold
         case .caption:
             return .medium
         default:
