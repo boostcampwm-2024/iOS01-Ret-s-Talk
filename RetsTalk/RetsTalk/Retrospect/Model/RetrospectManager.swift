@@ -15,7 +15,6 @@ final class RetrospectManager: RetrospectManageable {
     private let retrospectAssistantProvider: RetrospectAssistantProvidable
     
     private(set) var retrospects: [Retrospect]
-    private(set) var newRetrospectsManager: RetrospectChatManageable?
     private(set) var errorOccurred: Swift.Error?
     
     // MARK: Initialization
@@ -34,9 +33,8 @@ final class RetrospectManager: RetrospectManageable {
     
     // MARK: RetrospectManageable conformance
     
-    func createRetrospect() async {
+    func createRetrospect() async -> RetrospectChatManageable? {
         do {
-            newRetrospectsManager = nil
             let newRetrospect = try await createNewRetrospect()
             retrospects.append(newRetrospect)
             let retrospectChatManager = RetrospectChatManager(
@@ -45,10 +43,11 @@ final class RetrospectManager: RetrospectManageable {
                 assistantMessageProvider: retrospectAssistantProvider,
                 retrospectChatManagerListener: self
             )
-            newRetrospectsManager = retrospectChatManager
             errorOccurred = nil
+            return retrospectChatManager
         } catch {
             errorOccurred = error
+            return nil
         }
     }
     
@@ -69,7 +68,7 @@ final class RetrospectManager: RetrospectManageable {
     
     func togglePinRetrospect(_ retrospect: Retrospect) async {
         do {
-            guard isPinAvailable else { throw Error.reachInProgressLimit }
+            guard !retrospect.isPinned || isPinAvailable else { throw Error.reachInProgressLimit }
             
             var updatingRetrospect = retrospect
             updatingRetrospect.isPinned.toggle()

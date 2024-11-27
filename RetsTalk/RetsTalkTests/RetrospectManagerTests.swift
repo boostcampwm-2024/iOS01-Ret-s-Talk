@@ -38,10 +38,9 @@ final class RetrospectManagerTests: XCTestCase {
             Message(retrospectID: UUID(), role: .assistant, content: "회고 도움 메시지")
         }
         
-        await retrospectManager.createRetrospect()
-        
-        let newRetrospectChatManager = await retrospectManager.newRetrospectsManager
+        let newRetrospectChatManager = await retrospectManager.createRetrospect()
         let errorOccured = await retrospectManager.errorOccurred
+        
         XCTAssertNotNil(newRetrospectChatManager)
         XCTAssertNil(errorOccured)
     }
@@ -56,10 +55,9 @@ final class RetrospectManagerTests: XCTestCase {
         }
         await retrospectManager.fetchRetrospects(of: [.inProgress])
         
-        await retrospectManager.createRetrospect()
-        
-        let newRetrospectChatManager = await retrospectManager.newRetrospectsManager
+        let newRetrospectChatManager = await retrospectManager.createRetrospect()
         let errorOccured = await retrospectManager.errorOccurred
+        
         XCTAssertNil(newRetrospectChatManager)
         XCTAssertNotNil(errorOccured)
     }
