@@ -57,6 +57,12 @@ final class RetrospectListViewController: BaseViewController {
         }
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        navigationController?.navigationBar.prefersLargeTitles = true
+    }
+    
     // MARK: Custom method
     
     private func sortAndSendRetrospects() {
