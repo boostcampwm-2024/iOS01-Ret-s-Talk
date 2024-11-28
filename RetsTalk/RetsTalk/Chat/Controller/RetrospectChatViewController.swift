@@ -1,5 +1,5 @@
 //
-//  ChattingViewController.swift
+//  RetrospectChatViewController.swift
 //  RetsTalk
 //
 //  Created by KimMinSeok on 11/13/24.
@@ -9,8 +9,8 @@ import Combine
 import SwiftUI
 import UIKit
 
-final class ChattingViewController: UIViewController {
-    private let messageManager: RetrospectChatManageable
+final class RetrospectChatViewController: UIViewController {
+    private let retrospectChatManager: RetrospectChatManageable
     
     private let renderingSubject: CurrentValueSubject<(retrospect: Retrospect, scrollToBottomNeeded: Bool), Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
@@ -27,8 +27,8 @@ final class ChattingViewController: UIViewController {
     
     // MARK: Initialization
     
-    init(retrospect: Retrospect, messageManager: RetrospectChatManageable) {
-        self.messageManager = messageManager
+    init(retrospect: Retrospect, retrospectChatManager: RetrospectChatManageable) {
+        self.retrospectChatManager = retrospectChatManager
         
         renderingSubject = CurrentValueSubject((retrospect, true))
         errorSubject = CurrentValueSubject(nil)
@@ -47,7 +47,9 @@ final class ChattingViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    var retrospect: Retrospect {
+    // MARK: Computed property
+    
+    private var retrospect: Retrospect {
         renderingSubject.value.retrospect
     }
     
@@ -118,7 +120,7 @@ final class ChattingViewController: UIViewController {
         )
     }
     
-    @objc func dismissKeyboard() {
+    @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
     
@@ -161,8 +163,8 @@ final class ChattingViewController: UIViewController {
         guard isInitial || isChatPrependable else { return }
         
         Task { [weak self] in
-            await self?.messageManager.fetchPreviousMessages()
-            if let updatedRetrospect = await self?.messageManager.retrospect {
+            await self?.retrospectChatManager.fetchPreviousMessages()
+            if let updatedRetrospect = await self?.retrospectChatManager.retrospect {
                 self?.renderingSubject.send((updatedRetrospect, isInitial))
             }
         }
@@ -188,7 +190,7 @@ final class ChattingViewController: UIViewController {
 
 // MARK: - UITableViewDataSource conformance
 
-extension ChattingViewController: UITableViewDataSource {
+extension RetrospectChatViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         retrospect.chat.count
     }
@@ -206,7 +208,7 @@ extension ChattingViewController: UITableViewDataSource {
 
 // MARK: - UITableViewDelegate conformance
 
-extension ChattingViewController: UITableViewDelegate {
+extension RetrospectChatViewController: UITableViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollView.contentOffset.y < scrollView.contentSize.height * Numerics.prependingRatio {
             if isChatPrependable && !isChatViewDragging {
@@ -229,11 +231,11 @@ extension ChattingViewController: UITableViewDelegate {
 
 // MARK: - ChatViewDelegate conformance
 
-extension ChattingViewController: ChatViewDelegate {
+extension RetrospectChatViewController: ChatViewDelegate {
     func sendMessage(_ chatView: ChatView, with text: String) {
         Task {
-            await messageManager.sendMessage(text)
-            renderingSubject.send((await messageManager.retrospect, true))
+            await retrospectChatManager.sendMessage(text)
+            renderingSubject.send((await retrospectChatManager.retrospect, true))
             chatView.updateRequestInProgressState(false)
         }
     }
@@ -241,7 +243,7 @@ extension ChattingViewController: ChatViewDelegate {
 
 // MARK: - Prepend supporting type
 
-fileprivate extension ChattingViewController {
+fileprivate extension RetrospectChatViewController {
     struct ScrollInfo: Equatable {
         let isDragging: Bool
         let contentHeight: CGFloat
@@ -264,7 +266,7 @@ fileprivate extension ChattingViewController {
 
 // MARK: - Constants
 
-fileprivate extension ChattingViewController {
+fileprivate extension RetrospectChatViewController {
     enum Numerics {
         static let prependingRatio = 0.2
         static let maxOffsetWhilePrepending = 1.0
