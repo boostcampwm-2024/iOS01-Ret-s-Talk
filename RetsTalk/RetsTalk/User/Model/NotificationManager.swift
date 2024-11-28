@@ -8,24 +8,27 @@
 import UserNotifications
 
 final class NotificationManager: NotificationManageable {
-    static let shared = NotificationManager()
-        
-    private init() {}
-    
-    func checkAndRequestPermission(completion: @escaping (Bool) -> Void) {
+    func checkAndRequestPermission(completion: @Sendable @escaping (Bool) -> Void) {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
-            guard settings.authorizationStatus != .authorized else {
+            switch settings.authorizationStatus {
+            case .authorized, .provisional, .ephemeral:
                 completion(true)
-                return
+                
+            case .denied:
+                completion(false)
+                
+            case .notDetermined:
+                self.requestPermission(completion: completion)
+
+            @unknown default:
+                completion(false)
             }
-            
-            self.requestPermission(completion: completion)
         }
     }
 
-    private func requestPermission(completion: @escaping (Bool) -> Void) {
+    private func requestPermission(completion: @Sendable @escaping (Bool) -> Void) {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            guard let error = error else {
+            guard error != nil else {
                 completion(granted)
                 return
             }
@@ -39,13 +42,17 @@ final class NotificationManager: NotificationManageable {
         
         let content = UNMutableNotificationContent()
         content.title = Texts.notificationTitle
-        content.body = Texts.notificationBody
+        content.body = Texts.notificationBody.randomElement() ?? Texts.notificationDefaultBody
         content.sound = UNNotificationSound.default
         
         let triggerDate = Calendar.current.dateComponents([.hour, .minute], from: date)
         let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: true)
         
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        let request = UNNotificationRequest(
+            identifier: Texts.notificationIdentifier,
+            content: content,
+            trigger: trigger
+        )
         center.add(request) { _ in }
     }
     
@@ -56,7 +63,16 @@ final class NotificationManager: NotificationManageable {
 
 private extension NotificationManager {
     enum Texts {
-        static let notificationTitle = "임시타이틀"
-        static let notificationBody = "임시내용"
+        static let notificationIdentifier = "RetsTalk.Notification.Reminder"
+        static let notificationTitle = "회고 작성 알림"
+        static let notificationBody = [
+            "오늘은 어떤 일이 있었나요?",
+            "오늘 무엇이 가장 기억에 남았나요?",
+            "오늘 하루도 고생 많았어요! 회고의 시간을 가져보세요.",
+            "하루를 마친 후, 잠시 회고하며 휴식을 취해보세요.",
+            "오늘 무엇을 배웠나요?",
+            "하루를 마무리하며 당신의 생각을 기록해 보세요. 내일은 더 나은 당신이 될 거예요.",
+        ]
+        static let notificationDefaultBody = "오늘은 어떤 일이 있었나요?"
     }
 }
