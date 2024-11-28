@@ -85,7 +85,7 @@ final class RetrospectManager: RetrospectManageable {
     
     func togglePinRetrospect(_ retrospect: Retrospect) async {
         do {
-            guard !retrospect.isPinned || isPinAvailable else { throw Error.reachInProgressLimit }
+            guard retrospect.isPinned || isPinAvailable else { throw Error.reachInProgressLimit }
             
             var updatingRetrospect = retrospect
             updatingRetrospect.isPinned.toggle()
