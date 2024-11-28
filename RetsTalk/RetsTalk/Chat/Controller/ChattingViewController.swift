@@ -70,6 +70,12 @@ final class ChattingViewController: UIViewController {
     private func setUpNavigationBar() {
         title = "2024년 11월 29일" // 모델 연결 전 임시 하드코딩
         
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemImage: .leftChevron),
+            style: .plain,
+            target: self,
+            action: #selector(backwardButtonTapped)
+        )
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             title: Texts.rightBarButtonTitle,
             style: .plain,
@@ -77,7 +83,6 @@ final class ChattingViewController: UIViewController {
             action: #selector(endChattingButtonTapped)
         )
         
-        navigationController?.navigationBar.prefersLargeTitles = false
         navigationItem.leftBarButtonItem?.tintColor = .blazingOrange
         navigationItem.rightBarButtonItem?.tintColor = .blazingOrange
     }
