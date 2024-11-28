@@ -211,7 +211,15 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
             },
             completionHandler: { _ in }
         )
+        guard retrospect.status == .finished else {
+            return [deleteAction]
+        }
         
+        let action = pinToggleAction(retrospect: retrospect)
+        return [deleteAction, action]
+    }
+    
+    private func pinToggleAction(retrospect: Retrospect) -> UIContextualAction {
         let pinToggleAction = { [weak self] in
             guard let self = self else { return }
             
@@ -234,8 +242,7 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
             action: pinToggleAction,
             completionHandler: { _ in }
         )
-        
-        return retrospect.isPinned ? [deleteAction, unpinAction] : [deleteAction, pinAction]
+        return retrospect.isPinned ? unpinAction : pinAction
     }
 }
 
