@@ -141,7 +141,7 @@ final class RetrospectChatViewController: UIViewController {
     private func subscribeChatEvents() {
         renderingSubject
             .sink(receiveValue: { [weak self] (retrospect, scrollToBottomNeeded) in
-                self?.updateDataSourceDiffrence(from: self?.previousRetrospect?.chat ?? [], to: retrospect.chat)
+                self?.updateDataSourceDifference(from: self?.previousRetrospect?.chat ?? [], to: retrospect.chat)
                 self?.previousRetrospect = retrospect
                 if scrollToBottomNeeded {
                     self?.chatView.scrollToBottom()
@@ -176,9 +176,9 @@ final class RetrospectChatViewController: UIViewController {
     
     @objc private func endChattingButtonTapped() {}
     
-    // MARK: DataSource diffrence managing
+    // MARK: DataSource difference managing
     
-    private func updateDataSourceDiffrence(from source: [Message], to updated: [Message]) {
+    private func updateDataSourceDifference(from source: [Message], to updated: [Message]) {
         var newIndexPaths = [IndexPath]()
         for (index, message) in updated.enumerated() where !source.contains(message) {
             newIndexPaths.append(IndexPath(row: index, section: 0))
