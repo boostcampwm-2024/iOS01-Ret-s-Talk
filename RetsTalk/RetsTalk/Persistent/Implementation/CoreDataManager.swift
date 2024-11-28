@@ -13,7 +13,7 @@ actor CoreDataManager: Persistable {
     
     // MARK: Initialization
     
-    init(inMemory: Bool = false, name: String, completion: @escaping (Result<Void, Swift.Error>) -> Void) {
+    init(inMemory: Bool = false, name: String, completion: @Sendable @escaping (Result<Void, Swift.Error>) -> Void) {
         persistentContainer = NSPersistentContainer(name: name)
         lastHistoryDate = Date()
         
