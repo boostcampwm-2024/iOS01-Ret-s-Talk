@@ -17,25 +17,36 @@ final class RetrospectListViewController: BaseViewController {
     private var retrospectsSubject: CurrentValueSubject<[[Retrospect]], Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
     
-    private let retrospectListView = {
-        let view = RetrospectListView()
-        view.backgroundColor = .backgroundMain
-        return view
-    }()
+    private let retrospectListView: RetrospectListView
     
     init(retrospectManager: RetrospectManageable, persistentStorage: Persistable) {
         self.retrospectManager = retrospectManager
         self.persistentStorage = persistentStorage
         
-        subscriptionSet = []
+        retrospectListView = RetrospectListView()
         retrospectsSubject = CurrentValueSubject([])
         errorSubject = CurrentValueSubject(nil)
+        subscriptionSet = []
         
         super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        let coreDataManager = CoreDataManager(name: "RetsTalk", completion: { _ in })
+        let clovaStudioManager = CLOVAStudioManager(urlSession: .shared)
+        retrospectManager = RetrospectManager(
+            userID: UUID(),
+            retrospectStorage: coreDataManager,
+            retrospectAssistantProvider: clovaStudioManager
+        )
+        persistentStorage = coreDataManager
+        
+        retrospectListView = RetrospectListView()
+        retrospectsSubject = CurrentValueSubject([])
+        errorSubject = CurrentValueSubject(nil)
+        subscriptionSet = []
+
+        super.init(coder: coder)
     }
     
     // MARK: ViewController lifecycle method
@@ -48,13 +59,10 @@ final class RetrospectListViewController: BaseViewController {
         super.viewDidLoad()
         
         retrospectListView.setTableViewDelegate(self)
-        observeRetrospects()
-        addCreateButtonTapAction()
+        subscribeRetrospects()
+        addCreateButtondidTapAction()
         
-        Task {
-            await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
-            sortAndSendRetrospects()
-        }
+        fetchInitialRetrospect()
     }
     
     // MARK: RetsTalk lifecycle method
@@ -75,7 +83,7 @@ final class RetrospectListViewController: BaseViewController {
         navigationItem.rightBarButtonItem?.tintColor = .black
     }
     
-    // MARK: Custom method
+    // MARK: Retrospect handling
     
     private func sortAndSendRetrospects() {
         Task {
@@ -84,7 +92,28 @@ final class RetrospectListViewController: BaseViewController {
         }
     }
     
-    private func observeRetrospects() {
+    private func fetchInitialRetrospect() {
+        Task {
+            await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
+            sortAndSendRetrospects()
+        }
+    }
+    
+    private func deleteRetrospect(_ retrospect: Retrospect) {
+        Task {
+            await self.retrospectManager.deleteRetrospect(retrospect)
+            self.sortAndSendRetrospects()
+        }
+    }
+    
+    private func togglepPinRetrospect(_ retrospect: Retrospect) {
+        Task {
+            await self.retrospectManager.togglePinRetrospect(retrospect)
+            self.sortAndSendRetrospects()
+        }
+    }
+    
+    private func subscribeRetrospects() {
         retrospectsSubject
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
@@ -94,6 +123,8 @@ final class RetrospectListViewController: BaseViewController {
             .store(in: &subscriptionSet)
     }
     
+    // MARK: Action controls
+
     @objc private func didTapSettings() {
         let userSettingViewController = UserSettingViewController(
             userSettingManager: UserSettingManager(userDataStorage: UserDefaultsManager())
@@ -101,7 +132,7 @@ final class RetrospectListViewController: BaseViewController {
         navigationController?.pushViewController(userSettingViewController, animated: true)
     }
     
-    private func addCreateButtonTapAction() {
+    private func addCreateButtondidTapAction() {
         retrospectListView.addCreateButtonAction(UIAction(handler: { [weak self] _ in
             guard let self = self else { return }
             
@@ -153,11 +184,11 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
         
         switch section {
         case 0:
-            return Texts.firstSectionTitle
+            return Texts.pinnedSectionTitle
         case 1:
-            return Texts.secondSectionTitle
+            return Texts.inProgressSectionTitle
         case 2:
-            return Texts.thirdSectionTitle
+            return Texts.pastRetrospectSectionTitle
         default:
             return nil
         }
@@ -204,16 +235,11 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
             named: Texts.deleteIconImageName,
             tintColor: .red,
             action: { [weak self] in
-                Task {
-                    await self?.retrospectManager.deleteRetrospect(retrospect)
-                    self?.sortAndSendRetrospects()
-                }
+                self?.deleteRetrospect(retrospect)
             },
             completionHandler: { _ in }
         )
-        guard retrospect.status == .finished else {
-            return [deleteAction]
-        }
+        guard retrospect.status == .finished else { return [deleteAction] }
         
         let pinAction = pinAction(by: retrospect)
         return [deleteAction, pinAction]
@@ -223,10 +249,7 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
         let pinToggleAction = { [weak self] in
             guard let self = self else { return }
             
-            Task {
-                await self.retrospectManager.togglePinRetrospect(retrospect)
-                sortAndSendRetrospects()
-            }
+            self.togglepPinRetrospect(retrospect)
         }
         
         let pinAction = UIContextualAction.actionWithSystemImage(
@@ -242,6 +265,7 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
             action: pinToggleAction,
             completionHandler: { _ in }
         )
+        
         return retrospect.isPinned ? unpinAction : pinAction
     }
 }
@@ -261,9 +285,9 @@ private extension RetrospectListViewController {
         static let unpinIconImageName = "pin.slash.fill"
         
         static let navigationTitle = "회고"
-        static let firstSectionTitle = "고정됨"
-        static let secondSectionTitle = "진행 중인 회고"
-        static let thirdSectionTitle = "지난 날의 회고"
+        static let pinnedSectionTitle = "고정됨"
+        static let inProgressSectionTitle = "진행 중인 회고"
+        static let pastRetrospectSectionTitle = "지난 날의 회고"
         
         static let defaultSummaryText = "대화를 종료해 요약을 확인하세요"
     }
