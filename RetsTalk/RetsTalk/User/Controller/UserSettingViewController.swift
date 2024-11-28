@@ -11,16 +11,20 @@ import UIKit
 
 final class UserSettingViewController: UIHostingController<UserSettingView> {
     private let userSettingManager: UserSettingManageable
+    private let notificationManager: NotificationManageable
     
     // MARK: Init method
     
-    init(userSettingManager: UserSettingManageable) {
+    init(userSettingManager: UserSettingManageable, notificationManager: NotificationManageable) {
         self.userSettingManager = userSettingManager
-        guard let userSettingManager = userSettingManager as? UserSettingManager else {
-            fatalError()
-        }
+        self.notificationManager = notificationManager
         
-        let userSettingView = UserSettingView(userSettingManager: userSettingManager)
+        guard let userSettingManager = userSettingManager as? UserSettingManager else { fatalError() }
+        
+        let userSettingView = UserSettingView(
+            userSettingManager: userSettingManager,
+            notificationManager: notificationManager
+        )
         
         super.init(rootView: userSettingView)
     }
@@ -28,6 +32,7 @@ final class UserSettingViewController: UIHostingController<UserSettingView> {
     required init?(coder: NSCoder) {
         let userDefaultsManager = UserDefaultsManager()
         self.userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
+        self.notificationManager = NotificationManager()
         
         super.init(coder: coder)
     }

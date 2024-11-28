@@ -8,7 +8,13 @@
 import SwiftUI
 
 struct UserSettingView: View {
-    @StateObject var userSettingManager: UserSettingManager
+    @ObservedObject var userSettingManager: UserSettingManager
+    private let notificationManager: NotificationManageable
+    
+    init(userSettingManager: UserSettingManager, notificationManager: NotificationManageable) {
+        self.userSettingManager = userSettingManager
+        self.notificationManager = notificationManager
+    }
     
     var body: some View {
         List {
@@ -32,10 +38,14 @@ struct UserSettingView: View {
             Section(Texts.thirdSectionTitle) {
                 NotificationSettingView(
                     isNotificationOn: $userSettingManager.userData.isNotificationOn,
-                    selectedDate: $userSettingManager.userData.notificationTime
-                ) {
-                    
-                }
+                    selectedDate: $userSettingManager.userData.notificationTime,
+                    toggleAction: { isOn, date in
+                        requestNotification(isOn, at: date)
+                    },
+                    pickAction: { date in
+                        requestNotification(at: date)
+                    }
+                )
             }
             
             Section(Texts.fourthSectionTitle) {
@@ -44,6 +54,30 @@ struct UserSettingView: View {
         }
         .onAppear {
             userSettingManager.fetch()
+        }
+    }
+}
+
+// MARK: - Custom method
+
+private extension UserSettingView {
+    func requestNotification(_ isOn: Bool = true, at date: Date) {
+        Task {
+            var userData = userSettingManager.userData
+            if isOn {
+                notificationManager.checkAndRequestPermission { didAllow in
+                    switch didAllow {
+                    case true:
+                        notificationManager.scheduleNotification(date: date)
+                    case false:
+                        notificationManager.cancelNotification()
+                    }
+                }
+            } else {
+                notificationManager.cancelNotification()
+            }
+            userData.isNotificationOn = isOn
+            userSettingManager.update(to: userData)
         }
     }
 }
