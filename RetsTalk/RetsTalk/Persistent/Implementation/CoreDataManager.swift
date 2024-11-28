@@ -8,18 +8,18 @@
 @preconcurrency import CoreData
 
 actor CoreDataManager: Persistable {
-    private let persistentContainer: NSPersistentContainer
+    private let persistentContainer: NSPersistentCloudKitContainer
     private var lastHistoryDate: Date
     
     // MARK: Initialization
     
     init(
         inMemory: Bool = false,
-        isiCloudSynced: Bool,
+        isiCloudSynced: Bool = false,
         name: String,
         completion: @escaping (Result<Void, Swift.Error>) -> Void
     ) {
-        persistentContainer = NSPersistentContainer(name: name)
+        persistentContainer = NSPersistentCloudKitContainer(name: name)
         lastHistoryDate = Date()
         
         do {
