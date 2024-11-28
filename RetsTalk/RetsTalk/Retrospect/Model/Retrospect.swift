@@ -92,8 +92,7 @@ extension Retrospect: EntityRepresentable {
     init(dictionary: [String: Any]) {
         id = dictionary["id"] as? UUID ?? UUID()
         userID = dictionary["userID"] as? UUID ?? UUID()
-        let summaryValue = dictionary["summary"] as? String ?? ""
-        summary = summaryValue.isEmpty == false ? summaryValue : nil
+        summary = dictionary["summary"] as? String
         let statusValue = dictionary["status"] as? String ?? Texts.waitingForUserInput
         status = Self.mapRawValueToStatus(statusValue)
         isPinned = dictionary["isPinned"] as? Bool ?? false

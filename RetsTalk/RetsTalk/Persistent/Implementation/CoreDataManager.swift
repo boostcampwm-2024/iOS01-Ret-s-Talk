@@ -29,7 +29,7 @@ actor CoreDataManager: Persistable {
                 if error != nil {
                     completion(.failure(Error.storeSetUpFailed))
                 } else {
-                    self?.deleteOldPersistentHistory()  
+                    self?.deleteOldPersistentHistory()
                     completion(.success(()))
                 }
             }
@@ -55,8 +55,8 @@ actor CoreDataManager: Persistable {
         persistentContainer.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
     }
     
-    // MARK: - CloudKit Observer
-    
+    // MARK: CloudKit observer
+
     private nonisolated func addObserver() {
         NotificationCenter.default.addObserver(
             self,
