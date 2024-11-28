@@ -20,7 +20,7 @@ class BaseViewController: UIViewController, UINavigationControllerDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        self.navigationController?.delegate = self
+        navigationController?.delegate = self
         setupNavigationBar()
     }
     
@@ -36,7 +36,7 @@ class BaseViewController: UIViewController, UINavigationControllerDelegate {
            navigationController.viewControllers.count > 1 {
             navigationController.popViewController(animated: true)
         } else {
-            self.dismiss(animated: true, completion: nil)
+            dismiss(animated: true, completion: nil)
         }
     }
         
