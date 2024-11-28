@@ -52,7 +52,8 @@ final class RetrospectManager: RetrospectManageable {
     }
     
     func retrospectChatManager(of retrospect: Retrospect) -> (any RetrospectChatManageable)? {
-        guard let retrospect = retrospects.first( where: { $0.id == retrospect.id } ) else {
+        guard let retrospect = retrospects.first(where: { $0.id == retrospect.id })
+        else {
             errorOccurred = Error.invalidRetrospect
             return nil
         }
