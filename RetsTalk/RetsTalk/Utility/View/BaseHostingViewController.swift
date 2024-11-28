@@ -1,30 +1,19 @@
 //
-//  BaseViewController.swift
+//  BaseHostingViewController.swift
 //  RetsTalk
 //
-//  Created by HanSeung on 11/27/24.
+//  Created by HanSeung on 11/28/24.
 //
 
-import UIKit
+import SwiftUI
 
-class BaseViewController: UIViewController, UINavigationControllerDelegate {
-    
-    // MARK: UIKit lifecycle method
-    
-    override func loadView() { }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-    
+class BaseHostingViewController<Content: View>: UIHostingController<Content>, UINavigationControllerDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         navigationController?.delegate = self
         setupNavigationBar()
     }
-    
-    // MARK: RetsTalk lifecycle method
     
     func setupNavigationBar() { }
     

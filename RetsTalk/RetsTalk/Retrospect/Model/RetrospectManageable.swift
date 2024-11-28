@@ -11,6 +11,7 @@ protocol RetrospectManageable: Sendable {
     var errorOccurred: Error? { get }
     
     func createRetrospect() async -> RetrospectChatManageable?
+    func retrospectChatManager(of retrospect: Retrospect) -> RetrospectChatManageable?
     func fetchRetrospects(of kindSet: Set<Retrospect.Kind>) async
     func togglePinRetrospect(_ retrospect: Retrospect) async
     func finishRetrospect(_ retrospect: Retrospect) async
