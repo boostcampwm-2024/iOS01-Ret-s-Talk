@@ -17,9 +17,11 @@ final class RetrospectListViewController: BaseViewController {
     private var retrospectsSubject: CurrentValueSubject<[[Retrospect]], Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
     
-    // MARK: UI Components
-    
-    let retrospectListView = RetrospectListView()
+    private let retrospectListView = {
+        let view = RetrospectListView()
+        view.backgroundColor = .backgroundMain
+        return view
+    }()
     
     init(retrospectManager: RetrospectManageable, persistentStorage: Persistable) {
         self.retrospectManager = retrospectManager
@@ -45,8 +47,6 @@ final class RetrospectListViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .backgroundMain
-        setUpNavigationBar()
         retrospectListView.setTableViewDelegate(self)
         observeRetrospects()
         addCreateButtonTapAction()
@@ -55,6 +55,24 @@ final class RetrospectListViewController: BaseViewController {
             await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
             sortAndSendRetrospects()
         }
+    }
+    
+    // MARK: RetsTalk lifecycle method
+    
+    override func setupNavigationBar() {
+        title = Texts.navigationTitle
+        navigationController?.navigationBar.prefersLargeTitles = true
+        
+        let settingsButton = UIBarButtonItem(
+            image: UIImage(systemName: Texts.settingButtonImageName),
+            style: .plain,
+            target: self,
+            action: #selector(didTapSettings)
+        )
+        
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.rightBarButtonItem = settingsButton
+        navigationItem.rightBarButtonItem?.tintColor = .black
     }
     
     // MARK: Custom method
@@ -76,22 +94,6 @@ final class RetrospectListViewController: BaseViewController {
             .store(in: &subscriptionSet)
     }
     
-    private func setUpNavigationBar() {
-        title = Texts.titleLabelText
-        navigationController?.navigationBar.prefersLargeTitles = true
-        
-        let settingsButton = UIBarButtonItem(
-            image: UIImage(systemName: Texts.settingButtonImageName),
-            style: .plain,
-            target: self,
-            action: #selector(didTapSettings)
-        )
-        
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.rightBarButtonItem = settingsButton
-        navigationItem.rightBarButtonItem?.tintColor = .black
-    }
-    
     @objc func didTapSettings() {
         let userSettingViewController = UserSettingViewController(
             userSettingManager: UserSettingManager(userDataStorage: UserDefaultsManager())
@@ -104,13 +106,7 @@ final class RetrospectListViewController: BaseViewController {
             guard let self = self else { return }
             
             Task {
-                let assistantMessageProvider = CLOVAStudioManager(urlSession: .shared)
-                let retrospectChatManager = await RetrospectChatManager(
-                    retrospect: Retrospect(id: UUID(), userID: retrospectManager.sharedUserID),
-                    messageStorage: persistentStorage,
-                    assistantMessageProvider: assistantMessageProvider,
-                    retrospectChatManagerListener: retrospectManager
-                )
+                guard let retrospectChatManager = await retrospectManager.createRetrospect() else { return }
                 let chattingViewController = ChattingViewController(messageManager: retrospectChatManager)
                 navigationController?.pushViewController(chattingViewController, animated: true)
             }
@@ -183,13 +179,9 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         Task {
-            let assistantMessageProvider = CLOVAStudioManager(urlSession: URLSession.shared)
-            let retrospectChatManager = await RetrospectChatManager(
-                retrospect: retrospectsSubject.value[indexPath.section][indexPath.row],
-                messageStorage: persistentStorage,
-                assistantMessageProvider: assistantMessageProvider,
-                retrospectChatManagerListener: retrospectManager
-            )
+            let retrospect = retrospectsSubject.value[indexPath.section][indexPath.row]
+            guard let retrospectChatManager = await retrospectManager.retrospectChatManager(of: retrospect)
+            else { return }
             
             let chattingViewController = ChattingViewController(messageManager: retrospectChatManager)
             navigationController?.pushViewController(chattingViewController, animated: true)
@@ -200,13 +192,10 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView,
                    trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
-    ) -> UISwipeActionsConfiguration?
-    {
+    ) -> UISwipeActionsConfiguration? {
         let selectedRetrospect = retrospectsSubject.value[indexPath.section][indexPath.row]
-        
         let configuration = UISwipeActionsConfiguration(actions: retrospectSwipeAction(selectedRetrospect))
         configuration.performsFirstActionWithFullSwipe = false
-        
         return configuration
     }
     
@@ -215,39 +204,35 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
             named: Texts.deleteIconImageName,
             tintColor: .red,
             action: { [weak self] in
-                guard let self = self else { return }
                 Task {
-                    await self.retrospectManager.deleteRetrospect(retrospect)
-                    sortAndSendRetrospects()
+                    await self?.retrospectManager.deleteRetrospect(retrospect)
+                    self?.sortAndSendRetrospects()
                 }
             },
-            completionHandler: {_ in}
+            completionHandler: { _ in }
         )
+        
+        let pinToggleAction = { [weak self] in
+            guard let self = self else { return }
+            
+            Task {
+                await self.retrospectManager.togglePinRetrospect(retrospect)
+                sortAndSendRetrospects()
+            }
+        }
         
         let pinAction = UIContextualAction.actionWithSystemImage(
             named: Texts.pinIconImageName,
             tintColor: .blazingOrange,
-            action: { [weak self] in
-                guard let self = self else { return }
-                Task {
-                    await self.retrospectManager.togglePinRetrospect(retrospect)
-                    sortAndSendRetrospects()
-                }
-            },
-            completionHandler: {_ in}
+            action: pinToggleAction,
+            completionHandler: { _ in }
         )
         
         let unpinAction = UIContextualAction.actionWithSystemImage(
             named: Texts.unpinIconImageName,
             tintColor: .blazingOrange,
-            action: { [weak self] in
-                guard let self = self else { return }
-                Task {
-                    await self.retrospectManager.togglePinRetrospect(retrospect)
-                    sortAndSendRetrospects()
-                }
-            },
-            completionHandler: {_ in}
+            action: pinToggleAction,
+            completionHandler: { _ in }
         )
         
         return retrospect.isPinned ? [deleteAction, unpinAction] : [deleteAction, pinAction]
@@ -263,15 +248,12 @@ private extension RetrospectListViewController {
     }
     
     enum Texts {
-        static let titleLabelText = "회고"
-        
         static let settingButtonImageName = "gearshape"
         static let deleteIconImageName = "trash.fill"
         static let pinIconImageName = "pin.fill"
         static let unpinIconImageName = "pin.slash.fill"
         
-        
-        
+        static let navigationTitle = "회고"
         static let firstSectionTitle = "고정됨"
         static let secondSectionTitle = "진행 중인 회고"
         static let thirdSectionTitle = "지난 날의 회고"
