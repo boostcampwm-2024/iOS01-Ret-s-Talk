@@ -51,6 +51,22 @@ final class RetrospectManager: RetrospectManageable {
         }
     }
     
+    func retrospectChatManager(of retrospect: Retrospect) -> (any RetrospectChatManageable)? {
+        guard let retrospect = retrospects.first( where: { $0.id == retrospect.id } ) else {
+            errorOccurred = Error.invalidRetrospect
+            return nil
+        }
+        
+        let retrospectChatManager = RetrospectChatManager(
+            retrospect: retrospect,
+            messageStorage: retrospectStorage,
+            assistantMessageProvider: retrospectAssistantProvider,
+            retrospectChatManagerListener: self
+        )
+        errorOccurred = nil
+        return retrospectChatManager
+    }
+    
     func fetchRetrospects(of kindSet: Set<Retrospect.Kind>) async {
         do {
             for kind in kindSet {
@@ -177,6 +193,7 @@ fileprivate extension RetrospectManager {
         case creationFailed
         case reachInProgressLimit
         case reachPinLimit
+        case invalidRetrospect
         
         var errorDescription: String? {
             switch self {
@@ -186,6 +203,8 @@ fileprivate extension RetrospectManager {
                 "회고는 최대 2개까지 진행할 수 있습니다. 새로 생성하려면 기존의 회고를 끝내주세요."
             case .reachPinLimit:
                 "회고는 최대 2개까지 고정할 수 있습니다. 다른 회고의 고정을 풀어주세요."
+            case .invalidRetrospect:
+                "존재하지 않는 회고입니다."
             }
         }
     }
