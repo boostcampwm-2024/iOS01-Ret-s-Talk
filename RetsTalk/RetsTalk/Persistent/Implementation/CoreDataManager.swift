@@ -29,7 +29,7 @@ actor CoreDataManager: Persistable {
                 if error != nil {
                     completion(.failure(Error.storeSetUpFailed))
                 } else {
-                    self?.deleteOldPersistentHistory()
+                    self?.deleteOldPersistentHistory()  
                     completion(.success(()))
                 }
             }
@@ -76,6 +76,7 @@ actor CoreDataManager: Persistable {
         switch event.type {
         case .import:
             if event.succeeded {
+                print("Import Success")
                 // notification을 받는 쪽에서 뷰를 업데이트 해주는 작업을 해줘야 하기 때문에 main 스레드에서 동작함을 보장해야함
                 DispatchQueue.main.async {
                     NotificationCenter.default.post(name: .coreDataImportedNotification, object: nil)
