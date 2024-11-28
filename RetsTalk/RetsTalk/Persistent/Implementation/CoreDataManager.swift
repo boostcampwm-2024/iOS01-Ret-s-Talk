@@ -78,7 +78,7 @@ actor CoreDataManager: Persistable {
             if event.succeeded {
                 print("Import Success")
                 // notification을 받는 쪽에서 뷰를 업데이트 해주는 작업을 해줘야 하기 때문에 main 스레드에서 동작함을 보장해야함
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     NotificationCenter.default.post(name: .coreDataImportedNotification, object: nil)
                 }
             }
