@@ -17,7 +17,7 @@ actor CoreDataManager: Persistable {
         inMemory: Bool = false,
         isiCloudSynced: Bool = false,
         name: String,
-        completion: @escaping (Result<Void, Swift.Error>) -> Void
+        completion: @Sendable @escaping (Result<Void, Swift.Error>) -> Void
     ) {
         persistentContainer = NSPersistentCloudKitContainer(name: name)
         lastHistoryDate = Date()
