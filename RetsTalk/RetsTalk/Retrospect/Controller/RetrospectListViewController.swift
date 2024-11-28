@@ -94,7 +94,7 @@ final class RetrospectListViewController: BaseViewController {
             .store(in: &subscriptionSet)
     }
     
-    @objc func didTapSettings() {
+    @objc private func didTapSettings() {
         let userSettingViewController = UserSettingViewController(
             userSettingManager: UserSettingManager(userDataStorage: UserDefaultsManager())
         )
@@ -215,11 +215,11 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
             return [deleteAction]
         }
         
-        let action = pinToggleAction(retrospect: retrospect)
-        return [deleteAction, action]
+        let pinAction = pinAction(by: retrospect)
+        return [deleteAction, pinAction]
     }
     
-    private func pinToggleAction(retrospect: Retrospect) -> UIContextualAction {
+    private func pinAction(by retrospect: Retrospect) -> UIContextualAction {
         let pinToggleAction = { [weak self] in
             guard let self = self else { return }
             
