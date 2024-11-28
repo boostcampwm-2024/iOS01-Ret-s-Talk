@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Message {
+struct Message: Hashable {
     let retrospectID: UUID
     let role: Role
     var content: String

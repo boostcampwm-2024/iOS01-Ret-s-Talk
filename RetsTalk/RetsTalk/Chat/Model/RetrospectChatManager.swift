@@ -91,7 +91,7 @@ final class RetrospectChatManager: RetrospectChatManageable {
     
     private func recentMessageFetchRequest(offset: Int, amount: Int) -> PersistFetchRequest<Message> {
         let matchingRetorspect = CustomPredicate(format: Texts.matchingRetorspect, argumentArray: [retrospect.id])
-        let recentDateSorting = CustomSortDescriptor(key: Texts.matchingRetorspect, ascending: false)
+        let recentDateSorting = CustomSortDescriptor(key: Texts.messageSortKey, ascending: false)
         let request = PersistFetchRequest<Message>(
             predicate: matchingRetorspect,
             sortDescriptors: [recentDateSorting],

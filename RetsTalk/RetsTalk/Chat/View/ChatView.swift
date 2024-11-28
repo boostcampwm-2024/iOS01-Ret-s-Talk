@@ -36,12 +36,6 @@ final class ChatView: UIView {
         chattingTableViewSetUp()
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        scrollToBottom()
-    }
-    
     private func messageInputViewSetUp() {
         addSubview(messageInputView)
         
@@ -72,6 +66,7 @@ final class ChatView: UIView {
     private func chattingTableViewSetUp() {
         addSubview(chattingTableView)
         
+        chattingTableView.scrollsToTop = false
         chattingTableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
@@ -112,10 +107,10 @@ final class ChatView: UIView {
     }
 
     func insertMessages(at indexPaths: [IndexPath]) {
-        chattingTableView.performBatchUpdates {
-            chattingTableView.insertRows(at: indexPaths, with: .bottom)
-            scrollToBottom()
-        }
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        chattingTableView.insertRows(at: indexPaths, with: .none)
+        CATransaction.commit()
     }
 
     func updateRequestInProgressState(_ state: Bool) {
