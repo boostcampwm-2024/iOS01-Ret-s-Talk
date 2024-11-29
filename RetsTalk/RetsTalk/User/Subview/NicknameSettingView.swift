@@ -15,8 +15,10 @@ extension UserSettingView {
         
         var body: some View {
             HStack {
-                Text(nickname)
+                Text(Texts.nicknameSettingViewTitle)
                 Spacer()
+                Text(nickname)
+                    .foregroundStyle(.secondary)
                 NicknameEditButton(isShowingModal: $isShowingModal)
             }
             .sheet(isPresented: $isShowingModal) {
@@ -44,7 +46,7 @@ extension UserSettingView {
                     Image(systemName: Texts.editButtonImageName)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .foregroundColor(.blazingOrange)
+                        .foregroundColor(.blueBerry)
                         .frame(width: Metrics.editButtonSize)
                 })
             .buttonStyle(PlainButtonStyle())
@@ -56,7 +58,7 @@ extension UserSettingView {
 
 private extension UserSettingView {
     enum Metrics {
-        static let editButtonSize = 18.0
+        static let editButtonSize = 16.0
         static let horizontalPadding = 16.0
         static let verticalPadding = 8.0
     }
@@ -67,5 +69,6 @@ private extension UserSettingView {
     
     enum Texts {
         static let editButtonImageName = "pencil"
+        static let nicknameSettingViewTitle = "닉네임"
     }
 }
