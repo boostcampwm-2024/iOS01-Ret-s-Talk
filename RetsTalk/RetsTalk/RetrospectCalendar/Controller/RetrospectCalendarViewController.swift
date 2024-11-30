@@ -38,17 +38,25 @@ final class RetrospectCalendarViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func loadView() {
+        view = retrospectCalendarView
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         retrospectCalendarView.setCalendarViewDelegate(self)
         
+        setUpNavigationBar()
+        
         subscribeRetrospects()
         loadRetrospects()
     }
     
-    override func loadView() {
-        view = retrospectCalendarView
+    // MARK: Navigation bar
+    
+    private func setUpNavigationBar() {
+        title = Texts.CalendarViewTitle
     }
     
     // MARK: Subscription
@@ -125,4 +133,11 @@ extension RetrospectCalendarViewController {
     private func normalizedDateComponents(from date: Date) -> DateComponents {
         Calendar.current.dateComponents([.year, .month, .day], from: date)
     }
+}
+
+extension RetrospectCalendarViewController {
+    enum Texts {
+        static let CalendarViewTitle = "달력"
+    }
+    
 }
