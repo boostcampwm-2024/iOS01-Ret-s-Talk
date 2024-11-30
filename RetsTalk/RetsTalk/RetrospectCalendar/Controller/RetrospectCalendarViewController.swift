@@ -42,11 +42,45 @@ final class RetrospectCalendarViewController: BaseViewController {
         super.viewDidLoad()
         
         retrospectCalendarView.setCalendarViewDelegate(self)
+        
+        subscribeRetrospects()
+        loadRetrospects()
     }
     
     override func loadView() {
         view = retrospectCalendarView
     }
+    
+    // MARK: Subscription
+    
+    private func subscribeRetrospects() {
+        retrospectsSubject
+            .receive(on: RunLoop.main)
+            .sink { [weak self] retrospects in
+                guard let self = self else { return }
+                
+                var dateComponents: [DateComponents] = []
+                retrospects.forEach {
+                    self.addRetrospectToCache($0)
+                    let components = self.normalizedDateComponents(from: $0.createdAt)
+                    dateComponents.append(components)
+                }
+                self.retrospectCalendarView.reloadDecorations(forDateComponents: dateComponents)
+            }
+            .store(in: &subscriptionSet)
+    }
+    
+    // MARK: RetrospectManager Action
+    
+    private func loadRetrospects() {
+        Task { [weak self] in
+            await self?.retrospectManager.fetchRetrospects(of: [.all])
+            if let fetchRetrospects = await self?.retrospectManager.retrospects {
+                self?.retrospectsSubject.send(fetchRetrospects)
+            }
+        }
+    }
+    
     private func addRetrospectToCache(_ retrospect: Retrospect) {
         let dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: retrospect.createdAt)
         retrospectsCache[dateComponents, default: []].append(retrospect)
