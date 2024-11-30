@@ -90,17 +90,16 @@ final class RetrospectCalendarViewController: BaseViewController {
 // MARK: - CalendarViewDelegate
 
 extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelegate {
-    func calendarView(_ calendarView: UICalendarView, didSelect dateComponents: DateComponents) {
-        selectedDate = dateComponents
-        print("Selected date: \(dateComponents)")
-    }
-    
-    func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
-        guard let day = dateComponents.day else {
+    func calendarView(
+        _ calendarView: UICalendarView,
+        decorationFor dateComponents: DateComponents
+    ) -> UICalendarView.Decoration? {
+        let normalizedDate = normalizedDateComponents(from: dateComponents)
+        guard let resultRetrospects = retrospectsCache[normalizedDate], !resultRetrospects.isEmpty else {
             return nil
         }
-
-        return day.isMultiple(of: 2) ? nil : .default(color: .blazingOrange)
+        
+        return .default(color: .blazingOrange)
     }
 }
 
@@ -114,6 +113,7 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
 
 // MARK: - DateComponents Helper
 
+extension RetrospectCalendarViewController {
     private func normalizedDateComponents(from dateComponents: DateComponents) -> DateComponents {
         guard let date = Calendar.current.date(from: dateComponents) else {
             return DateComponents()
