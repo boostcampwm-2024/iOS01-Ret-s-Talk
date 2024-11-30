@@ -20,7 +20,7 @@ final class RetrospectChatManagerTests: XCTestCase {
                 retrospect: Retrospect(userID: UUID()),
                 messageStorage: MockMessageStore(),
                 assistantMessageProvider: MockRetrospectAssistantProvider(),
-                retrospectChatManagerListener: MockRetrospectManager()
+                retrospectChatManagerListener: MockTestRetrospectManager()
             )
         }
     }
