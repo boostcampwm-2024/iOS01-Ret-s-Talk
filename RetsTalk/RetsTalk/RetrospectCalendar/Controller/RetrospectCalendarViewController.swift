@@ -64,11 +64,25 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelega
     }
 }
 
+// MARK: - CalendarSelectionSingleDateDelegate
+
 extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionSingleDateDelegate {
     func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
+        print("선택된 날자: \(String(describing: dateComponents))")
+    }
+}
+
+// MARK: - DateComponents Helper
+
+    private func normalizedDateComponents(from dateComponents: DateComponents) -> DateComponents {
+        guard let date = Calendar.current.date(from: dateComponents) else {
+            return DateComponents()
+        }
         
-        selectedDate = dateComponents
-        print("Selet\(selectedDate)")
+        return normalizedDateComponents(from: date)
     }
     
+    private func normalizedDateComponents(from date: Date) -> DateComponents {
+        Calendar.current.dateComponents([.year, .month, .day], from: date)
+    }
 }
