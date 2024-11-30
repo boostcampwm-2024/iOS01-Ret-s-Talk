@@ -82,7 +82,7 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     private func loadRetrospects() {
         Task { [weak self] in
-            await self?.retrospectManager.fetchRetrospects(of: [.all])
+            await self?.retrospectManager.fetchRetrospects(of: [.finished])
             if let fetchRetrospects = await self?.retrospectManager.retrospects {
                 self?.retrospectsSubject.send(fetchRetrospects)
             }
