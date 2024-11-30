@@ -5,18 +5,29 @@
 //  Created by KimMinSeok on 11/30/24.
 //
 
+import Combine
 import Foundation
 import UIKit
 
 @MainActor
 final class RetrospectCalendarViewController: BaseViewController {
-    private let retrospectCalendarView: RetrospectCalendarView
+    private let retrospectManager: RetrospectManageable
+    
+    private var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
+    private let errorSubject: CurrentValueSubject<Error?, Never>
+    private var subscriptionSet: Set<AnyCancellable>
     private var selectedDate: DateComponents?
     
+    private let retrospectCalendarView: RetrospectCalendarView
     // MARK: Initalization
     
-    init() {
+    init(retrospectManager: RetrospectManageable) {
+        self.retrospectManager = retrospectManager
         retrospectCalendarView = RetrospectCalendarView()
+        
+        retrospectsSubject = CurrentValueSubject([])
+        errorSubject = CurrentValueSubject(nil)
+        subscriptionSet = []
         
         super.init(nibName: nil, bundle: nil)
     }
