@@ -53,9 +53,6 @@ final class MockRetrospectManager: RetrospectManageable, RetrospectChatManagerLi
                        status: .inProgress(.waitingForUserInput),
                        isPinned: false),
             Retrospect(userID: sharedUserID,
-                       summary: "디버깅에 지친 하루였지만, 원인을 찾고 문제를 해결하면서 조금 더 단단해진 기분이다.",
-                       status: .finished,isPinned: false),
-            Retrospect(userID: sharedUserID,
                        summary: "혼자서는 막막했던 문제도 함께 고민하니 쉽게 풀리며, 협업의 힘을 실감한 하루였다.",
                        status: .finished,
                        isPinned: false),
@@ -70,6 +67,15 @@ final class MockRetrospectManager: RetrospectManageable, RetrospectChatManagerLi
         }
         
         errorOccurred = nil
+    }
+    
+    func retrospectChatManager(of retrospect: Retrospect) -> (any RetrospectChatManageable)? {
+        RetrospectChatManager(
+            retrospect: retrospect,
+            messageStorage: UserDefaultsManager(),
+            assistantMessageProvider: CLOVAStudioManager(urlSession: URLSession.shared),
+            retrospectChatManagerListener: self
+        )
     }
     
     func togglePinRetrospect(_ retrospect: Retrospect) async {
