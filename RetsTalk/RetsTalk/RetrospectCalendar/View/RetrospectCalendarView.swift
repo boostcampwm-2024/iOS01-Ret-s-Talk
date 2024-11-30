@@ -61,6 +61,9 @@ final class RetrospectCalendarView: UIView {
         )
     }
     
+    func reloadDecorations(forDateComponents dateCompoenents: [DateComponents]) {
+        calendarView.reloadDecorations(forDateComponents: dateCompoenents, animated: true)
+    }
     
     func setCalendarViewDelegate(_ delegate: UICalendarViewDelegate & UICalendarSelectionSingleDateDelegate) {
         calendarView.delegate = delegate
