@@ -24,4 +24,9 @@ extension Date {
             return dateFormatter.string(from: self)
         }
     }
+    
+    static func from(year: Int, month: Int, day: Int, hour: Int = 0, minute: Int = 0, second: Int = 0) -> Date {
+        let components = DateComponents(year: year, month: month, day: day, hour: hour, minute: minute, second: second)
+        return Calendar.current.date(from: components) ?? Date()
+    }
 }
