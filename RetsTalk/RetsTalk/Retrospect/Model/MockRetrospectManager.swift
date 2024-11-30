@@ -103,7 +103,7 @@ final class MockRetrospectManager: RetrospectManageable, RetrospectChatManagerLi
         errorOccurred = nil
     }
     
-    // MARK: MessageManagerListener conformance
+    // MARK: RetrospectChatManagerListener conformance
     
     func didUpdateRetrospect(_ retrospectChatManageable: any RetrospectChatManageable, retrospect: Retrospect) {
         guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id })

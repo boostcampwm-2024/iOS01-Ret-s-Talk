@@ -1,5 +1,5 @@
 //
-//  MessageManagerTests.swift
+//  RetrospectChatManagerTests.swift
 //  RetsTalk
 //
 //  Created by KimMinSeok on 11/20/24.
