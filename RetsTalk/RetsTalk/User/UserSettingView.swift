@@ -51,15 +51,11 @@ struct UserSettingView: View {
 
 private extension UserSettingView {
     func setCloudSync(_ isOn: Bool) {
-        var userData = userSettingManager.userData
-        userData.isCloudSyncOn = isOn
-        userSettingManager.update(to: userData)
+        userSettingManager.updateCloudSyncState(state: isOn)
     }
     
     func setNickname(_ updatingNickname: String) {
-        var updatingUserData = userSettingManager.userData
-        updatingUserData.nickname = updatingNickname
-        userSettingManager.update(to: updatingUserData)
+        userSettingManager.updateNickname(updatingNickname)
     }
 }
 
