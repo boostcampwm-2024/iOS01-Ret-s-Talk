@@ -6,9 +6,12 @@
 //
 
 import Foundation
+import UIKit
 
+@MainActor
 final class RetrospectCalendarViewController: BaseViewController {
     private let retrospectCalendarView: RetrospectCalendarView
+    private var selectedDate: DateComponents?
     
     // MARK: Initalization
     
@@ -24,9 +27,29 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        retrospectCalendarView.setCalendarViewDelegate(self)
     }
     
     override func loadView() {
         view = retrospectCalendarView
     }
+}
+
+// MARK: - CalendarViewDelegate
+
+extension RetrospectCalendarViewController: UICalendarViewDelegate {
+    func calendarView(_ calendarView: UICalendarView, didSelect dateComponents: DateComponents) {
+        selectedDate = dateComponents
+        print("Selected date: \(dateComponents)")
+    }
+}
+
+extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionSingleDateDelegate {
+    func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
+        
+        selectedDate = dateComponents
+        print("Selet\(selectedDate)")
+    }
+    
 }

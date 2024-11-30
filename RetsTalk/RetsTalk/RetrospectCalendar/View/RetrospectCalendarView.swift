@@ -38,6 +38,7 @@ final class RetrospectCalendarView: UIView {
         ])
         
         calendarView.wantsDateDecorations = true
+        calendarView.fontDesign = .rounded
     }
     
     private func retrospectListTableViewSetUp() {
@@ -57,5 +58,13 @@ final class RetrospectCalendarView: UIView {
             UITableViewCell.self,
             forCellReuseIdentifier: Constants.retrospectCellIdentifier
         )
+    }
+    
+    
+    func setCalendarViewDelegate(_ delegate: UICalendarViewDelegate & UICalendarSelectionSingleDateDelegate) {
+        calendarView.delegate = delegate
+        
+        let dateSelection = UICalendarSelectionSingleDate(delegate: delegate)
+        calendarView.selectionBehavior = dateSelection
     }
 }
