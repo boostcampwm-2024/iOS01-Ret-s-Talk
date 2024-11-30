@@ -38,10 +38,18 @@ final class RetrospectCalendarViewController: BaseViewController {
 
 // MARK: - CalendarViewDelegate
 
-extension RetrospectCalendarViewController: UICalendarViewDelegate {
+extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelegate {
     func calendarView(_ calendarView: UICalendarView, didSelect dateComponents: DateComponents) {
         selectedDate = dateComponents
         print("Selected date: \(dateComponents)")
+    }
+    
+    func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
+        guard let day = dateComponents.day else {
+            return nil
+        }
+
+        return day.isMultiple(of: 2) ? nil : .default(color: .blazingOrange)
     }
 }
 

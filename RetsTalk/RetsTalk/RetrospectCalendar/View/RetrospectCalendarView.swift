@@ -39,6 +39,7 @@ final class RetrospectCalendarView: UIView {
         
         calendarView.wantsDateDecorations = true
         calendarView.fontDesign = .rounded
+        calendarView.tintColor = .blazingOrange
     }
     
     private func retrospectListTableViewSetUp() {
