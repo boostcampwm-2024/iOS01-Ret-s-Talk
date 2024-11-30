@@ -11,7 +11,7 @@ extension UserSettingView {
     struct CloudSettingView: View {
         @Binding var isCloudSyncOn: Bool
         @Binding var cloudAddress: String
-        var action: (_ isOn: Bool) -> Void
+        var onCloudSyncChange: (_ isOn: Bool) -> Void
         
         var body: some View {
             HStack {
@@ -20,7 +20,7 @@ extension UserSettingView {
                 Toggle(isOn: $isCloudSyncOn) {}
                     .toggleStyle(SwitchToggleStyle(tint: .blazingOrange))
                     .onChange(of: isCloudSyncOn) { _ in
-                        action(isCloudSyncOn)
+                        onCloudSyncChange(isCloudSyncOn)
                     }
             }
             

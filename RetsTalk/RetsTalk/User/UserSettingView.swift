@@ -22,7 +22,7 @@ struct UserSettingView: View {
                 CloudSettingView(
                     isCloudSyncOn: $userSettingManager.userData.isCloudSyncOn,
                     cloudAddress: $userSettingManager.userData.cloudAddress,
-                    action: { isOn in
+                    onCloudSyncChange: { isOn in
                         setCloudSync(isOn)
                     }
                 )
