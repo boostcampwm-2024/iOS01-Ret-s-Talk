@@ -17,8 +17,10 @@ final class RetrospectCalendarViewController: BaseViewController {
     private let errorSubject: CurrentValueSubject<Error?, Never>
     private var subscriptionSet: Set<AnyCancellable>
     private var selectedDate: DateComponents?
+    private var retrospectsCache: [DateComponents: [Retrospect]] = [:]
     
     private let retrospectCalendarView: RetrospectCalendarView
+
     // MARK: Initalization
     
     init(retrospectManager: RetrospectManageable) {
@@ -44,6 +46,10 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     override func loadView() {
         view = retrospectCalendarView
+    }
+    private func addRetrospectToCache(_ retrospect: Retrospect) {
+        let dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: retrospect.createdAt)
+        retrospectsCache[dateComponents, default: []].append(retrospect)
     }
 }
 
