@@ -25,9 +25,7 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
             let request = PersistFetchRequest<UserData>(fetchLimit: 1)
             let fetchedData = try await userDataStorage.fetch(by: request)
             guard let storedUserData = fetchedData.first
-            else {
-                return initializeUserData()
-            }
+            else { return initializeUserData() }
 
             await MainActor.run {
                 userData = storedUserData
