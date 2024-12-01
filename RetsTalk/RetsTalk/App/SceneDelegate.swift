@@ -16,13 +16,27 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         options connectionOptions: UIScene.ConnectionOptions
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        
-        let mockRetrospectManager = MockRetrospectManager()
-        let coreDataManager = CoreDataManager(inMemory: true, name: "RetsTalk") { _ in }
+
+        let userDefaultsManager = UserDefaultsManager()
+        let userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
+        let userData = userSettingManager.userData
+        let userID = UUID(uuidString: userData.userID) ?? UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1))
+        let isiCloudSynced = userData.isCloudSyncOn
+        let coreDataManager = CoreDataManager(
+            inMemory: false,
+            isiCloudSynced: isiCloudSynced,
+            name: "RetsTalk"
+        ) { _ in }
+        let retrospectAssistantProvider = CLOVAStudioManager(urlSession: .shared)
+        let retrospectManager = RetrospectManager(
+            userID: userID,
+            retrospectStorage: coreDataManager,
+            retrospectAssistantProvider: retrospectAssistantProvider
+        )
         let navigationController = customedNavigationController(
             rootViewController: RetrospectListViewController(
-                retrospectManager: mockRetrospectManager,
-                persistentStorage: coreDataManager
+                retrospectManager: retrospectManager,
+                userDefaultsManager: userDefaultsManager
             )
         )
         window = UIWindow(windowScene: windowScene)
