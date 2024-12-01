@@ -80,6 +80,8 @@ final class RetrospectCalendarViewController: BaseViewController {
             tableView: retrospectCalendarView.retrospectListTableView
         ) { tableView, indexPath, retrospect in
             let cell = tableView.dequeueReusableCell(withIdentifier: Constants.retrospectCellIdentifier, for: indexPath)
+            cell.selectionStyle = .none
+            cell.backgroundColor = .clear
             cell.contentConfiguration = UIHostingConfiguration {
                 RetrospectCell(
                     summary: retrospect.summary ?? "",
@@ -95,7 +97,7 @@ final class RetrospectCalendarViewController: BaseViewController {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Retrospect>()
         snapshot.appendSections([.retrospect])
         snapshot.appendItems(currentDateRetrospects, toSection: .retrospect)
-        dataSource?.apply(snapshot)
+        dataSource?.apply(snapshot, animatingDifferences: true)
     }
     
     // MARK: RetrospectManager Action
