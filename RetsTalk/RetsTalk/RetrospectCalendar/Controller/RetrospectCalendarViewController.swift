@@ -7,8 +7,8 @@
 
 import Combine
 import Foundation
-import UIKit
 import SwiftUI
+import UIKit
 
 final class RetrospectCalendarViewController: BaseViewController {
     private let retrospectManager: RetrospectManageable
@@ -50,7 +50,6 @@ final class RetrospectCalendarViewController: BaseViewController {
         
         retrospectCalendarView.setCalendarViewDelegate(self)
         
-        setUpNavigationBar()
         setUpDataSource()
         
         subscribeRetrospects()
@@ -59,7 +58,7 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     // MARK: Navigation bar
     
-    private func setUpNavigationBar() {
+    override func setupNavigationBar() {
         title = Texts.CalendarViewTitle
     }
     
@@ -84,7 +83,7 @@ final class RetrospectCalendarViewController: BaseViewController {
             cell.backgroundColor = .clear
             cell.contentConfiguration = UIHostingConfiguration {
                 RetrospectCell(
-                    summary: retrospect.summary ?? "",
+                    summary: retrospect.summary ?? Texts.defaultSummaryText,
                     createdAt: retrospect.createdAt,
                     isPinned: retrospect.isPinned
                 )
@@ -147,10 +146,7 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelega
 
 extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionSingleDateDelegate {
     func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
-        guard let dateComponents = dateComponents else {
-            print("선택된 날짜가 없습니다.")
-            return
-        }
+        guard let dateComponents = dateComponents else { return }
         
         let selectedDate = normalizedDateComponents(from: dateComponents)
         currentDateRetrospects = retrospectsCache[selectedDate] ?? []
@@ -173,7 +169,9 @@ extension RetrospectCalendarViewController {
     }
 }
 
-extension RetrospectCalendarViewController {
+// MARK: - Table Section
+
+private extension RetrospectCalendarViewController {
     enum Section {
         case retrospect
     }
@@ -181,8 +179,9 @@ extension RetrospectCalendarViewController {
 
 // MARK: - Constants
 
-extension RetrospectCalendarViewController {
+private extension RetrospectCalendarViewController {
     enum Texts {
         static let CalendarViewTitle = "달력"
+        static let defaultSummaryText = "대화를 종료해 요약을 확인하세요"
     }
 }

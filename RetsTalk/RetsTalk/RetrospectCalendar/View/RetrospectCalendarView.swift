@@ -33,8 +33,8 @@ final class RetrospectCalendarView: UIView {
         
         NSLayoutConstraint.activate([
             calendarView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            calendarView.leftAnchor.constraint(equalTo: leftAnchor),
-            calendarView.rightAnchor.constraint(equalTo: rightAnchor),
+            calendarView.leftAnchor.constraint(equalTo: leftAnchor, constant: Metrics.horizontalMargin),
+            calendarView.rightAnchor.constraint(equalTo: rightAnchor, constant: -Metrics.horizontalMargin),
         ])
         
         calendarView.wantsDateDecorations = true
@@ -70,5 +70,11 @@ final class RetrospectCalendarView: UIView {
         
         let dateSelection = UICalendarSelectionSingleDate(delegate: delegate)
         calendarView.selectionBehavior = dateSelection
+    }
+}
+
+private extension RetrospectCalendarView {
+    enum Metrics {
+        static let horizontalMargin = 16.0
     }
 }
