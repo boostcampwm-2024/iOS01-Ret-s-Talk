@@ -71,10 +71,10 @@ extension UserSettingView {
                 action()
             }, label:
                     {
-                ZStack {
-                    Color.blazingOrange
-                        .clipShape(RoundedRectangle(cornerRadius: UserSettingViewMetrics.nicknameModalCornerRadius))
+                ZStack {                  
                     Text(UserSettingViewTexts.nicknameModalDoneButtonTitle)
+                    Color.blueBerry
+                        .clipShape(RoundedRectangle(cornerRadius: Metrics.nicknameModalCornerRadius))
                         .foregroundStyle(.white)
                         .font(.headline)
                 }

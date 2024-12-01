@@ -15,7 +15,6 @@ final class RetrospectListView: UIView {
         let tableView = UITableView()
         tableView.separatorStyle = .none
         tableView.backgroundColor = .backgroundMain
-        tableView.allowsSelection = false
         tableView.rowHeight = UITableView.automaticDimension
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: Constants.retrospectCellIdentifier)
         return tableView
@@ -28,20 +27,22 @@ final class RetrospectListView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        setUpTableViewLayout()
-        setUpButtonLayout()
+        backgroundColor = .backgroundMain
+        setupTableViewLayout()
+        setupButtonLayout()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         
-        setUpTableViewLayout()
-        setUpButtonLayout()
+        backgroundColor = .backgroundMain
+        setupTableViewLayout()
+        setupButtonLayout()
     }
     
     // MARK: Custom Method
     
-    private func setUpTableViewLayout() {
+    private func setupTableViewLayout() {
         addSubview(retrospectListTableView)
         retrospectListTableView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -53,7 +54,7 @@ final class RetrospectListView: UIView {
         ])
     }
     
-    private func setUpButtonLayout() {
+    private func setupButtonLayout() {
         addSubview(createRetrospectButton)
         createRetrospectButton.translatesAutoresizingMaskIntoConstraints = false
 
@@ -83,6 +84,10 @@ final class RetrospectListView: UIView {
     
     func addCreateButtonAction(_ action: UIAction) {
         createRetrospectButton.addAction(action, for: .touchUpInside)
+    }
+
+    func reloadData() {
+        retrospectListTableView.reloadData()
     }
 }
 

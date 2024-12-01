@@ -42,7 +42,17 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
             }
         }
     }
-    
+
+    func updateCloudSyncState(state isOn: Bool) {
+        userData.isCloudSyncOn = isOn
+        update(to: userData)
+    }
+
+    func updateNickname(_ nickname: String) {
+        userData.nickname = nickname
+        update(to: userData)
+    }
+
     private func initiateUserData() {
         Task {
             let addedData = try await userDataStorage.add(contentsOf: [UserData(dictionary: [:])])

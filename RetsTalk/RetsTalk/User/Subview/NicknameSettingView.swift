@@ -15,8 +15,10 @@ extension UserSettingView {
         
         var body: some View {
             HStack {
-                Text(nickname)
+                Text(Texts.nicknameSettingViewTitle)
                 Spacer()
+                Text(nickname)
+                    .foregroundStyle(.secondary)
                 NicknameEditButton(isShowingModal: $isShowingModal)
             }
             .sheet(isPresented: $isShowingModal) {
@@ -44,7 +46,7 @@ extension UserSettingView {
                     Image(systemName: UserSettingViewTexts.editButtonImageName)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .foregroundColor(.blazingOrange)
+                        .foregroundColor(.blueBerry)
                         .frame(width: UserSettingViewMetrics.editButtonSize)
                 })
             .buttonStyle(PlainButtonStyle())

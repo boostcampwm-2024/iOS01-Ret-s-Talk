@@ -8,17 +8,23 @@
 @preconcurrency import CoreData
 
 actor CoreDataManager: Persistable {
-    private let persistentContainer: NSPersistentContainer
+    private let persistentContainer: NSPersistentCloudKitContainer
     private var lastHistoryDate: Date
     
     // MARK: Initialization
     
-    init(inMemory: Bool = false, name: String, completion: @escaping (Result<Void, Swift.Error>) -> Void) {
-        persistentContainer = NSPersistentContainer(name: name)
+    init(
+        inMemory: Bool = false,
+        isiCloudSynced: Bool = false,
+        name: String,
+        completion: @Sendable @escaping (Result<Void, Swift.Error>) -> Void
+    ) {
+        persistentContainer = NSPersistentCloudKitContainer(name: name)
         lastHistoryDate = Date()
+        addObserver()
         
         do {
-            try setUpPersistentContainer(inMemory: inMemory)
+            try setUpPersistentContainer(inMemory: inMemory, isiCloudSynced: isiCloudSynced)
             persistentContainer.loadPersistentStores { [weak self] (_, error) in
                 if error != nil {
                     completion(.failure(Error.storeSetUpFailed))
@@ -32,17 +38,53 @@ actor CoreDataManager: Persistable {
         }
     }
     
-    private nonisolated func setUpPersistentContainer(inMemory: Bool) throws {
+    private nonisolated func setUpPersistentContainer(inMemory: Bool, isiCloudSynced: Bool) throws {
         guard let description = persistentContainer.persistentStoreDescriptions.first
         else { throw Error.storeSetUpFailed }
         
         if inMemory {
             description.url = URL(fileURLWithPath: "/dev/null")
         }
+        if !isiCloudSynced {
+            description.cloudKitContainerOptions = nil
+        }
+        
         description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
         
         persistentContainer.viewContext.automaticallyMergesChangesFromParent = false
         persistentContainer.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+    }
+    
+    // MARK: CloudKit observer
+
+    private nonisolated func addObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleCloudKitEvent),
+            name: NSPersistentCloudKitContainer.eventChangedNotification,
+            object: nil
+        )
+    }
+    
+    @objc nonisolated private func handleCloudKitEvent(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let event = userInfo[NSPersistentCloudKitContainer.eventNotificationUserInfoKey]
+                as? NSPersistentCloudKitContainer.Event else {
+            return
+        }
+        
+        switch event.type {
+        case .import:
+            if event.succeeded {
+                print("Import Success")
+                // notification을 받는 쪽에서 뷰를 업데이트 해주는 작업을 해줘야 하기 때문에 main 스레드에서 동작함을 보장해야함
+                Task { @MainActor in
+                    NotificationCenter.default.post(name: .coreDataImportedNotification, object: nil)
+                }
+            }
+        default:
+            print("Other CloudKit event occurred: \(event.type)")
+        }
     }
     
     // MARK: Persistable conformance

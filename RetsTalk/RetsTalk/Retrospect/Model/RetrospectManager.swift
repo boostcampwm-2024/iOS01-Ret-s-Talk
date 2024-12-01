@@ -6,147 +6,216 @@
 //
 
 import Foundation
-import Combine
 
-final class RetrospectManager: RetrospectManageable, @unchecked Sendable {
+typealias RetrospectAssistantProvidable = AssistantMessageProvidable & SummaryProvider
+
+final class RetrospectManager: RetrospectManageable {
     private let userID: UUID
-    private var retrospects: [Retrospect] {
-        didSet { retrospectsSubject.send(retrospects) }
-    }
-    private(set) var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
     private let retrospectStorage: Persistable
-    private let assistantMessageProvider: AssistantMessageProvidable
+    private let retrospectAssistantProvider: RetrospectAssistantProvidable
     
-    init(
+    private(set) var retrospects: [Retrospect]
+    private(set) var errorOccurred: Swift.Error?
+    
+    // MARK: Initialization
+    
+    nonisolated init(
         userID: UUID,
         retrospectStorage: Persistable,
-        assistantMessageProvider: AssistantMessageProvidable
+        retrospectAssistantProvider: RetrospectAssistantProvidable
     ) {
         self.userID = userID
-        self.retrospects = []
-        self.retrospectsSubject = CurrentValueSubject(retrospects)
         self.retrospectStorage = retrospectStorage
-        self.assistantMessageProvider = assistantMessageProvider
+        self.retrospectAssistantProvider = retrospectAssistantProvider
+        
+        retrospects = []
     }
     
-    func fetchRetrospects(offset: Int, amount: Int) async throws {
-        let recentFinishedRequest = recentFinishedRetrospectFetchRequest(offset: offset, amount: amount)
-        let recentFinishedEntities = try await retrospectStorage.fetch(by: recentFinishedRequest)
-        retrospects.append(contentsOf: recentFinishedEntities)
+    // MARK: RetrospectManageable conformance
+    
+    func createRetrospect() async -> RetrospectChatManageable? {
+        do {
+            let newRetrospect = try await createNewRetrospect()
+            retrospects.append(newRetrospect)
+            let retrospectChatManager = RetrospectChatManager(
+                retrospect: newRetrospect,
+                messageStorage: retrospectStorage,
+                assistantMessageProvider: retrospectAssistantProvider,
+                retrospectChatManagerListener: self
+            )
+            errorOccurred = nil
+            return retrospectChatManager
+        } catch {
+            errorOccurred = error
+            return nil
+        }
     }
     
-    func fetchinitRetrospects(offset: Int, amount: Int) async throws {
-        let pinnedRequest = pinnedRetrospectFetchRequest()
-        let pinnedEntities = try await retrospectStorage.fetch(by: pinnedRequest)
-        
-        let inProgressRequest = inProgressRetrospectFetchRequest()
-        let inProgressEntities = try await retrospectStorage.fetch(by: inProgressRequest)
-        
-        let recentFinishedRequest = recentFinishedRetrospectFetchRequest(offset: offset, amount: amount)
-        let recentFinishedEntities = try await retrospectStorage.fetch(by: recentFinishedRequest)
-        
-        let resultRetrospects = pinnedEntities + inProgressEntities + recentFinishedEntities
-        retrospects.append(contentsOf: resultRetrospects)
-    }
-    
-    func create() async throws -> RetrospectChatManageable {
-        let retrospect = Retrospect(userID: userID)
-        _ = try await retrospectStorage.add(contentsOf: [retrospect])
-        retrospects.append(retrospect)
+    func retrospectChatManager(of retrospect: Retrospect) -> (any RetrospectChatManageable)? {
+        guard let retrospect = retrospects.first(where: { $0.id == retrospect.id })
+        else {
+            errorOccurred = Error.invalidRetrospect
+            return nil
+        }
         
         let retrospectChatManager = RetrospectChatManager(
             retrospect: retrospect,
             messageStorage: retrospectStorage,
-            assistantMessageProvider: assistantMessageProvider,
+            assistantMessageProvider: retrospectAssistantProvider,
             retrospectChatManagerListener: self
         )
- 
+        errorOccurred = nil
         return retrospectChatManager
     }
     
-    func update(_ retrospect: Retrospect) async throws {
-        
+    func fetchRetrospects(of kindSet: Set<Retrospect.Kind>) async {
+        do {
+            for kind in kindSet {
+                let request = retrospectFetchRequest(for: kind)
+                let fetchedRetrospects = try await retrospectStorage.fetch(by: request)
+                for retrospect in fetchedRetrospects where !retrospects.contains(retrospect) {
+                    retrospects.append(retrospect)
+                }
+            }
+            errorOccurred = nil
+        } catch {
+            errorOccurred = error
+        }
     }
     
-    func delete(_ retrospect: Retrospect) async throws {
-        
-    }
-}
-
-// MARK: - ChatManager Create FetchRequest
-
-extension RetrospectManager {
-    private func pinnedRetrospectFetchRequest() -> PersistFetchRequest<Retrospect> {
-        let predicate = CustomPredicate(format: "userID = %@ AND isPinned = %@", argumentArray: [userID, true])
-        let sortDescriptors = CustomSortDescriptor(key: "createdAt", ascending: false)
-        
-        let request = PersistFetchRequest<Retrospect>(
-            predicate: predicate,
-            sortDescriptors: [sortDescriptors],
-            fetchLimit: Numerics.isPinnedFetchAmount
-        )
-        
-        return request
+    func togglePinRetrospect(_ retrospect: Retrospect) async {
+        do {
+            guard retrospect.isPinned || isPinAvailable else { throw Error.reachInProgressLimit }
+            
+            var updatingRetrospect = retrospect
+            updatingRetrospect.isPinned.toggle()
+            let updatedRetrospect = try await retrospectStorage.update(from: retrospect, to: updatingRetrospect)
+            updateRetrospects(by: updatedRetrospect)
+            errorOccurred = nil
+        } catch {
+            errorOccurred = error
+        }
     }
     
-    private func inProgressRetrospectFetchRequest() -> PersistFetchRequest<Retrospect> {
-        let predicate = CustomPredicate(
-            format: "userID = %@ AND status != %@",
-            argumentArray: [userID, Texts.finishedStatus]
-        )
-        let sortDescriptors = CustomSortDescriptor(key: "createdAt", ascending: false)
-        
-        let request = PersistFetchRequest<Retrospect>(
-            predicate: predicate,
-            sortDescriptors: [sortDescriptors],
-            fetchLimit: Numerics.isProgressFetchAmount
-        )
-        
-        return request
+    func finishRetrospect(_ retrospect: Retrospect) async {
+        do {
+            var updatingRetrospect = retrospect
+            updatingRetrospect.summary = try await retrospectAssistantProvider.requestSummary(for: retrospect.chat)
+            updatingRetrospect.status = .finished
+            let updatedRetrospect = try await retrospectStorage.update(from: retrospect, to: updatingRetrospect)
+            updateRetrospects(by: updatedRetrospect)
+            errorOccurred = nil
+        } catch {
+            errorOccurred = error
+        }
     }
     
-    private func recentFinishedRetrospectFetchRequest(offset: Int, amount: Int) -> PersistFetchRequest<Retrospect> {
-        let predicate = CustomPredicate(
-            format: "userID = %@ AND status = %@ AND isPinned = %@",
-            argumentArray: [userID, Texts.finishedStatus, false]
-        )
-        let sortDescriptors = CustomSortDescriptor(key: "createdAt", ascending: false)
-        
-        let request = PersistFetchRequest<Retrospect>(
-            predicate: predicate,
-            sortDescriptors: [sortDescriptors],
-            fetchLimit: amount,
-            fetchOffset: offset
-        )
-        
-        return request
+    func deleteRetrospect(_ retrospect: Retrospect) async {
+        do {
+            try await retrospectStorage.delete(contentsOf: [retrospect])
+            retrospects.removeAll(where: { $0.id == retrospect.id })
+            errorOccurred = nil
+        } catch {
+            errorOccurred = error
+        }
     }
-}
-
-// MARK: - MessageManagerListener conformance
-
-extension RetrospectManager: RetrospectChatManagerListener {
-    func didUpdateRetrospect(_ retrospectChatManageable: any RetrospectChatManageable, retrospect: Retrospect) {
-        guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id })
-        else { return }
+    
+    // MARK: Support retrospect creation
+    
+    private func createNewRetrospect() async throws -> Retrospect {
+        guard isCreationAvailable else { throw Error.reachInProgressLimit }
+        
+        var newRetrospect = Retrospect(userID: userID)
+        let initialAssistentMessage = try await requestInitialAssistentMessage(for: newRetrospect)
+        newRetrospect.append(contentsOf: [initialAssistentMessage])
+        guard let addedRetrospect = try await retrospectStorage.add(contentsOf: [newRetrospect]).first
+        else { throw Error.creationFailed }
+        
+        return addedRetrospect
+    }
+    
+    private func requestInitialAssistentMessage(for retrospect: Retrospect) async throws -> Message {
+        let emptyUserMessage = Message(retrospectID: retrospect.id, role: .user, content: "")
+        let initialAssistentMessage = try await retrospectAssistantProvider.requestAssistantMessage(
+            for: [emptyUserMessage]
+        )
+        return initialAssistentMessage
+    }
+    
+    // MARK: Support retrospect fetching
+    
+    private func retrospectFetchRequest(for kind: Retrospect.Kind) -> PersistFetchRequest<Retrospect> {
+        PersistFetchRequest<Retrospect>(
+            predicate: kind.predicate(for: userID),
+            sortDescriptors: [CustomSortDescriptor(key: "createdAt", ascending: false)],
+            fetchLimit: kind.fetchLimit
+        )
+    }
+    
+    // MARK: Manage retrospects
+    
+    private var isCreationAvailable: Bool {
+        retrospects.filter({ $0.status != .finished }).count < Numerics.inProgressLimit
+    }
+    
+    private var isPinAvailable: Bool {
+        retrospects.filter({ $0.isPinned }).count < Numerics.pinLimit
+    }
+    
+    private func updateRetrospects(by retrospect: Retrospect) {
+        guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id }) else { return }
         
         retrospects[matchingIndex] = retrospect
     }
+}
+
+// MARK: - RetrospectChatManagerListener conformance
+
+extension RetrospectManager: RetrospectChatManagerListener {
+    func didUpdateRetrospect(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) {
+        guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id })
+        else { return }
+        
+        Task {
+            try await retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+        }
+        retrospects[matchingIndex] = retrospect
+    }
     
-    func shouldTogglePin(_ retrospectChatManageable: any RetrospectChatManageable, retrospect: Retrospect) -> Bool {
-        true
+    func shouldTogglePin(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) -> Bool {
+        isPinAvailable
+    }
+}
+
+// MARK: - Error
+
+fileprivate extension RetrospectManager {
+    enum Error: LocalizedError {
+        case creationFailed
+        case reachInProgressLimit
+        case reachPinLimit
+        case invalidRetrospect
+        
+        var errorDescription: String? {
+            switch self {
+            case .creationFailed:
+                "회고를 생성하는데 실패했습니다."
+            case .reachInProgressLimit:
+                "회고는 최대 2개까지 진행할 수 있습니다. 새로 생성하려면 기존의 회고를 끝내주세요."
+            case .reachPinLimit:
+                "회고는 최대 2개까지 고정할 수 있습니다. 다른 회고의 고정을 풀어주세요."
+            case .invalidRetrospect:
+                "존재하지 않는 회고입니다."
+            }
+        }
     }
 }
 
 // MARK: - Constant
 
-extension RetrospectManager {
+fileprivate extension RetrospectManager {
     enum Numerics {
-        static let isPinnedFetchAmount = 2
-        static let isProgressFetchAmount = 2
-    }
-    
-    enum Texts {
-        static let finishedStatus = "retrospectFinished"
+        static let pinLimit = 2
+        static let inProgressLimit = 2
     }
 }

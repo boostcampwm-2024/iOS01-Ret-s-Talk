@@ -20,19 +20,18 @@ struct UserSettingView<T: UserSettingManageable>: View {
         List {
             Section(UserSettingViewTexts.firstSectionTitle) {
                 NicknameSettingView(nickname: $userSettingManager.userData.nickname) { updatingNickname in
-                    var updatingUserData = userSettingManager.userData
-                    updatingUserData.nickname = updatingNickname
-                    userSettingManager.update(to: updatingUserData)
+                    setNickname(updatingNickname)
                 }
             }
             
             Section(UserSettingViewTexts.secondSectionTitle) {
                 CloudSettingView(
                     isCloudSyncOn: $userSettingManager.userData.isCloudSyncOn,
-                    cloudAddress: $userSettingManager.userData.cloudAddress
-                ) {
-                    
-                }
+                    cloudAddress: $userSettingManager.userData.cloudAddress,
+                    onCloudSyncChange: { isOn in
+                        setCloudSync(isOn)
+                    }
+                )
             }
             
             Section(UserSettingViewTexts.thirdSectionTitle) {
@@ -59,6 +58,16 @@ struct UserSettingView<T: UserSettingManageable>: View {
 }
 
 // MARK: - Custom method
+
+private extension UserSettingView {
+    func setCloudSync(_ isOn: Bool) {
+        userSettingManager.updateCloudSyncState(state: isOn)
+    }
+    
+    func setNickname(_ updatingNickname: String) {
+        userSettingManager.updateNickname(updatingNickname)
+    }
+}
 
 private extension UserSettingView {
     func requestNotification(_ isOn: Bool = true, at date: Date) {

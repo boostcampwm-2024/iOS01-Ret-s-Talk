@@ -1,5 +1,5 @@
 //
-//  MessageManagerTests.swift
+//  RetrospectChatManagerTests.swift
 //  RetsTalk
 //
 //  Created by KimMinSeok on 11/20/24.
@@ -8,32 +8,34 @@
 import XCTest
 
 final class RetrospectChatManagerTests: XCTestCase {
-    private var retrospectChatManager: RetrospectChatManager?
+    private var retrospectChatManager: RetrospectChatManageable?
     
     // MARK: Set up
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         
-        retrospectChatManager = RetrospectChatManager(
-            retrospect: Retrospect(userID: UUID()),
-            messageStorage: MockMessageStore(),
-            assistantMessageProvider: MockAssistantMessageProvider(),
-            retrospectChatManagerListener: MockRetrospectManager()
-        )
+        retrospectChatManager = await RetrospectActor.run {
+            RetrospectChatManager(
+                retrospect: Retrospect(userID: UUID()),
+                messageStorage: MockMessageStore(),
+                assistantMessageProvider: MockRetrospectAssistantProvider(),
+                retrospectChatManagerListener: MockTestRetrospectManager()
+            )
+        }
     }
     
-    override func tearDown() {
-        MockAssistantMessageProvider.requestAssistantMessageHandler = nil
+    override func tearDown() async throws {
+        MockRetrospectAssistantProvider.requestAssistantMessageHandler = nil
         
-        super.tearDown()
+        try await super.tearDown()
     }
     
     // MARK: Send
     
     func test_회고_도움_메시지를_받아왔을때_상태_반영을_하는지() async throws {
         let retrospectChatManager = try XCTUnwrap(retrospectChatManager)
-        MockAssistantMessageProvider.requestAssistantMessageHandler = { _ in
+        MockRetrospectAssistantProvider.requestAssistantMessageHandler = { _ in
             let retrospect = await retrospectChatManager.retrospect
             XCTAssertEqual(retrospect.status, .inProgress(.waitingForResponse))
             return Message(retrospectID: retrospect.id, role: .assistant, content: "응답 테스트 메시지")
@@ -48,8 +50,8 @@ final class RetrospectChatManagerTests: XCTestCase {
     
     func test_회고_도움_메시지를_받아오는데_실패한_경우_상태_반영을_하는지() async throws {
         let retrospectChatManager = try XCTUnwrap(retrospectChatManager)
-        MockAssistantMessageProvider.requestAssistantMessageHandler = { _ in
-            throw CustomError.custom
+        MockRetrospectAssistantProvider.requestAssistantMessageHandler = { _ in
+            throw TestError.custom
         }
 
         await retrospectChatManager.sendMessage("실패 !")
@@ -91,11 +93,5 @@ final class RetrospectChatManagerTests: XCTestCase {
         
         let retrospect = await retrospectChatManager.retrospect
         XCTAssertNotEqual(retrospect.isPinned, previousPinState)
-    }
-    
-    // MARK: Error for test
-    
-    enum CustomError: Error {
-        case custom
     }
 }
