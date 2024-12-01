@@ -8,8 +8,7 @@
 import UIKit
 
 final class RetrospectCalendarView: UIView {
-    private let calendarView = UICalendarView()
-    let retrospectListTableView = UITableView()
+    private let retrospectCalendarView = UICalendarView()
     
     // MARK: Initalization
     
@@ -17,8 +16,7 @@ final class RetrospectCalendarView: UIView {
         super.init(frame: frame)
         
         backgroundColor = .backgroundMain
-        calendarViewSetUp()
-        retrospectListTableViewSetUp()
+        retrospectCalendarViewSetUp()
     }
     
     required init?(coder: NSCoder) {
@@ -27,49 +25,30 @@ final class RetrospectCalendarView: UIView {
     
     // MARK: View SetUp
     
-    private func calendarViewSetUp() {
-        addSubview(calendarView)
-        calendarView.translatesAutoresizingMaskIntoConstraints = false
+    private func retrospectCalendarViewSetUp() {
+        addSubview(retrospectCalendarView)
+        retrospectCalendarView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            calendarView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            calendarView.leftAnchor.constraint(equalTo: leftAnchor, constant: Metrics.horizontalMargin),
-            calendarView.rightAnchor.constraint(equalTo: rightAnchor, constant: -Metrics.horizontalMargin),
+            retrospectCalendarView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            retrospectCalendarView.leftAnchor.constraint(equalTo: leftAnchor, constant: Metrics.horizontalMargin),
+            retrospectCalendarView.rightAnchor.constraint(equalTo: rightAnchor, constant: -Metrics.horizontalMargin),
         ])
         
-        calendarView.wantsDateDecorations = true
-        calendarView.fontDesign = .rounded
-        calendarView.tintColor = .blazingOrange
-    }
-    
-    private func retrospectListTableViewSetUp() {
-        addSubview(retrospectListTableView)
-        retrospectListTableView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            retrospectListTableView.topAnchor.constraint(equalTo: calendarView.bottomAnchor),
-            retrospectListTableView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            retrospectListTableView.leftAnchor.constraint(equalTo: leftAnchor),
-            retrospectListTableView.rightAnchor.constraint(equalTo: rightAnchor),
-        ])
-        
-        retrospectListTableView.separatorStyle = .none
-        retrospectListTableView.backgroundColor = .backgroundMain
-        retrospectListTableView.register(
-            UITableViewCell.self,
-            forCellReuseIdentifier: Constants.retrospectCellIdentifier
-        )
+        retrospectCalendarView.wantsDateDecorations = true
+        retrospectCalendarView.fontDesign = .rounded
+        retrospectCalendarView.tintColor = .blazingOrange
     }
     
     func reloadDecorations(forDateComponents dateCompoenents: [DateComponents]) {
-        calendarView.reloadDecorations(forDateComponents: dateCompoenents, animated: true)
+        retrospectCalendarView.reloadDecorations(forDateComponents: dateCompoenents, animated: true)
     }
     
     func setCalendarViewDelegate(_ delegate: UICalendarViewDelegate & UICalendarSelectionSingleDateDelegate) {
-        calendarView.delegate = delegate
+        retrospectCalendarView.delegate = delegate
         
         let dateSelection = UICalendarSelectionSingleDate(delegate: delegate)
-        calendarView.selectionBehavior = dateSelection
+        retrospectCalendarView.selectionBehavior = dateSelection
     }
 }
 
