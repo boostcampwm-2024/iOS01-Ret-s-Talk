@@ -16,8 +16,8 @@ final class RetrospectCalendarViewController: BaseViewController {
     private let retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
     private var subscriptionSet: Set<AnyCancellable>
-    private var selectedDate: DateComponents?
     private var retrospectsCache: [DateComponents: [Retrospect]] = [:]
+    private var currentDateRetrospects: [Retrospect] = []
     
     private var dataSource: UITableViewDiffableDataSource<Section, Retrospect>?
     private var snapshot: NSDiffableDataSourceSnapshot<Section, Retrospect>?
@@ -69,7 +69,6 @@ final class RetrospectCalendarViewController: BaseViewController {
         retrospectsSubject
             .sink { [weak self] retrospects in
                 self?.retrospectsUpdateData(retrospects)
-                self?.updateTableView()
             }
             .store(in: &subscriptionSet)
     }
@@ -95,7 +94,7 @@ final class RetrospectCalendarViewController: BaseViewController {
     func updateTableView() {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Retrospect>()
         snapshot.appendSections([.retrospect])
-        snapshot.appendItems(retrospectsSubject.value, toSection: .retrospect)
+        snapshot.appendItems(currentDateRetrospects, toSection: .retrospect)
         dataSource?.apply(snapshot)
     }
     
@@ -145,7 +144,15 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelega
 
 extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionSingleDateDelegate {
     func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
-        print("선택된 날자: \(String(describing: dateComponents))")
+        guard let dateComponents = dateComponents else {
+            print("선택된 날짜가 없습니다.")
+            return
+        }
+        
+        let selectedDate = normalizedDateComponents(from: dateComponents)
+        currentDateRetrospects = retrospectsCache[selectedDate] ?? []
+        
+        updateTableView()
     }
 }
 
