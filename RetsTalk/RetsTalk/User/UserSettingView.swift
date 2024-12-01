@@ -7,11 +7,11 @@
 
 import SwiftUI
 
-struct UserSettingView: View {
-    @ObservedObject var userSettingManager: UserSettingManager
+struct UserSettingView<T: UserSettingManageable>: View {
+    @ObservedObject var userSettingManager: T
     private let notificationManager: NotificationManageable
     
-    init(userSettingManager: UserSettingManager, notificationManager: NotificationManageable) {
+    init(userSettingManager: T, notificationManager: NotificationManageable) {
         self.userSettingManager = userSettingManager
         self.notificationManager = notificationManager
     }
@@ -84,11 +84,9 @@ private extension UserSettingView {
 
 // MARK: - Constants
 
-private extension UserSettingView {
-    enum Texts {
-        static let firstSectionTitle = "사용자 정보"
-        static let secondSectionTitle = "클라우드"
-        static let thirdSectionTitle = "알림"
-        static let fourthSectionTitle = "앱 정보"
-    }
+enum Texts {
+    static let firstSectionTitle = "사용자 정보"
+    static let secondSectionTitle = "클라우드"
+    static let thirdSectionTitle = "알림"
+    static let fourthSectionTitle = "앱 정보"
 }

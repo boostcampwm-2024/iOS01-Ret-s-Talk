@@ -9,17 +9,14 @@ import UserNotifications
 
 final class NotificationManager: NotificationManageable {
     func checkAndRequestPermission(completion: @Sendable @escaping (Bool) -> Void) {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
+        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
             switch settings.authorizationStatus {
             case .authorized, .provisional, .ephemeral:
                 completion(true)
-                
             case .denied:
                 completion(false)
-                
             case .notDetermined:
-                self.requestPermission(completion: completion)
-
+                self?.requestPermission(completion: completion)
             @unknown default:
                 completion(false)
             }
@@ -28,36 +25,42 @@ final class NotificationManager: NotificationManageable {
 
     private func requestPermission(completion: @Sendable @escaping (Bool) -> Void) {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            guard error != nil else {
-                completion(granted)
+            guard error == nil
+            else {
+                completion(false)
                 return
             }
             
-            completion(false)
+            completion(granted)
         }
     }
     
     func scheduleNotification(date: Date) {
         let center = UNUserNotificationCenter.current()
-        
-        let content = UNMutableNotificationContent()
-        content.title = Texts.notificationTitle
-        content.body = Texts.notificationBody.randomElement() ?? Texts.notificationDefaultBody
-        content.sound = UNNotificationSound.default
-        
-        let triggerDate = Calendar.current.dateComponents([.hour, .minute], from: date)
-        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: true)
-        
         let request = UNNotificationRequest(
             identifier: Texts.notificationIdentifier,
-            content: content,
-            trigger: trigger
+            content: notificationContent(),
+            trigger: notificationTrigger(date)
         )
         center.add(request) { _ in }
     }
     
     func cancelNotification() {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+    }
+    
+    private func notificationContent() -> UNMutableNotificationContent {
+        let content = UNMutableNotificationContent()
+        content.title = Texts.randomNotificationBody
+        content.body = Texts.notificationBody.randomElement() ?? Texts.notificationDefaultBody
+        content.sound = UNNotificationSound.default
+        return content
+    }
+    
+    private func notificationTrigger(_ date: Date) -> UNNotificationTrigger {
+        let triggerDate = Calendar.current.dateComponents([.hour, .minute], from: date)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: true)
+        return trigger
     }
 }
 
@@ -74,5 +77,9 @@ private extension NotificationManager {
             "하루를 마무리하며 당신의 생각을 기록해 보세요. 내일은 더 나은 당신이 될 거예요.",
         ]
         static let notificationDefaultBody = "오늘은 어떤 일이 있었나요?"
+        
+        static var randomNotificationBody: String {
+            return Texts.notificationBody.randomElement() ?? Texts.notificationDefaultBody
+        }
     }
 }

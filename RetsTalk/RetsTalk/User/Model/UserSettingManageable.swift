@@ -8,8 +8,8 @@
 import Combine
 import Foundation
 
-protocol UserSettingManageable: Sendable {
-    var userData: UserData { get }
+protocol UserSettingManageable: Sendable, ObservableObject {
+    var userData: UserData { get set }
 
     func fetch()
     func update(to userData: UserData)
