@@ -12,5 +12,7 @@ protocol UserSettingManageable: Sendable, ObservableObject {
     var userData: UserData { get set }
 
     func fetch()
-    func update(to userData: UserData)
+    func updateNickname(_ nickname: String)
+    func updateCloudSyncState(state isOn: Bool)
+    func updateNotificationStatus(_ isOn: Bool, at date: Date)
 }

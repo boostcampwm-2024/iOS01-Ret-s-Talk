@@ -38,11 +38,8 @@ struct UserSettingView<Manageable: UserSettingManageable>: View {
                 NotificationSettingView(
                     isNotificationOn: $userSettingManager.userData.isNotificationOn,
                     selectedDate: $userSettingManager.userData.notificationTime,
-                    toggleAction: { isOn, date in
-                        requestNotification(isOn, at: date)
-                    },
-                    pickAction: { date in
-                        requestNotification(at: date)
+                    action: { isOn, date in
+                        setNotification(isOn, at: date)
                     }
                 )
             }
@@ -57,7 +54,7 @@ struct UserSettingView<Manageable: UserSettingManageable>: View {
     }
 }
 
-// MARK: - Custom method
+// MARK: - UserData setting method
 
 private extension UserSettingView {
     func setCloudSync(_ isOn: Bool) {
@@ -67,26 +64,10 @@ private extension UserSettingView {
     func setNickname(_ updatingNickname: String) {
         userSettingManager.updateNickname(updatingNickname)
     }
-}
 
-private extension UserSettingView {
-    func requestNotification(_ isOn: Bool = true, at date: Date) {
-        Task {
-            var userData = userSettingManager.userData
-            if isOn {
-                notificationManager.checkAndRequestPermission { didAllow in
-                    switch didAllow {
-                    case true:
-                        notificationManager.scheduleNotification(date: date)
-                    case false:
-                        notificationManager.cancelNotification()
-                    }
-                }
-            } else {
-                notificationManager.cancelNotification()
-            }
-            userData.isNotificationOn = isOn
-            userSettingManager.update(to: userData)
+    func setNotification(_ isOn: Bool, at date: Date) {
+        notificationManager.requestNotification(isOn, date: date) { [userSettingManager] completion in
+            userSettingManager.updateNotificationStatus(completion, at: date)
         }
     }
 }

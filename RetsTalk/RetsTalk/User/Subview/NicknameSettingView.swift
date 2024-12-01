@@ -15,7 +15,7 @@ extension UserSettingView {
         
         var body: some View {
             HStack {
-                Text(Texts.nicknameSettingViewTitle)
+                Text(UserSettingViewTexts.nicknameSettingViewTitle)
                 Spacer()
                 Text(nickname)
                     .foregroundStyle(.secondary)
@@ -68,4 +68,5 @@ private extension UserSettingViewNumerics {
 
 private extension UserSettingViewTexts {
     static let editButtonImageName = "pencil"
+    static let nicknameSettingViewTitle = "닉네임"
 }

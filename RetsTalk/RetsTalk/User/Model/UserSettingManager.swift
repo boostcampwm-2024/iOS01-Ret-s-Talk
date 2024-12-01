@@ -6,6 +6,7 @@
 //
 
 import Combine
+import Foundation
 
 final class UserSettingManager: UserSettingManageable, @unchecked Sendable, ObservableObject {
     @Published var userData: UserData = .init(dictionary: [:])
@@ -34,7 +35,7 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
         }
     }
     
-    func update(to updatingData: UserData) {
+    private func update(to updatingData: UserData) {
         Task {
             let updatedData = try await userDataStorage.update(from: updatingData, to: updatingData)
             await MainActor.run {
@@ -42,17 +43,26 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
             }
         }
     }
-
-    func updateCloudSyncState(state isOn: Bool) {
-        userData.isCloudSyncOn = isOn
-        update(to: userData)
-    }
-
+    
     func updateNickname(_ nickname: String) {
-        userData.nickname = nickname
-        update(to: userData)
+        var updatingUserData = userData
+        updatingUserData.nickname = nickname
+        update(to: updatingUserData)
+    }
+    
+    func updateCloudSyncState(state isOn: Bool) {
+        var updatingUserData = userData
+        updatingUserData.isCloudSyncOn = isOn
+        update(to: updatingUserData)
     }
 
+    func updateNotificationStatus(_ isOn: Bool, at date: Date) {
+        var updatingUserData = userData
+        updatingUserData.isNotificationOn = isOn
+        updatingUserData.notificationTime = date
+        update(to: updatingUserData)
+    }
+    
     private func initiateUserData() {
         Task {
             let addedData = try await userDataStorage.add(contentsOf: [UserData(dictionary: [:])])

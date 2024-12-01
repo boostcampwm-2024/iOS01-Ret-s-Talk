@@ -11,8 +11,7 @@ extension UserSettingView {
     struct NotificationSettingView: View {
         @Binding var isNotificationOn: Bool
         @Binding var selectedDate: Date
-        var toggleAction: (_ isNotificationOn: Bool, _ date: Date) -> Void
-        var pickAction: (_ selectedDate: Date) -> Void
+        var action: (_ isNotificationOn: Bool, _ date: Date) -> Void
         
         var body: some View {
             HStack {
@@ -21,7 +20,7 @@ extension UserSettingView {
                 Toggle(isOn: $isNotificationOn) {}
                     .toggleStyle(SwitchToggleStyle(tint: .blazingOrange))
                     .onChange(of: isNotificationOn) { newValue in
-                        toggleAction(newValue, selectedDate)
+                        action(newValue, selectedDate)
                     }
             }
             
@@ -33,7 +32,7 @@ extension UserSettingView {
                 )
                 .tint(.blazingOrange)
                 .onChange(of: selectedDate) { selectedDate in
-                    pickAction(selectedDate)
+                    action(isNotificationOn, selectedDate)
                 }
             }
         }

@@ -8,6 +8,45 @@
 import UserNotifications
 
 final class NotificationManager: NotificationManageable {
+    func requestNotification(_ isOn: Bool, date: Date, completion: @Sendable @escaping (Bool) -> Void) {
+        if isOn {
+            checkAndRequestPermission { [weak self] didAllow in
+                switch didAllow {
+                case true:
+                    self?.scheduleNotification(date: date)
+                    completion(true)
+                case false:
+                    self?.cancelNotification()
+                    completion(false)
+                }
+            }
+        } else {
+            cancelNotification()
+            completion(false)
+        }
+    }
+    
+    /*
+     func requestNotification(_ isOn: Bool = true, at date: Date) {
+         Task {
+             if isOn {
+                 notificationManager.checkAndRequestPermission { [userSettingManager] didAllow in
+                     switch didAllow {
+                     case true:
+                         notificationManager.scheduleNotification(date: date)
+                     case false:
+                         notificationManager.cancelNotification()
+                         userSettingManager.updateNotificationStatus(false, at: date)
+                         return
+                     }
+                 }
+             } else {
+                 notificationManager.cancelNotification()
+             }
+             userSettingManager.updateNotificationStatus(isOn, at: date)
+         }
+     }
+     */
     func checkAndRequestPermission(completion: @Sendable @escaping (Bool) -> Void) {
         UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
             switch settings.authorizationStatus {
