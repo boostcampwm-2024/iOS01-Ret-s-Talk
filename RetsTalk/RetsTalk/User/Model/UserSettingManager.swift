@@ -57,7 +57,7 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
         }
     }
     
-    // MARK: Custom method
+    // MARK: Creating UserData Method
 
     private func initializeUserData() -> UUID {
         let newUserID = UUID()
@@ -71,7 +71,6 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
                 userData = addedData
             }
         }
-        
         return newUserID
     }
     
