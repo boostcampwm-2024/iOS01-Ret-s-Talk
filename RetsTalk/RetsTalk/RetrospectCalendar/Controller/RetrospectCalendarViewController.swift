@@ -78,7 +78,10 @@ final class RetrospectCalendarViewController: BaseViewController {
         dataSource = UITableViewDiffableDataSource<Section, Retrospect>(
             tableView: retrospectCalendarView.retrospectListTableView
         ) { tableView, indexPath, retrospect in
-            let cell = tableView.dequeueReusableCell(withIdentifier: Constants.retrospectCellIdentifier, for: indexPath)
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: Constants.Texts.retrospectCellIdentifier,
+                for: indexPath
+            )
             cell.selectionStyle = .none
             cell.backgroundColor = .clear
             cell.contentConfiguration = UIHostingConfiguration {
