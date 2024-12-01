@@ -23,7 +23,7 @@ final class RetrospectCalendarViewController: BaseViewController {
     private var snapshot: NSDiffableDataSourceSnapshot<Section, Retrospect>?
     
     private let retrospectCalendarView: RetrospectCalendarView
-
+    
     // MARK: Initalization
     
     init(retrospectManager: RetrospectManageable) {
@@ -111,22 +111,24 @@ final class RetrospectCalendarViewController: BaseViewController {
         }
     }
     
-    private func addRetrospectToCache(_ retrospect: Retrospect) {
-        let dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: retrospect.createdAt)
-        retrospectsCache[dateComponents, default: []].append(retrospect)
-    }
-    
     private func retrospectsUpdateData(_ retrospects: [Retrospect]) {
-        var dateComponents: [DateComponents] = []
+        var dateComponents: Set<DateComponents> = []
         
         retrospects.forEach {
             addRetrospectToCache($0)
             let components = normalizedDateComponents(from: $0.createdAt)
-            dateComponents.append(components)
+            dateComponents.insert(components)
         }
         
-        retrospectCalendarView.reloadDecorations(forDateComponents: dateComponents)
-    }}
+        retrospectCalendarView.reloadDecorations(forDateComponents: Array(dateComponents))
+    }
+    
+    private func addRetrospectToCache(_ retrospect: Retrospect) {
+        let dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: retrospect.createdAt)
+        retrospectsCache[dateComponents, default: []].append(retrospect)
+    }
+}
+
 
 // MARK: - CalendarViewDelegate
 
