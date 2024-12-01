@@ -19,10 +19,10 @@ final class RetrospectListView: UIView {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: Constants.retrospectCellIdentifier)
         return tableView
     }()
-    private let dayCountButton: RetrospectCountButton = {
+    private let calendarButton: RetrospectCountButton = {
         let button = RetrospectCountButton(
-            imageSystemName: Texts.dayCountButtonImageName,
-            title: Texts.dayCountButtonTitle,
+            imageSystemName: Texts.calendarButtonImageName,
+            title: Texts.calendarButtonTitle,
             subtitle: "2일"
         )
         return button
@@ -76,15 +76,15 @@ final class RetrospectListView: UIView {
     }
     
     private func setupFixedButtonLayout() {
-        addSubview(dayCountButton)
+        addSubview(calendarButton)
         addSubview(totalCountButton)
         
-        dayCountButton.translatesAutoresizingMaskIntoConstraints = false
+        calendarButton.translatesAutoresizingMaskIntoConstraints = false
         totalCountButton.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            dayCountButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            dayCountButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Metrics.dayCountButtonMargin),
+            calendarButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            calendarButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Metrics.calendarButtonMargin),
             
             totalCountButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             totalCountButton.leadingAnchor.constraint(equalTo: centerXAnchor, constant: Metrics.totalCountButtonMargin),
@@ -124,6 +124,10 @@ final class RetrospectListView: UIView {
         createRetrospectButton.addAction(action, for: .touchUpInside)
     }
     
+    func addCalendarButtonAction(_ action: UIAction) {
+        calendarButton.addAction(action, for: .touchUpInside)
+    }
+    
     func reloadData() {
         retrospectListTableView.reloadData()
     }
@@ -137,15 +141,15 @@ private extension RetrospectListView {
         static let buttonBottomAnchorConstant = -10.0
         
         static let fixedButtonAreaHeight = 40.0
-        static let dayCountButtonMargin = 16.0
+        static let calendarButtonMargin = 16.0
         static let totalCountButtonMargin = 32.0
     }
     
     enum Texts {
         static let foregroundImageName = "plus"
         
-        static let dayCountButtonImageName = "calendar"
-        static let dayCountButtonTitle = "회고 쓴 일수"
+        static let calendarButtonImageName = "calendar"
+        static let calendarButtonTitle = "회고 쓴 일수"
         
         static let totalCountButtonImageName = "tray.full.fill"
         static let totalCountButtonTitle = "총 회고 수"
