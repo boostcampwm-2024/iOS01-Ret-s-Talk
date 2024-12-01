@@ -9,7 +9,6 @@ import Combine
 import Foundation
 import UIKit
 
-@MainActor
 final class RetrospectCalendarViewController: BaseViewController {
     private let retrospectManager: RetrospectManageable
     
