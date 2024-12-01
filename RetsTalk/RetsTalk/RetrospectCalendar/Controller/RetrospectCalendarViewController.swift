@@ -129,7 +129,6 @@ final class RetrospectCalendarViewController: BaseViewController {
     }
 }
 
-
 // MARK: - CalendarViewDelegate
 
 extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelegate {
