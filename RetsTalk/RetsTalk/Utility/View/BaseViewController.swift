@@ -13,10 +13,6 @@ class BaseViewController: UIViewController, UINavigationControllerDelegate {
     
     override func loadView() { }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         

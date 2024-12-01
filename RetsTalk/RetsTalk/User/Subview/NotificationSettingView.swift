@@ -11,28 +11,29 @@ extension UserSettingView {
     struct NotificationSettingView: View {
         @Binding var isNotificationOn: Bool
         @Binding var selectedDate: Date
-        var action: () -> Void
+        var toggleAction: (_ isNotificationOn: Bool, _ date: Date) -> Void
+        var pickAction: (_ selectedDate: Date) -> Void
         
         var body: some View {
             HStack {
-                Text(Texts.notificationSettingViewToggleTitle)
+                Text(UserSettingViewTexts.notificationSettingViewToggleTitle)
                 Spacer()
                 Toggle(isOn: $isNotificationOn) {}
                     .toggleStyle(SwitchToggleStyle(tint: .blazingOrange))
-                    .onChange(of: isNotificationOn) { _ in
-                        action()
+                    .onChange(of: isNotificationOn) { newValue in
+                        toggleAction(newValue, selectedDate)
                     }
             }
             
             if isNotificationOn {
                 DatePicker(
-                    Texts.notificationSettingViewDatePickerTitle,
+                    UserSettingViewTexts.notificationSettingViewDatePickerTitle,
                     selection: $selectedDate,
                     displayedComponents: .hourAndMinute
                 )
                 .tint(.blazingOrange)
-                .onChange(of: selectedDate) { _ in
-                    action()
+                .onChange(of: selectedDate) { selectedDate in
+                    pickAction(selectedDate)
                 }
             }
         }
@@ -41,9 +42,7 @@ extension UserSettingView {
 
 // MARK: - Constants
 
-private extension UserSettingView {
-    enum Texts {
-        static let notificationSettingViewToggleTitle = "회고 작성 알림"
-        static let notificationSettingViewDatePickerTitle = "시간"
-    }
+private extension UserSettingViewTexts {
+    static let notificationSettingViewToggleTitle = "회고 작성 알림"
+    static let notificationSettingViewDatePickerTitle = "시간"
 }

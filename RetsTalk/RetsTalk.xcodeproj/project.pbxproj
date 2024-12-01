@@ -55,10 +55,12 @@
 				Persistent/Implementation/PersistFetchRequest.swift,
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,
-				Retrospect/Model/MockRetrospectManager.swift,
 				Retrospect/Model/Retrospect.swift,
+				Retrospect/Model/RetrospectActor.swift,
 				Retrospect/Model/RetrospectManageable.swift,
 				Retrospect/Model/RetrospectManager.swift,
+				User/Model/NotificationManageable.swift,
+				User/Model/NotificationManager.swift,
 				Retrospect/Model/SummaryProvider.swift,
 				User/Model/User.swift,
 				User/Model/UserData.swift,
@@ -105,6 +107,7 @@
 				Persistent/Persistable.swift,
 				Persistent/PersistFetchRequestable.swift,
 				"Utility/Extensions/Collection+Extension.swift",
+				"Utility/Extensions/NotificationName+Extension.swift",
 			);
 			target = D5EEA5F02CEC32A600090456 /* PersistTests */;
 		};

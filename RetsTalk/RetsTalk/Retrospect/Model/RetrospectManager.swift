@@ -169,7 +169,7 @@ final class RetrospectManager: RetrospectManageable {
     }
 }
 
-// MARK: - MessageManagerListener conformance
+// MARK: - RetrospectChatManagerListener conformance
 
 extension RetrospectManager: RetrospectChatManagerListener {
     func didUpdateRetrospect(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) {

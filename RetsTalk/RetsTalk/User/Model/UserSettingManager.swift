@@ -57,12 +57,24 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
         }
     }
     
-    // MARK: Creating UserData Method
+    // MARK: UserData Handling Method
 
     private func initializeUserData() -> UUID {
         let newUserID = UUID()
         let newNickname = randomNickname()
         let newUserData = UserData(dictionary: ["userID": newUserID.uuidString, "nickname": newNickname])
+      
+    func updateCloudSyncState(state isOn: Bool) {
+        userData.isCloudSyncOn = isOn
+        update(to: userData)
+    }
+
+    func updateNickname(_ nickname: String) {
+        userData.nickname = nickname
+        update(to: userData)
+    }
+
+    private func initiateUserData() {
         Task {
             let addedData = try await userDataStorage.add(contentsOf: [newUserData])
             guard let addedData = addedData.first else { return }

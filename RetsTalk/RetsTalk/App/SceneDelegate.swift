@@ -17,7 +17,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        let navigationController = customedNavigationController(rootViewController: RetrospectListViewController())
+        let mockRetrospectManager = MockRetrospectManager()
+        let coreDataManager = CoreDataManager(inMemory: true, name: "RetsTalk") { _ in }
+        let navigationController = customedNavigationController(
+            rootViewController: RetrospectListViewController(
+                retrospectManager: mockRetrospectManager,
+                persistentStorage: coreDataManager
+            )
+        )
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()

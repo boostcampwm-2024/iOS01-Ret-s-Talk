@@ -1,5 +1,5 @@
 //
-//  MessageManagerTests.swift
+//  RetrospectChatManagerTests.swift
 //  RetsTalk
 //
 //  Created by KimMinSeok on 11/20/24.
@@ -20,7 +20,7 @@ final class RetrospectChatManagerTests: XCTestCase {
                 retrospect: Retrospect(userID: UUID()),
                 messageStorage: MockMessageStore(),
                 assistantMessageProvider: MockRetrospectAssistantProvider(),
-                retrospectChatManagerListener: MockRetrospectManager()
+                retrospectChatManagerListener: MockTestRetrospectManager()
             )
         }
     }

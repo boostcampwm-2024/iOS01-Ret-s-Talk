@@ -47,22 +47,23 @@ final class MockRetrospectManager: RetrospectManageable, RetrospectChatManagerLi
             Retrospect(userID: sharedUserID,
                        summary: "회고의 중요성을 깨닫고, 혼자만이 아닌 함께 성장하기 위해 남은 시간 동안 성실히 임할 것을 다짐.",
                        status: .finished,
-                       isPinned: true),
+                       isPinned: true,
+                       createdAt: Date.from(year: 2024, month: 12, day: 14)),
             Retrospect(userID: sharedUserID,
                        summary: "계획을 계속 수정했지만, 그 과정 속에서 나의 우선순위를 다시 생각해볼 수 있었다.",
                        status: .inProgress(.waitingForUserInput),
-                       isPinned: false),
-            Retrospect(userID: sharedUserID,
-                       summary: "디버깅에 지친 하루였지만, 원인을 찾고 문제를 해결하면서 조금 더 단단해진 기분이다.",
-                       status: .finished,isPinned: false),
+                       isPinned: false,
+                       createdAt: Date.from(year: 2024, month: 11, day: 24)),
             Retrospect(userID: sharedUserID,
                        summary: "혼자서는 막막했던 문제도 함께 고민하니 쉽게 풀리며, 협업의 힘을 실감한 하루였다.",
                        status: .finished,
-                       isPinned: false),
+                       isPinned: false,
+                       createdAt: Date.from(year: 2024, month: 10, day: 24)),
             Retrospect(userID: sharedUserID,
                        summary: "코드 리뷰를 통해 생각지도 못한 개선점을 알게 되었고, 내 자신을 돌아볼 수 있는 계기가 되었다.",
                        status: .finished,
-                       isPinned: false),
+                       isPinned: false,
+                       createdAt: Date.from(year: 2024, month: 11, day: 3)),
         ]
         
         for retrospect in testableRetrospects {
@@ -70,6 +71,15 @@ final class MockRetrospectManager: RetrospectManageable, RetrospectChatManagerLi
         }
         
         errorOccurred = nil
+    }
+    
+    func retrospectChatManager(of retrospect: Retrospect) -> (any RetrospectChatManageable)? {
+        RetrospectChatManager(
+            retrospect: retrospect,
+            messageStorage: UserDefaultsManager(),
+            assistantMessageProvider: CLOVAStudioManager(urlSession: URLSession.shared),
+            retrospectChatManagerListener: self
+        )
     }
     
     func togglePinRetrospect(_ retrospect: Retrospect) async {
@@ -97,7 +107,7 @@ final class MockRetrospectManager: RetrospectManageable, RetrospectChatManagerLi
         errorOccurred = nil
     }
     
-    // MARK: MessageManagerListener conformance
+    // MARK: RetrospectChatManagerListener conformance
     
     func didUpdateRetrospect(_ retrospectChatManageable: any RetrospectChatManageable, retrospect: Retrospect) {
         guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id })
