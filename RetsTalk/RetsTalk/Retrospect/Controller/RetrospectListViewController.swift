@@ -10,7 +10,7 @@ import SwiftUI
 import UIKit
 
 final class RetrospectListViewController: BaseViewController {
-    private var retrospectManager: RetrospectManageable
+    private let retrospectManager: RetrospectManageable
     private let userDefaultsManager: UserDefaultsManager
     private let userSettingManager: UserSettingManager
 
@@ -114,19 +114,13 @@ final class RetrospectListViewController: BaseViewController {
 
     @objc private func regenerateRetrospectManager() {
         let userData = userSettingManager.userData
-        let userID = UUID(uuidString: userData.userID) ?? UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1))
-
         let isCloudSyncOn = userData.isCloudSyncOn
-        let retrospectAssistantProvider = CLOVAStudioManager(urlSession: .shared)
         let newCoreDataManager = CoreDataManager(
             isiCloudSynced: isCloudSyncOn,
             name: Constants.CoreDataContainerName) { _ in }
-        let newRetrospectManager = RetrospectManager(
-            userID: userID,
-            retrospectStorage: newCoreDataManager,
-            retrospectAssistantProvider: retrospectAssistantProvider
-        )
-        retrospectManager = newRetrospectManager
+        Task {
+            await retrospectManager.replaceRetrospectStorage(newCoreDataManager)
+        }
     }
 
     // MARK: Retrospect handling
