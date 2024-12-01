@@ -16,22 +16,26 @@ extension UserSettingView {
         var body: some View {
             VStack {
                 NicknameModalTitleText()
-                NicknameModalTextField(Texts.nicknameModalPlaceholder, text: $nickname)
+                NicknameModalTextField(UserSettingViewTexts.nicknameModalPlaceholder, text: $nickname)
                 NicknameModalDoneButton(action: {
                     action(nickname)
                     dismiss()
                 })
                 .disabled(nickname.isEmpty)
-                .opacity(nickname.isEmpty ? Numerics.doneButtonDisabledOpaque : Numerics.doneButtonDefaultOpaque)
+                .opacity(
+                    nickname.isEmpty
+                    ? UserSettingViewNumerics.doneButtonDisabledOpaque
+                    : UserSettingViewNumerics.doneButtonDefaultOpaque
+                )
             }
         }
     }
     
     struct NicknameModalTitleText: View {
         var body: some View {
-            Text(Texts.nicknameModalTitle)
+            Text(UserSettingViewTexts.nicknameModalTitle)
                 .font(.headline)
-                .padding(.vertical, Metrics.verticalPadding)
+                .padding(.vertical, UserSettingViewMetrics.verticalPadding)
         }
     }
     
@@ -46,12 +50,12 @@ extension UserSettingView {
         
         var body: some View {
             TextField(placeholder, text: $text)
-                .padding(Metrics.horizontalPadding)
-                .frame(height: Metrics.nicknameModalDoneButtonHeight)
+                .padding(UserSettingViewMetrics.horizontalPadding)
+                .frame(height: UserSettingViewMetrics.nicknameModalDoneButtonHeight)
                 .background(Color.backgroundMain)
-                .clipShape(RoundedRectangle(cornerRadius: Metrics.nicknameModalCornerRadius))
-                .padding(.horizontal, Metrics.horizontalPadding)
-                .padding(.vertical, Metrics.verticalPadding)
+                .clipShape(RoundedRectangle(cornerRadius: UserSettingViewMetrics.nicknameModalCornerRadius))
+                .padding(.horizontal, UserSettingViewMetrics.horizontalPadding)
+                .padding(.vertical, UserSettingViewMetrics.verticalPadding)
         }
     }
     
@@ -69,15 +73,15 @@ extension UserSettingView {
                     {
                 ZStack {
                     Color.blazingOrange
-                        .clipShape(RoundedRectangle(cornerRadius: Metrics.nicknameModalCornerRadius))
-                    Text(Texts.nicknameModalDoneButtonTitle)
+                        .clipShape(RoundedRectangle(cornerRadius: UserSettingViewMetrics.nicknameModalCornerRadius))
+                    Text(UserSettingViewTexts.nicknameModalDoneButtonTitle)
                         .foregroundStyle(.white)
                         .font(.headline)
                 }
                 .frame(maxWidth: .infinity)
-                .frame(height: Metrics.nicknameModalDoneButtonHeight)
-                .padding(.horizontal, Metrics.horizontalPadding)
-                .padding(.vertical, Metrics.verticalPadding)
+                .frame(height: UserSettingViewMetrics.nicknameModalDoneButtonHeight)
+                .padding(.horizontal, UserSettingViewMetrics.horizontalPadding)
+                .padding(.vertical, UserSettingViewMetrics.verticalPadding)
             })
         }
     }
@@ -85,22 +89,20 @@ extension UserSettingView {
 
 // MARK: - Constants
 
-private extension UserSettingView {
-    enum Metrics {
-        static let horizontalPadding = 16.0
-        static let verticalPadding = 8.0
-        static let nicknameModalDoneButtonHeight = 52.0
-        static let nicknameModalCornerRadius = nicknameModalDoneButtonHeight / 2
-    }
-    
-    enum Numerics {
-        static let doneButtonDisabledOpaque =  0.5
-        static let doneButtonDefaultOpaque = 1.0
-    }
-    
-    enum Texts {
-        static let nicknameModalTitle = "닉네임 변경"
-        static let nicknameModalPlaceholder = "새로운 닉네임을 입력하세요"
-        static let nicknameModalDoneButtonTitle = "완료"
-    }
+private extension UserSettingViewMetrics {
+    static let horizontalPadding = 16.0
+    static let verticalPadding = 8.0
+    static let nicknameModalDoneButtonHeight = 52.0
+    static let nicknameModalCornerRadius = nicknameModalDoneButtonHeight / 2
+}
+
+private extension UserSettingViewNumerics {
+    static let doneButtonDisabledOpaque =  0.5
+    static let doneButtonDefaultOpaque = 1.0
+}
+
+private extension UserSettingViewTexts {
+    static let nicknameModalTitle = "닉네임 변경"
+    static let nicknameModalPlaceholder = "새로운 닉네임을 입력하세요"
+    static let nicknameModalDoneButtonTitle = "완료"
 }

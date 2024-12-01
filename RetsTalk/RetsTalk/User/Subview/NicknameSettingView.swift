@@ -23,7 +23,7 @@ extension UserSettingView {
                 NicknameModalView(action: { updatingNickname in
                     action(updatingNickname)
                 })
-                .presentationDetents([.fraction(Numerics.modalFraction)])
+                .presentationDetents([.fraction(UserSettingViewNumerics.modalFraction)])
             }
         }
     }
@@ -41,11 +41,11 @@ extension UserSettingView {
                     isShowingModal = true
                 },
                 label: {
-                    Image(systemName: Texts.editButtonImageName)
+                    Image(systemName: UserSettingViewTexts.editButtonImageName)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .foregroundColor(.blazingOrange)
-                        .frame(width: Metrics.editButtonSize)
+                        .frame(width: UserSettingViewMetrics.editButtonSize)
                 })
             .buttonStyle(PlainButtonStyle())
         }
@@ -54,18 +54,16 @@ extension UserSettingView {
 
 // MARK: - Constants
 
-private extension UserSettingView {
-    enum Metrics {
-        static let editButtonSize = 18.0
-        static let horizontalPadding = 16.0
-        static let verticalPadding = 8.0
-    }
-    
-    enum Numerics {
-        static let modalFraction = 0.3
-    }
-    
-    enum Texts {
-        static let editButtonImageName = "pencil"
-    }
+private extension UserSettingViewMetrics {
+    static let editButtonSize = 18.0
+    static let horizontalPadding = 16.0
+    static let verticalPadding = 8.0
+}
+
+private extension UserSettingViewNumerics {
+    static let modalFraction = 0.3
+}
+
+private extension UserSettingViewTexts {
+    static let editButtonImageName = "pencil"
 }

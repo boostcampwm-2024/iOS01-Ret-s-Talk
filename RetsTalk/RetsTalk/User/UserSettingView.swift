@@ -18,7 +18,7 @@ struct UserSettingView<T: UserSettingManageable>: View {
     
     var body: some View {
         List {
-            Section(Texts.firstSectionTitle) {
+            Section(UserSettingViewTexts.firstSectionTitle) {
                 NicknameSettingView(nickname: $userSettingManager.userData.nickname) { updatingNickname in
                     var updatingUserData = userSettingManager.userData
                     updatingUserData.nickname = updatingNickname
@@ -26,7 +26,7 @@ struct UserSettingView<T: UserSettingManageable>: View {
                 }
             }
             
-            Section(Texts.secondSectionTitle) {
+            Section(UserSettingViewTexts.secondSectionTitle) {
                 CloudSettingView(
                     isCloudSyncOn: $userSettingManager.userData.isCloudSyncOn,
                     cloudAddress: $userSettingManager.userData.cloudAddress
@@ -35,7 +35,7 @@ struct UserSettingView<T: UserSettingManageable>: View {
                 }
             }
             
-            Section(Texts.thirdSectionTitle) {
+            Section(UserSettingViewTexts.thirdSectionTitle) {
                 NotificationSettingView(
                     isNotificationOn: $userSettingManager.userData.isNotificationOn,
                     selectedDate: $userSettingManager.userData.notificationTime,
@@ -48,7 +48,7 @@ struct UserSettingView<T: UserSettingManageable>: View {
                 )
             }
             
-            Section(Texts.fourthSectionTitle) {
+            Section(UserSettingViewTexts.fourthSectionTitle) {
                 AppVersionView()
             }
         }
@@ -84,7 +84,7 @@ private extension UserSettingView {
 
 // MARK: - Constants
 
-enum Texts {
+private extension UserSettingViewTexts {
     static let firstSectionTitle = "사용자 정보"
     static let secondSectionTitle = "클라우드"
     static let thirdSectionTitle = "알림"

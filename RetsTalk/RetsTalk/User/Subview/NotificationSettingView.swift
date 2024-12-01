@@ -16,7 +16,7 @@ extension UserSettingView {
         
         var body: some View {
             HStack {
-                Text(Texts.notificationSettingViewToggleTitle)
+                Text(UserSettingViewTexts.notificationSettingViewToggleTitle)
                 Spacer()
                 Toggle(isOn: $isNotificationOn) {}
                     .toggleStyle(SwitchToggleStyle(tint: .blazingOrange))
@@ -27,7 +27,7 @@ extension UserSettingView {
             
             if isNotificationOn {
                 DatePicker(
-                    Texts.notificationSettingViewDatePickerTitle,
+                    UserSettingViewTexts.notificationSettingViewDatePickerTitle,
                     selection: $selectedDate,
                     displayedComponents: .hourAndMinute
                 )
@@ -42,9 +42,7 @@ extension UserSettingView {
 
 // MARK: - Constants
 
-private extension UserSettingView {
-    enum Texts {
-        static let notificationSettingViewToggleTitle = "회고 작성 알림"
-        static let notificationSettingViewDatePickerTitle = "시간"
-    }
+private extension UserSettingViewTexts {
+    static let notificationSettingViewToggleTitle = "회고 작성 알림"
+    static let notificationSettingViewDatePickerTitle = "시간"
 }

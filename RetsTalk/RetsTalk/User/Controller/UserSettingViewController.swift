@@ -9,18 +9,15 @@ import Combine
 import SwiftUI
 import UIKit
 
-final class UserSettingViewController: UIHostingController<UserSettingView> {
-    private let userSettingManager: UserSettingManageable
+final class UserSettingViewController<T: UserSettingManageable>: UIHostingController<UserSettingView<T>> {
+    private let userSettingManager: T
     private let notificationManager: NotificationManageable
     
     // MARK: Init method
     
-    init(userSettingManager: UserSettingManageable, notificationManager: NotificationManageable) {
+    init(userSettingManager: T, notificationManager: NotificationManageable) {
         self.userSettingManager = userSettingManager
         self.notificationManager = notificationManager
-        
-        guard let userSettingManager = userSettingManager as? UserSettingManager else { fatalError() }
-        
         let userSettingView = UserSettingView(
             userSettingManager: userSettingManager,
             notificationManager: notificationManager
@@ -28,17 +25,11 @@ final class UserSettingViewController: UIHostingController<UserSettingView> {
         
         super.init(rootView: userSettingView)
     }
-
-    required init?(coder: NSCoder) {
-        let userDefaultsManager = UserDefaultsManager()
-        self.userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
-        self.notificationManager = NotificationManager()
-        
-        super.init(coder: coder)
-    }
-
+    
+    required init?(coder: NSCoder) { fatalError() }
+    
     // MARK: ViewController lifecycle method
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -46,9 +37,9 @@ final class UserSettingViewController: UIHostingController<UserSettingView> {
     }
     
     // MARK: Custom method
-
+    
     private func setUpNavigationBar() {
-        title = Texts.navigationBarTitle
+        title = UserSettingViewTexts.navigationBarTitle
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemImage: .leftChevron),
@@ -67,9 +58,11 @@ final class UserSettingViewController: UIHostingController<UserSettingView> {
 
 // MARK: - Constants
 
-private extension UserSettingViewController {
-    enum Texts {
-        static let navigationBarTitle = "설정"
-        static let leftBarButtonItemTitle = "회고"
-    }
+enum UserSettingViewMetrics { }
+
+enum UserSettingViewNumerics { }
+
+enum UserSettingViewTexts {
+    static let navigationBarTitle = "설정"
+    static let leftBarButtonItemTitle = "회고"
 }

@@ -15,7 +15,7 @@ extension UserSettingView {
         
         var body: some View {
             HStack {
-                Text(Texts.cloudSettingViewTitle)
+                Text(UserSettingViewTexts.cloudSettingViewTitle)
                 Spacer()
                 Toggle(isOn: $isCloudSyncOn) {}
                     .toggleStyle(SwitchToggleStyle(tint: .blazingOrange))
@@ -31,8 +31,6 @@ extension UserSettingView {
 
 // MARK: - Constants
 
-private extension UserSettingView {
-    enum Texts {
-        static let cloudSettingViewTitle = "클라우드 동기화"
-    }
+private extension UserSettingViewTexts {
+    static let cloudSettingViewTitle = "클라우드 동기화"
 }
