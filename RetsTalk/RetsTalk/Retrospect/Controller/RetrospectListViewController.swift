@@ -37,7 +37,7 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     required init?(coder: NSCoder) {
-        let coreDataManager = CoreDataManager(name: "RetsTalk", completion: { _ in })
+        let coreDataManager = CoreDataManager(name: Constants.CoreDataContainerName, completion: { _ in })
         let clovaStudioManager = CLOVAStudioManager(urlSession: .shared)
         retrospectManager = RetrospectManager(
             userID: UUID(),

@@ -6,6 +6,7 @@
 //
 
 enum Constants {
+    static let CoreDataContainerName = "RetsTalk"
     static let retrospectCellIdentifier = "RetrospectCell"
     static let messageCellIdentifier = "MessageCell"
     
