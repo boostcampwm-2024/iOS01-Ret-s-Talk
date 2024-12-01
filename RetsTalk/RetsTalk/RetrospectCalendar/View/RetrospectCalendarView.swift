@@ -9,7 +9,7 @@ import UIKit
 
 final class RetrospectCalendarView: UIView {
     private let calendarView = UICalendarView()
-    private let retrospectListTableView = UITableView()
+    let retrospectListTableView = UITableView()
     
     // MARK: Initalization
     

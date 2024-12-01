@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 import UIKit
+import SwiftUI
 
 final class RetrospectCalendarViewController: BaseViewController {
     private let retrospectManager: RetrospectManageable
@@ -17,6 +18,9 @@ final class RetrospectCalendarViewController: BaseViewController {
     private var subscriptionSet: Set<AnyCancellable>
     private var selectedDate: DateComponents?
     private var retrospectsCache: [DateComponents: [Retrospect]] = [:]
+    
+    private var dataSource: UITableViewDiffableDataSource<Section, Retrospect>?
+    private var snapshot: NSDiffableDataSourceSnapshot<Section, Retrospect>?
     
     private let retrospectCalendarView: RetrospectCalendarView
 
@@ -47,6 +51,7 @@ final class RetrospectCalendarViewController: BaseViewController {
         retrospectCalendarView.setCalendarViewDelegate(self)
         
         setUpNavigationBar()
+        setUpDataSource()
         
         subscribeRetrospects()
         loadRetrospects()
@@ -64,8 +69,34 @@ final class RetrospectCalendarViewController: BaseViewController {
         retrospectsSubject
             .sink { [weak self] retrospects in
                 self?.retrospectsUpdateData(retrospects)
+                self?.updateTableView()
             }
             .store(in: &subscriptionSet)
+    }
+    
+    // MARK: TableView SetUp
+    
+    private func setUpDataSource() {
+        dataSource = UITableViewDiffableDataSource<Section, Retrospect>(
+            tableView: retrospectCalendarView.retrospectListTableView
+        ) { tableView, indexPath, retrospect in
+            let cell = tableView.dequeueReusableCell(withIdentifier: Constants.retrospectCellIdentifier, for: indexPath)
+            cell.contentConfiguration = UIHostingConfiguration {
+                RetrospectCell(
+                    summary: retrospect.summary ?? "",
+                    createdAt: retrospect.createdAt,
+                    isPinned: retrospect.isPinned
+                )
+            }
+            return cell
+        }
+    }
+    
+    func updateTableView() {
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Retrospect>()
+        snapshot.appendSections([.retrospect])
+        snapshot.appendItems(retrospectsSubject.value, toSection: .retrospect)
+        dataSource?.apply(snapshot)
     }
     
     // MARK: RetrospectManager Action
@@ -129,6 +160,12 @@ extension RetrospectCalendarViewController {
     
     private func normalizedDateComponents(from date: Date) -> DateComponents {
         Calendar.current.dateComponents([.year, .month, .day], from: date)
+    }
+}
+
+extension RetrospectCalendarViewController {
+    enum Section {
+        case retrospect
     }
 }
 
