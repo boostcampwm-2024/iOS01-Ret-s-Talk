@@ -101,7 +101,7 @@ final class RetrospectListViewController: BaseViewController {
         )
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(regenerateRetrospectManager),
+            selector: #selector(regenerateAndReplaceCoreDataManager),
             name: .iCloudSyncStateChangeNotification,
             object: nil
         )
@@ -112,7 +112,7 @@ final class RetrospectListViewController: BaseViewController {
         fetchInitialRetrospect()
     }
 
-    @objc private func regenerateRetrospectManager() {
+    @objc private func regenerateAndReplaceCoreDataManager() {
         let userData = userSettingManager.userData
         let isCloudSyncOn = userData.isCloudSyncOn
         let newCoreDataManager = CoreDataManager(
