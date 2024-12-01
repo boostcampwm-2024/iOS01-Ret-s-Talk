@@ -26,43 +26,22 @@ final class NotificationManager: NotificationManageable {
         }
     }
     
-    /*
-     func requestNotification(_ isOn: Bool = true, at date: Date) {
-         Task {
-             if isOn {
-                 notificationManager.checkAndRequestPermission { [userSettingManager] didAllow in
-                     switch didAllow {
-                     case true:
-                         notificationManager.scheduleNotification(date: date)
-                     case false:
-                         notificationManager.cancelNotification()
-                         userSettingManager.updateNotificationStatus(false, at: date)
-                         return
-                     }
-                 }
-             } else {
-                 notificationManager.cancelNotification()
-             }
-             userSettingManager.updateNotificationStatus(isOn, at: date)
-         }
-     }
-     */
-    func checkAndRequestPermission(completion: @Sendable @escaping (Bool) -> Void) {
-        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+    func checkAndRequestPermission(completion: @escaping (Bool) -> Void) {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
             switch settings.authorizationStatus {
             case .authorized, .provisional, .ephemeral:
                 completion(true)
             case .denied:
                 completion(false)
             case .notDetermined:
-                self?.requestPermission(completion: completion)
+                self.requestPermission(completion: completion)
             @unknown default:
                 completion(false)
             }
         }
     }
 
-    private func requestPermission(completion: @Sendable @escaping (Bool) -> Void) {
+    private func requestPermission(completion: @escaping (Bool) -> Void) {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             guard error == nil
             else {
