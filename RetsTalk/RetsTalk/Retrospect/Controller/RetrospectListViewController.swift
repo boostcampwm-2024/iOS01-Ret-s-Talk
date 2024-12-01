@@ -11,7 +11,6 @@ import UIKit
 
 final class RetrospectListViewController: BaseViewController {
     private var retrospectManager: RetrospectManageable
-    private let persistentStorage: Persistable // 얘 필요 없지 않나??
     private let userDefaultsManager: UserDefaultsManager
     private let userSettingManager: UserSettingManager
 
@@ -23,11 +22,9 @@ final class RetrospectListViewController: BaseViewController {
     
     init(
         retrospectManager: RetrospectManageable,
-        persistentStorage: Persistable,
         userDefaultsManager: UserDefaultsManager
     ) {
         self.retrospectManager = retrospectManager
-        self.persistentStorage = persistentStorage
         self.userDefaultsManager = userDefaultsManager
         userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
 
@@ -47,7 +44,6 @@ final class RetrospectListViewController: BaseViewController {
             retrospectStorage: coreDataManager,
             retrospectAssistantProvider: clovaStudioManager
         )
-        persistentStorage = coreDataManager
         userDefaultsManager = UserDefaultsManager()
         userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
 
