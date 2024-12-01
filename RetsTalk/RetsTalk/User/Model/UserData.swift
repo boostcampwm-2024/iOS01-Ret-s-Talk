@@ -8,6 +8,7 @@
 import Foundation
 
 struct UserData {
+    var userID: String
     var isCloudSyncOn: Bool
     var isNotificationOn: Bool
     var notificationTime: Date
@@ -20,6 +21,7 @@ struct UserData {
 extension UserData: EntityRepresentable {
     var mappingDictionary: [String: Any] {
         [
+            "userID": userID,
             "isCloudSyncOn": isCloudSyncOn,
             "isNotificationOn": isNotificationOn,
             "notificationTime": notificationTime,
@@ -29,6 +31,7 @@ extension UserData: EntityRepresentable {
     }
     
     init(dictionary: [String: Any]) {
+        userID = dictionary["userID"] as? String ?? ""
         isCloudSyncOn = dictionary["isCloudSyncOn"] as? Bool ?? false
         isNotificationOn = dictionary["isNotificationOn"] as? Bool ?? false
         notificationTime = dictionary["notificationTime"] as? Date ?? Date()

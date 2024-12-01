@@ -69,8 +69,8 @@ final class NotificationManager: NotificationManageable {
     
     private func notificationContent() -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
-        content.title = Texts.randomNotificationBody
-        content.body = Texts.notificationBody.randomElement() ?? Texts.notificationDefaultBody
+        content.title = Texts.notificationTitle
+        content.body = Texts.randomNotificationBody
         content.sound = UNNotificationSound.default
         return content
     }
