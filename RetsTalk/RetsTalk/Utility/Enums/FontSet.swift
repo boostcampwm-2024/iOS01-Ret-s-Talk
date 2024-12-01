@@ -10,6 +10,7 @@ import UIKit
 enum FontSet {
     case largeTitle
     case title
+    case subtitle
     case semiTitle
     case body
     case caption
@@ -20,6 +21,8 @@ enum FontSet {
             return 34
         case .title:
             return 22
+        case .subtitle:
+            return 16
         case .semiTitle:
             return 16
         case .body:
@@ -34,6 +37,8 @@ enum FontSet {
         case .largeTitle:
             return .bold
         case .title:
+            return .bold
+        case .subtitle:
             return .bold
         case .caption:
             return .medium
