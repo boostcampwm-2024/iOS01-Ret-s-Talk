@@ -10,7 +10,7 @@ import UIKit
 final class RetrospectListView: UIView {
     
     // MARK: UI components
-
+    
     private let retrospectListTableView: UITableView = {
         let tableView = UITableView()
         tableView.separatorStyle = .none
@@ -19,17 +19,34 @@ final class RetrospectListView: UIView {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: Constants.retrospectCellIdentifier)
         return tableView
     }()
-    
+    private let dayCountButton: RetrospectCountButton = {
+        let button = RetrospectCountButton(
+            imageSystemName: Texts.dayCountButtonImageName,
+            title: Texts.dayCountButtonTitle,
+            subtitle: "2일"
+        )
+        return button
+    }()
+    private let totalCountButton: RetrospectCountButton = {
+        let button = RetrospectCountButton(
+            imageSystemName: Texts.totalCountButtonImageName,
+            title: Texts.totalCountButtonTitle,
+            subtitle: "2일"
+        )
+        button.setImageColor(.blueBerry)
+        return button
+    }()
     private let createRetrospectButton = CreateRetrospectButton()
     
     // MARK: Init method
-
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
         backgroundColor = .backgroundMain
         setupTableViewLayout()
-        setupButtonLayout()
+        setupFixedButtonLayout()
+        setupFloatingButtonLayout()
     }
     
     required init?(coder: NSCoder) {
@@ -37,7 +54,8 @@ final class RetrospectListView: UIView {
         
         backgroundColor = .backgroundMain
         setupTableViewLayout()
-        setupButtonLayout()
+        setupFixedButtonLayout()
+        setupFloatingButtonLayout()
     }
     
     // MARK: Custom Method
@@ -47,17 +65,37 @@ final class RetrospectListView: UIView {
         retrospectListTableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            retrospectListTableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            retrospectListTableView.topAnchor.constraint(
+                equalTo: safeAreaLayoutGuide.topAnchor,
+                constant: Metrics.fixedButtonAreaHeight
+            ),
             retrospectListTableView.bottomAnchor.constraint(equalTo: bottomAnchor),
             retrospectListTableView.leftAnchor.constraint(equalTo: leftAnchor),
             retrospectListTableView.rightAnchor.constraint(equalTo: rightAnchor),
         ])
     }
     
-    private func setupButtonLayout() {
+    private func setupFixedButtonLayout() {
+        addSubview(dayCountButton)
+        addSubview(totalCountButton)
+        
+        dayCountButton.translatesAutoresizingMaskIntoConstraints = false
+        totalCountButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            dayCountButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            dayCountButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Metrics.dayCountButtonMargin),
+            
+            totalCountButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            totalCountButton.leadingAnchor.constraint(equalTo: centerXAnchor, constant: Metrics.totalCountButtonMargin),
+        ])
+    }
+    
+    private func setupFloatingButtonLayout() {
         addSubview(createRetrospectButton)
+        
         createRetrospectButton.translatesAutoresizingMaskIntoConstraints = false
-
+        
         NSLayoutConstraint.activate([
             createRetrospectButton.bottomAnchor.constraint(
                 equalTo: safeAreaLayoutGuide.bottomAnchor,
@@ -85,7 +123,7 @@ final class RetrospectListView: UIView {
     func addCreateButtonAction(_ action: UIAction) {
         createRetrospectButton.addAction(action, for: .touchUpInside)
     }
-
+    
     func reloadData() {
         retrospectListTableView.reloadData()
     }
@@ -97,9 +135,19 @@ private extension RetrospectListView {
     enum Metrics {
         static let diameter = 80.0
         static let buttonBottomAnchorConstant = -10.0
+        
+        static let fixedButtonAreaHeight = 40.0
+        static let dayCountButtonMargin = 16.0
+        static let totalCountButtonMargin = 32.0
     }
     
     enum Texts {
         static let foregroundImageName = "plus"
+        
+        static let dayCountButtonImageName = "calendar"
+        static let dayCountButtonTitle = "회고 쓴 일수"
+        
+        static let totalCountButtonImageName = "tray.full.fill"
+        static let totalCountButtonTitle = "총 회고 수"
     }
 }
