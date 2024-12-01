@@ -13,7 +13,7 @@ import UIKit
 final class RetrospectCalendarViewController: BaseViewController {
     private let retrospectManager: RetrospectManageable
     
-    private var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
+    private let retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
     private var subscriptionSet: Set<AnyCancellable>
     private var selectedDate: DateComponents?
@@ -63,17 +63,8 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     private func subscribeRetrospects() {
         retrospectsSubject
-            .receive(on: RunLoop.main)
             .sink { [weak self] retrospects in
-                guard let self = self else { return }
-                
-                var dateComponents: [DateComponents] = []
-                retrospects.forEach {
-                    self.addRetrospectToCache($0)
-                    let components = self.normalizedDateComponents(from: $0.createdAt)
-                    dateComponents.append(components)
-                }
-                self.retrospectCalendarView.reloadDecorations(forDateComponents: dateComponents)
+                self?.retrospectsUpdateData(retrospects)
             }
             .store(in: &subscriptionSet)
     }
@@ -93,7 +84,18 @@ final class RetrospectCalendarViewController: BaseViewController {
         let dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: retrospect.createdAt)
         retrospectsCache[dateComponents, default: []].append(retrospect)
     }
-}
+    
+    private func retrospectsUpdateData(_ retrospects: [Retrospect]) {
+        var dateComponents: [DateComponents] = []
+        
+        retrospects.forEach {
+            addRetrospectToCache($0)
+            let components = normalizedDateComponents(from: $0.createdAt)
+            dateComponents.append(components)
+        }
+        
+        retrospectCalendarView.reloadDecorations(forDateComponents: dateComponents)
+    }}
 
 // MARK: - CalendarViewDelegate
 
@@ -103,9 +105,7 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelega
         decorationFor dateComponents: DateComponents
     ) -> UICalendarView.Decoration? {
         let normalizedDate = normalizedDateComponents(from: dateComponents)
-        guard let resultRetrospects = retrospectsCache[normalizedDate], !resultRetrospects.isEmpty else {
-            return nil
-        }
+        guard let resultRetrospects = retrospectsCache[normalizedDate], !resultRetrospects.isEmpty else { return nil }
         
         return .default(color: .blazingOrange)
     }
@@ -123,9 +123,7 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
 
 extension RetrospectCalendarViewController {
     private func normalizedDateComponents(from dateComponents: DateComponents) -> DateComponents {
-        guard let date = Calendar.current.date(from: dateComponents) else {
-            return DateComponents()
-        }
+        guard let date = Calendar.current.date(from: dateComponents) else { return DateComponents() }
         
         return normalizedDateComponents(from: date)
     }
@@ -135,9 +133,10 @@ extension RetrospectCalendarViewController {
     }
 }
 
+// MARK: - Constants
+
 extension RetrospectCalendarViewController {
     enum Texts {
         static let CalendarViewTitle = "달력"
     }
-    
 }
