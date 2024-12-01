@@ -108,9 +108,9 @@ final class RetrospectListViewController: BaseViewController {
     }
 
     @objc private func refetchRetrospects() {
-            print("동기화 완료되어 패치 요청")
-            fetchInitialRetrospect()
-        }
+        print("동기화 완료되어 패치 요청")
+        fetchInitialRetrospect()
+    }
 
     @objc private func regenerateRetrospectManager() {
         let userData = userSettingManager.userData
@@ -120,7 +120,7 @@ final class RetrospectListViewController: BaseViewController {
         let retrospectAssistantProvider = CLOVAStudioManager(urlSession: .shared)
         let newCoreDataManager = CoreDataManager(
             isiCloudSynced: isCloudSyncOn,
-            name: "RetsTalk") { _ in }
+            name: Constants.CoreDataContainerName) { _ in }
         let newRetrospectManager = RetrospectManager(
             userID: userID,
             retrospectStorage: newCoreDataManager,
