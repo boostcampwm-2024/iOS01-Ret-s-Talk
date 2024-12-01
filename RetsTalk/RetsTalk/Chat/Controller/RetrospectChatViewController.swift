@@ -172,10 +172,17 @@ final class RetrospectChatViewController: UIViewController {
     
     // MARK: Button actions
 
-    @objc private func backwardButtonTapped() {}
-    
-    @objc private func endChattingButtonTapped() {}
-    
+    @objc private func backwardButtonTapped() {
+        navigationController?.popViewController(animated: true)
+    }
+
+    @objc private func endChattingButtonTapped() {
+        Task { [weak self] in
+            await self?.retrospectChatManager.endRetrospect()
+            self?.navigationController?.popViewController(animated: true)
+        }
+    }
+
     // MARK: DataSource difference managing
     
     private func updateDataSourceDifference(from source: [Message], to updated: [Message]) {
