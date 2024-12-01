@@ -18,32 +18,32 @@ enum FontSet {
     var size: CGFloat {
         switch self {
         case .largeTitle:
-            return 34
+            34
         case .title:
-            return 22
+            22
         case .subtitle:
-            return 16
+            16
         case .semiTitle:
-            return 16
+            16
         case .body:
-            return 14
+            14
         case .caption:
-            return 11
+            11
         }
     }
     
     var weight: UIFont.Weight {
         switch self {
         case .largeTitle:
-            return .bold
+            UIFont.Weight.bold
         case .title:
-            return .bold
+            UIFont.Weight.bold
         case .subtitle:
-            return .bold
+            UIFont.Weight.bold
         case .caption:
-            return .medium
+            UIFont.Weight.medium
         default:
-            return .regular
+            UIFont.Weight.regular
         }
     }
 }
