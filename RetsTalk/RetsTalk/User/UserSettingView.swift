@@ -7,11 +7,11 @@
 
 import SwiftUI
 
-struct UserSettingView<T: UserSettingManageable>: View {
-    @ObservedObject var userSettingManager: T
+struct UserSettingView<Manageable: UserSettingManageable>: View {
+    @ObservedObject var userSettingManager: Manageable
     private let notificationManager: NotificationManageable
     
-    init(userSettingManager: T, notificationManager: NotificationManageable) {
+    init(userSettingManager: Manageable, notificationManager: NotificationManageable) {
         self.userSettingManager = userSettingManager
         self.notificationManager = notificationManager
     }

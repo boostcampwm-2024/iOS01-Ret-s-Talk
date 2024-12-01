@@ -79,7 +79,7 @@ private extension NotificationManager {
         static let notificationDefaultBody = "오늘은 어떤 일이 있었나요?"
         
         static var randomNotificationBody: String {
-            return Texts.notificationBody.randomElement() ?? Texts.notificationDefaultBody
+            Texts.notificationBody.randomElement() ?? Texts.notificationDefaultBody
         }
     }
 }
