@@ -16,7 +16,7 @@ final class RetrospectListView: UIView {
         tableView.separatorStyle = .none
         tableView.backgroundColor = .backgroundMain
         tableView.rowHeight = UITableView.automaticDimension
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: Constants.retrospectCellIdentifier)
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: Constants.Texts.retrospectCellIdentifier)
         return tableView
     }()
     

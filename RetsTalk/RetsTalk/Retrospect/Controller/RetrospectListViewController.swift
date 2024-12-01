@@ -37,7 +37,7 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     required init?(coder: NSCoder) {
-        let coreDataManager = CoreDataManager(name: Constants.CoreDataContainerName, completion: { _ in })
+        let coreDataManager = CoreDataManager(name: Constants.Texts.CoreDataContainerName, completion: { _ in })
         let clovaStudioManager = CLOVAStudioManager(urlSession: .shared)
         retrospectManager = RetrospectManager(
             userID: UUID(),
@@ -116,7 +116,7 @@ final class RetrospectListViewController: BaseViewController {
         let isCloudSyncOn = userData.isCloudSyncOn
         let newCoreDataManager = CoreDataManager(
             isiCloudSynced: isCloudSyncOn,
-            name: Constants.CoreDataContainerName) { _ in }
+            name: Constants.Texts.CoreDataContainerName) { _ in }
         Task {
             await retrospectManager.replaceRetrospectStorage(newCoreDataManager)
         }
@@ -204,7 +204,10 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let data = retrospectsSubject.value[indexPath.section][indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.retrospectCellIdentifier, for: indexPath)
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: Constants.Texts.retrospectCellIdentifier,
+            for: indexPath
+        )
         cell.selectionStyle = .none
         cell.backgroundColor = .clear
         cell.contentConfiguration = UIHostingConfiguration {
