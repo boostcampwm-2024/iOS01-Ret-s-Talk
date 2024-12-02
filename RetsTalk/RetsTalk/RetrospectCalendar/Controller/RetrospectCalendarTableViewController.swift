@@ -9,7 +9,7 @@ import SwiftUI
 import UIKit
 
 final class RetrospectCalendarTableViewController: BaseViewController {
-    private let retrospects: [Retrospect]
+    private var retrospects: [Retrospect]
     
     private var dataSource: UITableViewDiffableDataSource<Section, Retrospect>?
     private var snapshot: NSDiffableDataSourceSnapshot<Section, Retrospect>?
@@ -35,6 +35,7 @@ final class RetrospectCalendarTableViewController: BaseViewController {
         super.viewDidLoad()
         
         tableViewDataSourceSetUp()
+        updateTableView()
     }
     
     private func tableViewDataSourceSetUp() {
@@ -60,6 +61,11 @@ final class RetrospectCalendarTableViewController: BaseViewController {
         snapshot.appendSections([.retrospect])
         snapshot.appendItems(retrospects, toSection: .retrospect)
         dataSource?.apply(snapshot, animatingDifferences: true)
+    }
+    
+    func dataSetUp(currentRetrospects: [Retrospect]) {
+        retrospects = currentRetrospects
+        updateTableView()
     }
 }
 
