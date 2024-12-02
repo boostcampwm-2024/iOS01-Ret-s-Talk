@@ -41,7 +41,7 @@ final class RetrospectCalendarTableView: UIView {
         retrospectListTableView.backgroundColor = .clear
         retrospectListTableView.register(
             UITableViewCell.self,
-            forCellReuseIdentifier: Constants.retrospectCellIdentifier
+            forCellReuseIdentifier: Constants.Texts.retrospectCellIdentifier
         )
     }
 }
