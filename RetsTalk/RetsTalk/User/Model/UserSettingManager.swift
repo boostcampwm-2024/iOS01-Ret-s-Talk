@@ -69,12 +69,14 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
     
     func updateNotificationStatus(_ isOn: Bool, at date: Date) {
         notificationManager.requestNotification(isOn, date: date) { isNotificationAllowed in
+            var updatingUserData = self.userData
             if isNotificationAllowed {
-                var updatingUserData = self.userData
                 updatingUserData.isNotificationOn = isOn
                 updatingUserData.notificationTime = date
                 self.update(to: updatingUserData)
             } else {
+                updatingUserData.isNotificationOn = false
+                self.update(to: updatingUserData)
                 self.delegate?.alertNeedNotificationPermission()
             }
         }

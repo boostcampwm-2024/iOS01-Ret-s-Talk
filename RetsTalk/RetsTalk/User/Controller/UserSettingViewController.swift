@@ -48,33 +48,19 @@ final class UserSettingViewController<T: UserSettingManageable>:
     @objc private func backwardButtonTapped() {}
 }
 
+// MARK: - UserSettingManageableDelegate conformance
+
 extension UserSettingViewController: UserSettingManageableDelegate {
     typealias Situation = UserSettingViewSituation
 
-    enum UserSettingViewSituation: AlertSituation {
-        case needNotifactionPermission
-
-        var title: String {
-            "알림 권한 필요"
-        }
-        var message: String {
-            guard let appName = Bundle.main.infoDictionary?["CFBundleName"] as? String
-            else { return "알림 권한이 필요합니다." }
-            
-            let message = "\(appName)이(가) 접근 허용되어 있지않습니다. \r\n 설정화면으로 가시겠습니까?"
-
-            return message
-        }
-    }
-
     nonisolated func alertNeedNotificationPermission() {
         Task { @MainActor in
-            let alertAction = UIAlertAction(title: "moveToSetting", style: .default) { _ in
+            let alertAction = UIAlertAction(title: UserSettingViewTexts.accept, style: .default) { _ in
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     UIApplication.shared.open(url)
                 }
             }
-            let cancel = UIAlertAction(title: "cancel", style: .cancel)
+            let cancel = UIAlertAction(title: UserSettingViewTexts.cancel, style: .cancel)
             presentAlert(for: .needNotifactionPermission, actions: [alertAction, cancel])
         }
     }
@@ -83,6 +69,13 @@ extension UserSettingViewController: UserSettingManageableDelegate {
         let alert = UIAlertController(title: situation.title, message: situation.message, preferredStyle: .alert)
         actions.forEach { alert.addAction($0) }
         present(alert, animated: true)
+    }
+
+    enum UserSettingViewSituation: AlertSituation {
+        case needNotifactionPermission
+
+        var title: String { UserSettingViewTexts.needNotificationPermissonTitle }
+        var message: String { UserSettingViewTexts.needNotificationPermissonMessage }
     }
 }
 
@@ -95,4 +88,9 @@ enum UserSettingViewNumerics { }
 enum UserSettingViewTexts {
     static let navigationBarTitle = "설정"
     static let leftBarButtonItemTitle = "회고"
+    
+    static let accept = "확인"
+    static let cancel = "취소"
+    static let needNotificationPermissonTitle = "알림 권한 요청"
+    static let needNotificationPermissonMessage = "알림 권한이 꺼져있습니다. \r\n 알림 권한을 허용해주세요."
 }
