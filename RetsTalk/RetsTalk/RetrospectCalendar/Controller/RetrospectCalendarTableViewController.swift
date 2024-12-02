@@ -12,7 +12,6 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     private typealias DataSource = UITableViewDiffableDataSource<Section, Retrospect>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Retrospect>
     
-    
     private var retrospects: [Retrospect]
     
     private var dataSource: DataSource?
@@ -70,6 +69,12 @@ final class RetrospectCalendarTableViewController: BaseViewController {
         retrospects = currentRetrospects
         updateTableView()
     }
+}
+
+// MARK: - UITableViewDelegate
+
+extension RetrospectCalendarTableViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) { }
 }
 
 // MARK: - Table Section
