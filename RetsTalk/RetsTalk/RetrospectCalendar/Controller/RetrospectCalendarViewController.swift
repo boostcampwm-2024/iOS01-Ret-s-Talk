@@ -18,6 +18,8 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     private let retrospectCalendarView: RetrospectCalendarView
     
+    private var retrospectTableViewController: RetrospectCalendarTableViewController?
+    
     // MARK: Initalization
     
     init(retrospectManager: RetrospectManageable) {
@@ -115,6 +117,44 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
         
         let selectedDate = normalizedDateComponents(from: dateComponents)
         guard let currentDateRetrospects = retrospectsCache[selectedDate] else { return }
+        
+        presentRetrospectsList(retrospects: currentDateRetrospects)
+    }
+    
+    private func presentRetrospectsList(retrospects: [Retrospect]) {
+        if let retrospectTableViewController = retrospectTableViewController {
+            retrospectTableViewController.dataSetUp(currentRetrospects: retrospects)
+            return
+        }
+        
+        let newController = createRetrospectTableViewController(retrospects: retrospects)
+        retrospectTableViewController = newController
+        
+        guard let retrospectTableViewController = retrospectTableViewController else { return }
+        present(retrospectTableViewController, animated: true)
+    }
+    
+    private func createRetrospectTableViewController(retrospects: [Retrospect])
+    -> RetrospectCalendarTableViewController {
+        let controller = RetrospectCalendarTableViewController(retrospects: retrospects)
+        if let sheet = controller.sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.largestUndimmedDetentIdentifier = .medium
+            sheet.prefersGrabberVisible = true
+        }
+        controller.presentationController?.delegate = self
+        return controller
+    }
+}
+
+// MARK: - UIAdaptivePresentationControllerDelegate
+
+extension RetrospectCalendarViewController: UIAdaptivePresentationControllerDelegate {
+    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        // 모달이 닫히면 retrospectTableViewController를 nil로 설정
+        if presentationController.presentedViewController === retrospectTableViewController {
+            retrospectTableViewController = nil
+        }
     }
 }
 
