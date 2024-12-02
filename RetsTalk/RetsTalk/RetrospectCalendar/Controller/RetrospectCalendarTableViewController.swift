@@ -9,10 +9,14 @@ import SwiftUI
 import UIKit
 
 final class RetrospectCalendarTableViewController: BaseViewController {
+    private typealias DataSource = UITableViewDiffableDataSource<Section, Retrospect>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Retrospect>
+    
+    
     private var retrospects: [Retrospect]
     
-    private var dataSource: UITableViewDiffableDataSource<Section, Retrospect>?
-    private var snapshot: NSDiffableDataSourceSnapshot<Section, Retrospect>?
+    private var dataSource: DataSource?
+    private var snapshot: Snapshot?
     
     private let retrospectCalendarTableView = RetrospectCalendarTableView()
     
@@ -38,7 +42,7 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     }
     
     private func tableViewDataSourceSetUp() {
-        dataSource = UITableViewDiffableDataSource<Section, Retrospect>(
+        dataSource = DataSource(
             tableView: retrospectCalendarTableView.retrospectListTableView
         ) { tableView, indexPath, retrospect in
             let cell = tableView.dequeueReusableCell(withIdentifier: Constants.retrospectCellIdentifier, for: indexPath)
@@ -56,7 +60,7 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     }
     
     private func updateTableView() {
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Retrospect>()
+        var snapshot = Snapshot()
         snapshot.appendSections([.retrospect])
         snapshot.appendItems(retrospects, toSection: .retrospect)
         dataSource?.apply(snapshot, animatingDifferences: true)
