@@ -8,49 +8,50 @@
 import UIKit
 
 class BaseKeyBoardViewController: BaseViewController {
+    
+    // MARK: ViewController lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        addKeyboardObservers()
-        addTapGestureOfDismissingKeyboard()
+        addKeyboardNotificationObservers()
     }
     
-    // MARK: TapGesture of KeyboardDismissing
+    // MARK: Keyboard observing
     
-    private func addTapGestureOfDismissingKeyboard() {
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        view.addGestureRecognizer(tapGestureRecognizer)
-    }
-    
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
-    }
-    
-    // MARK: KeyboardObserving
-    
-    private func addKeyboardObservers() {
+    private func addKeyboardNotificationObservers() {
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(keyboardWillShowAndHide(_:)),
+            selector: #selector(keyboardWillShow(_:)),
             name: UIResponder.keyboardWillShowNotification,
             object: nil
         )
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(keyboardWillShowAndHide(_:)),
+            selector: #selector(keyboardWillHide(_:)),
             name: UIResponder.keyboardWillHideNotification,
             object: nil
         )
     }
     
-    @objc private func keyboardWillShowAndHide(_ notification: Notification) {
-        if let userInfo = notification.userInfo,
-           let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-            keyboardWillUpdateConstraint(keyboardHeight: keyboardFrame.height)
-        }
+    // MARK: Keyboard event hanler
+    
+    @objc
+    private func keyboardWillShow(_ notification: Notification) {
+        guard let keywordInfo = KeyboardInfo(notification: notification) else { return }
+        
+        handleKeyboardWillShowEvent(using: keywordInfo)
     }
     
-    /// 이 함수는 키보드 호출 시 높이를 전달받아 레이아웃을 조정합니다.
-    /// - Parameter keyboardHeight: 키보드 높이
-    func keyboardWillUpdateConstraint(keyboardHeight: CGFloat) { }
+    @objc
+    private func keyboardWillHide(_ notification: Notification) {
+        guard var keywordInfo = KeyboardInfo(notification: notification) else { return }
+        
+        keywordInfo.frame = CGRect()
+        handleKeyboardWillHideEvent(using: keywordInfo)
+    }
+    
+    func handleKeyboardWillShowEvent(using keyboardInfo: KeyboardInfo) {}
+    
+    func handleKeyboardWillHideEvent(using keyboardInfo: KeyboardInfo) {}
 }
