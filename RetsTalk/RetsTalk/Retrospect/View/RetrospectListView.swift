@@ -11,7 +11,7 @@ final class RetrospectListView: UIView {
     
     // MARK: UI components
     
-    private let retrospectListTableView: UITableView = {
+    let retrospectListTableView: UITableView = {
         let tableView = UITableView()
         tableView.separatorStyle = .none
         tableView.backgroundColor = .backgroundMain
@@ -115,9 +115,8 @@ final class RetrospectListView: UIView {
         bringSubviewToFront(createRetrospectButton)
     }
     
-    func setTableViewDelegate(_ delegate: UITableViewDelegate & UITableViewDataSource) {
+    func setTableViewDelegate(_ delegate: UITableViewDelegate) {
         retrospectListTableView.delegate = delegate
-        retrospectListTableView.dataSource = delegate
     }
     
     func addCreateButtonAction(_ action: UIAction) {
