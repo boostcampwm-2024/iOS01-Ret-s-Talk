@@ -131,7 +131,7 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
     
     private func presentRetrospectsList(retrospects: [Retrospect]) {
         if let retrospectTableViewController = retrospectTableViewController {
-            retrospectTableViewController.dataSetUp(currentRetrospects: retrospects)
+            retrospectTableViewController.updateRetrospect(with: retrospects)
             return
         }
         

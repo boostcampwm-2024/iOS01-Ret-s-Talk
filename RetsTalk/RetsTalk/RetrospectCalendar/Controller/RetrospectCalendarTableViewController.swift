@@ -66,7 +66,7 @@ final class RetrospectCalendarTableViewController: BaseViewController {
         dataSource?.apply(snapshot, animatingDifferences: true)
     }
     
-    func dataSetUp(currentRetrospects: [Retrospect]) {
+    func updateRetrospect(with currentRetrospects: [Retrospect]) {
         retrospects = currentRetrospects
         updateTableView()
     }

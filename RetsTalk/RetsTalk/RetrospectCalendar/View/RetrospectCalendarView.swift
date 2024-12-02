@@ -27,6 +27,7 @@ final class RetrospectCalendarView: UIView {
     
     private func retrospectCalendarViewSetUp() {
         addSubview(retrospectCalendarView)
+        
         retrospectCalendarView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
@@ -51,6 +52,8 @@ final class RetrospectCalendarView: UIView {
         retrospectCalendarView.selectionBehavior = dateSelection
     }
 }
+
+// MARK: - Constants
 
 private extension RetrospectCalendarView {
     enum Metrics {

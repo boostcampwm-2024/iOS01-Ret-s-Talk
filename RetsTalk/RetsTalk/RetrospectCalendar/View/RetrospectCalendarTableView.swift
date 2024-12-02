@@ -10,6 +10,8 @@ import UIKit
 final class RetrospectCalendarTableView: UIView {
     let retrospectListTableView = UITableView()
     
+    // MARK: Initalization
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -21,8 +23,11 @@ final class RetrospectCalendarTableView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: View SetUp
+    
     private func retrospectListTableVewSetUp() {
         addSubview(retrospectListTableView)
+        
         retrospectListTableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
