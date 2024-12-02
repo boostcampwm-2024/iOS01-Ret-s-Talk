@@ -26,7 +26,7 @@ final class RetrospectCalendarTableView: UIView {
         retrospectListTableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            retrospectListTableView.topAnchor.constraint(equalTo: topAnchor),
+            retrospectListTableView.topAnchor.constraint(equalTo: topAnchor, constant: Metrics.topPadding),
             retrospectListTableView.bottomAnchor.constraint(equalTo: bottomAnchor),
             retrospectListTableView.leftAnchor.constraint(equalTo: leftAnchor),
             retrospectListTableView.rightAnchor.constraint(equalTo: rightAnchor),
@@ -38,5 +38,13 @@ final class RetrospectCalendarTableView: UIView {
             UITableViewCell.self,
             forCellReuseIdentifier: Constants.retrospectCellIdentifier
         )
+    }
+}
+
+// MARK: - Constants
+
+extension RetrospectCalendarTableView {
+    enum Metrics {
+        static let topPadding = 16.0
     }
 }
