@@ -34,14 +34,14 @@ final class RetrospectCalendarTableView: BaseView {
     override func setupSubviewLayouts() {
         super.setupSubviewLayouts()
         
-        setupChatTableViewLayouts()
+        setupRetrospectCalendarTableViewLayouts()
     }
 }
 
 // MARK: - Subviews layouts
 
 fileprivate extension RetrospectCalendarTableView {
-    func setupChatTableViewLayouts() {
+    func setupRetrospectCalendarTableViewLayouts() {
         NSLayoutConstraint.activate([
             retrospectListTableView.topAnchor.constraint(equalTo: topAnchor, constant: Metrics.topPadding),
             retrospectListTableView.bottomAnchor.constraint(equalTo: bottomAnchor),

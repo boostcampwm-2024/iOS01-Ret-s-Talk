@@ -7,49 +7,61 @@
 
 import UIKit
 
-final class RetrospectCalendarView: UIView {
-    private let retrospectCalendarView = UICalendarView()
+final class RetrospectCalendarView: BaseView {
+    private let retrospectCalendarView: UICalendarView = {
+        let calendarView = UICalendarView()
+        calendarView.translatesAutoresizingMaskIntoConstraints = false
+        calendarView.wantsDateDecorations = true
+        calendarView.fontDesign = .rounded
+        calendarView.tintColor = .blazingOrange
+        return calendarView
+    }()
     
-    // MARK: Initalization
+    // MARK: RetsTalk lifecycle
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    override func setupStyles() {
+        super.setupStyles()
         
         backgroundColor = .backgroundMain
-        retrospectCalendarViewSetUp()
     }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    // MARK: View SetUp
-    
-    private func retrospectCalendarViewSetUp() {
+    override func setupSubviews() {
+        super.setupSubviews()
+        
         addSubview(retrospectCalendarView)
-        
-        retrospectCalendarView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            retrospectCalendarView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            retrospectCalendarView.leftAnchor.constraint(equalTo: leftAnchor, constant: Metrics.horizontalMargin),
-            retrospectCalendarView.rightAnchor.constraint(equalTo: rightAnchor, constant: -Metrics.horizontalMargin),
-        ])
-        
-        retrospectCalendarView.wantsDateDecorations = true
-        retrospectCalendarView.fontDesign = .rounded
-        retrospectCalendarView.tintColor = .blazingOrange
     }
     
-    func reloadDecorations(forDateComponents dateCompoenents: [DateComponents]) {
-        retrospectCalendarView.reloadDecorations(forDateComponents: dateCompoenents, animated: true)
+    override func setupSubviewLayouts() {
+        super.setupSubviewLayouts()
+        
+        setupRetrospectCalendarViewLayouts()
     }
+    
+    // MARK: Delegation
     
     func setCalendarViewDelegate(_ delegate: UICalendarViewDelegate & UICalendarSelectionSingleDateDelegate) {
         retrospectCalendarView.delegate = delegate
         
         let dateSelection = UICalendarSelectionSingleDate(delegate: delegate)
         retrospectCalendarView.selectionBehavior = dateSelection
+    }
+    
+    // MARK: Reload Decorations
+    
+    func reloadDecorations(forDateComponents dateCompoenents: [DateComponents]) {
+        retrospectCalendarView.reloadDecorations(forDateComponents: dateCompoenents, animated: true)
+    }
+}
+
+// MARK: - Subviews layouts
+
+fileprivate extension RetrospectCalendarView {
+    func setupRetrospectCalendarViewLayouts() {
+        NSLayoutConstraint.activate([
+            retrospectCalendarView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            retrospectCalendarView.leftAnchor.constraint(equalTo: leftAnchor, constant: Metrics.horizontalMargin),
+            retrospectCalendarView.rightAnchor.constraint(equalTo: rightAnchor, constant: -Metrics.horizontalMargin),
+        ])
     }
 }
 
