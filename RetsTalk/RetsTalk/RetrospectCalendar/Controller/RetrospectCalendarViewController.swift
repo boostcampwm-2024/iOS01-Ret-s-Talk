@@ -117,29 +117,25 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
         guard let dateComponents = dateComponents else { return }
         
         let selectedDate = normalizedDateComponents(from: dateComponents)
-        guard let currentDateRetrospects = retrospectsCache[selectedDate] else {
+        if let currentDateRetrospects = retrospectsCache[selectedDate] {
+            presentRetrospectsList(retrospects: currentDateRetrospects)
+        } else {
             retrospectTableViewController?.dismiss(animated: true) {
                 self.retrospectTableViewController = nil
             }
-            return
         }
-        
-        presentRetrospectsList(retrospects: currentDateRetrospects)
     }
     
     // MARK: Present Retrospect TableView 
     
     private func presentRetrospectsList(retrospects: [Retrospect]) {
-        if let retrospectTableViewController = retrospectTableViewController {
-            retrospectTableViewController.updateRetrospect(with: retrospects)
-            return
+        let controller = retrospectTableViewController ?? createRetrospectTableViewController(retrospects: retrospects)
+        controller.updateRetrospect(with: retrospects)
+        
+        if retrospectTableViewController == nil {
+            retrospectTableViewController = controller
+            present(controller, animated: true)
         }
-        
-        let newController = createRetrospectTableViewController(retrospects: retrospects)
-        retrospectTableViewController = newController
-        guard let retrospectTableViewController = retrospectTableViewController else { return }
-        
-        present(retrospectTableViewController, animated: true)
     }
     
     private func createRetrospectTableViewController(retrospects: [Retrospect])

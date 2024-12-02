@@ -35,16 +35,18 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        tableViewDataSourceSetUp()
+    
         updateTableView()
     }
     
-    private func tableViewDataSourceSetUp() {
+    override func setupDataSource() {
         dataSource = DataSource(
             tableView: retrospectCalendarTableView.retrospectListTableView
         ) { tableView, indexPath, retrospect in
-            let cell = tableView.dequeueReusableCell(withIdentifier: Constants.Texts.retrospectCellIdentifier, for: indexPath)
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: Constants.Texts.retrospectCellIdentifier,
+                for: indexPath
+            )
             cell.selectionStyle = .none
             cell.backgroundColor = .clear
             cell.contentConfiguration = UIHostingConfiguration {
