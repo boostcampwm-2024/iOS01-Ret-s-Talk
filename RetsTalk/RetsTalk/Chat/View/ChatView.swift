@@ -16,7 +16,7 @@ final class ChatView: BaseView {
     
     // MARK: Subviews
     
-    private let chattingTableView: UITableView = {
+    private let chatTableView: UITableView = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.scrollsToTop = false
@@ -45,7 +45,7 @@ final class ChatView: BaseView {
         super.setupSubviews()
         
         addSubview(messageInputView)
-        addSubview(chattingTableView)
+        addSubview(chatTableView)
         
         messageInputView.delegate = self
     }
@@ -57,23 +57,26 @@ final class ChatView: BaseView {
         setupMessageInputViewLayouts()
     }
     
-    // MARK: Delegate
+    // MARK: Delegation
     
     weak var delegate: ChatViewDelegate?
     
-    func setTableViewDelegate(_ delegate: UITableViewDelegate & UITableViewDataSource) {
-        chattingTableView.delegate = delegate
-        chattingTableView.dataSource = delegate
+    func setChatTableViewDelegate(_ delegate: UITableViewDelegate & UITableViewDataSource) {
+        chatTableView.delegate = delegate
+    }
+    
+    func setChatTableViewDataSource(_ delegate: UITableViewDataSource) {
+        chatTableView.dataSource = delegate
     }
     
     // MARK: TableView actions
     
     func scrollToBottom() {
-        let rows = chattingTableView.numberOfRows(inSection: 0)
+        let rows = chatTableView.numberOfRows(inSection: 0)
         guard 0 < rows else { return }
         
         let indexPath = IndexPath(row: rows - 1, section: 0)
-        chattingTableView.scrollToRow(
+        chatTableView.scrollToRow(
             at: indexPath,
             at: .bottom,
             animated: false
@@ -83,7 +86,7 @@ final class ChatView: BaseView {
     func insertMessages(at indexPaths: [IndexPath]) {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        chattingTableView.insertRows(at: indexPaths, with: .none)
+        chatTableView.insertRows(at: indexPaths, with: .none)
         CATransaction.commit()
     }
     
@@ -127,10 +130,10 @@ extension ChatView: MessageInputViewDelegate {
 fileprivate extension ChatView {
     func setupChatTableViewLayouts() {
         NSLayoutConstraint.activate([
-            chattingTableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            chattingTableView.bottomAnchor.constraint(equalTo: messageInputView.topAnchor),
-            chattingTableView.leftAnchor.constraint(equalTo: leftAnchor),
-            chattingTableView.rightAnchor.constraint(equalTo: rightAnchor),
+            chatTableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            chatTableView.bottomAnchor.constraint(equalTo: messageInputView.topAnchor),
+            chatTableView.leftAnchor.constraint(equalTo: leftAnchor),
+            chatTableView.rightAnchor.constraint(equalTo: rightAnchor),
         ])
     }
     

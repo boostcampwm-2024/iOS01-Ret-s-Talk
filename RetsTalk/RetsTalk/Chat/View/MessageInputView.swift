@@ -98,7 +98,7 @@ final class MessageInputView: BaseView {
         )
     }
     
-    // MARK: Delegate
+    // MARK: Delegation
     
     weak var delegate: MessageInputViewDelegate?
     

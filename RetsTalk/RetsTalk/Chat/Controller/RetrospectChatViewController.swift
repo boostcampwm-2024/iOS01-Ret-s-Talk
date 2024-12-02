@@ -67,8 +67,14 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
     override func setupDelegation() {
         super.setupDelegation()
         
-        chatView.setTableViewDelegate(self)
+        chatView.setChatTableViewDelegate(self)
         chatView.delegate = self
+    }
+    
+    override func setupDataSource() {
+        super.setupDataSource()
+        
+        chatView.setChatTableViewDataSource(self)
     }
 
     override func setupNavigationBar() {
