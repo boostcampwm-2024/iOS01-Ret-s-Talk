@@ -8,10 +8,15 @@
 import Combine
 import Foundation
 
+protocol UserSettingManageableDelegate: AnyObject {
+    func alertNeedNotificationPermission()
+}
+
 final class UserSettingManager: UserSettingManageable, @unchecked Sendable, ObservableObject {
     @Published var userData: UserData = .init(dictionary: [:])
     private let userDataStorage: Persistable
     private let notificationManager: NotificationManageable
+    weak var delegate: UserSettingManageableDelegate?
 
     // MARK: Init method
     
@@ -69,6 +74,8 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
                 updatingUserData.isNotificationOn = isOn
                 updatingUserData.notificationTime = date
                 self.update(to: updatingUserData)
+            } else {
+                self.delegate?.alertNeedNotificationPermission()
             }
         }
     }
