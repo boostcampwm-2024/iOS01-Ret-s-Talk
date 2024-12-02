@@ -14,11 +14,10 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     private var dataSource: UITableViewDiffableDataSource<Section, Retrospect>?
     private var snapshot: NSDiffableDataSourceSnapshot<Section, Retrospect>?
     
-    private let retrospectCalendarTableView: RetrospectCalendarTableView
+    private let retrospectCalendarTableView = RetrospectCalendarTableView()
     
     init(retrospects: [Retrospect]) {
         self.retrospects = retrospects
-        retrospectCalendarTableView = RetrospectCalendarTableView()
         
         super.init(nibName: nil, bundle: nil)
     }

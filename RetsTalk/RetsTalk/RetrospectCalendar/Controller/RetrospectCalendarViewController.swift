@@ -16,7 +16,7 @@ final class RetrospectCalendarViewController: BaseViewController {
     private var subscriptionSet: Set<AnyCancellable>
     private var retrospectsCache: [DateComponents: [Retrospect]] = [:]
     
-    private let retrospectCalendarView: RetrospectCalendarView
+    private let retrospectCalendarView = RetrospectCalendarView()
     
     private var retrospectTableViewController: RetrospectCalendarTableViewController?
     
@@ -24,7 +24,6 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     init(retrospectManager: RetrospectManageable) {
         self.retrospectManager = retrospectManager
-        retrospectCalendarView = RetrospectCalendarView()
         
         retrospectsSubject = CurrentValueSubject([])
         errorSubject = CurrentValueSubject(nil)
@@ -77,6 +76,8 @@ final class RetrospectCalendarViewController: BaseViewController {
         }
     }
     
+    // MARK: Retrospect Data Changed Action
+    
     private func retrospectsUpdateData(_ retrospects: [Retrospect]) {
         var dateComponents: Set<DateComponents> = []
         
@@ -125,6 +126,8 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
         
         presentRetrospectsList(retrospects: currentDateRetrospects)
     }
+    
+    // MARK: Present Retrospect TableView 
     
     private func presentRetrospectsList(retrospects: [Retrospect]) {
         if let retrospectTableViewController = retrospectTableViewController {
