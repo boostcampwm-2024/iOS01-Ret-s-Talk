@@ -116,7 +116,12 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
         guard let dateComponents = dateComponents else { return }
         
         let selectedDate = normalizedDateComponents(from: dateComponents)
-        guard let currentDateRetrospects = retrospectsCache[selectedDate] else { return }
+        guard let currentDateRetrospects = retrospectsCache[selectedDate] else {
+            retrospectTableViewController?.dismiss(animated: true) {
+                self.retrospectTableViewController = nil
+            }
+            return
+        }
         
         presentRetrospectsList(retrospects: currentDateRetrospects)
     }
@@ -129,8 +134,8 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
         
         let newController = createRetrospectTableViewController(retrospects: retrospects)
         retrospectTableViewController = newController
-        
         guard let retrospectTableViewController = retrospectTableViewController else { return }
+        
         present(retrospectTableViewController, animated: true)
     }
     
