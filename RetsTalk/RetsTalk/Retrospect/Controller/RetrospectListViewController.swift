@@ -10,6 +10,7 @@ import SwiftUI
 import UIKit
 
 final class RetrospectListViewController: BaseViewController {
+    typealias Situation = RetrospectListSituation
     private typealias RetrospectDataSource = UITableViewDiffableDataSource<RetrospectSection, Retrospect>
     
     private let retrospectManager: RetrospectManageable
@@ -45,22 +46,7 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     required init?(coder: NSCoder) {
-        let coreDataManager = CoreDataManager(name: Constants.Texts.CoreDataContainerName, completion: { _ in })
-        let clovaStudioManager = CLOVAStudioManager(urlSession: .shared)
-        retrospectManager = RetrospectManager(
-            userID: UUID(),
-            retrospectStorage: coreDataManager,
-            retrospectAssistantProvider: clovaStudioManager
-        )
-        userDefaultsManager = UserDefaultsManager()
-        userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
-
-        retrospectListView = RetrospectListView()
-        retrospectsSubject = CurrentValueSubject(SortedRetrospects())
-        errorSubject = CurrentValueSubject(nil)
-        subscriptionSet = []
-
-        super.init(coder: coder)
+        fatalError()
     }
     
     // MARK: ViewController lifecycle method
@@ -75,7 +61,7 @@ final class RetrospectListViewController: BaseViewController {
         addObserver()
         subscribeRetrospects()
         retrospectListView.setTableViewDelegate(self)
-        setupDataSource()
+        setUpDataSource()
         addCreateButtondidTapAction()
         fetchInitialRetrospect()
     }
@@ -143,7 +129,7 @@ final class RetrospectListViewController: BaseViewController {
         retrospectsSubject
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                guard let self = self else { return }
+                guard let self else { return }
                 
                 self.updateSnapshot()
             }
@@ -165,10 +151,20 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     private func deleteRetrospect(_ retrospect: Retrospect) {
-        Task {
-            await self.retrospectManager.deleteRetrospect(retrospect)
-            self.sortAndSendRetrospects()
-        }
+        presentAlert(
+            for: .delete,
+            actions: [
+                UIAlertAction(title: "취소", style: .cancel),
+                UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+                    guard let self else { return }
+
+                    Task {
+                        await self.retrospectManager.deleteRetrospect(retrospect)
+                        self.sortAndSendRetrospects()
+                    }
+                },
+            ]
+        )
     }
     
     private func togglepPinRetrospect(_ retrospect: Retrospect) {
@@ -212,7 +208,7 @@ final class RetrospectListViewController: BaseViewController {
 // MARK: - UITableViewDiffableDataSource method
 
 private extension RetrospectListViewController {
-    func setupDataSource() {
+    func setUpDataSource() {
         dataSource = RetrospectDataSource(
             tableView: retrospectListView.retrospectListTableView
         ) { tableView, indexPath, retrospect in
@@ -336,11 +332,33 @@ extension RetrospectListViewController: UITableViewDelegate {
     }
 }
 
+// MARK: - AlertPresentable conformance
+
+extension RetrospectListViewController: AlertPresentable {
+    enum RetrospectListSituation: AlertSituation {
+        case delete
+        
+        var title: String {
+            switch self {
+            case .delete:
+                "회고를 삭제하시겠습니까?"
+            }
+        }
+        
+        var message: String {
+            switch self {
+            case .delete:
+                "삭제된 회고는 복구할 수 없습니다."
+            }
+        }
+    }
+}
+
 // MARK: - Constants
 
 private extension RetrospectListViewController {
     enum RetrospectSection: Int, CaseIterable, Hashable {
-        case pinned = 0
+        case pinned
         case inProgress
         case finished
         
