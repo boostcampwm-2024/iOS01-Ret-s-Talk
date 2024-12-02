@@ -31,9 +31,7 @@ final class NotificationManager: NotificationManageable {
             switch settings.authorizationStatus {
             case .authorized, .provisional, .ephemeral:
                 completion(true)
-            case .denied:
-                completion(false)
-            case .notDetermined:
+            case .denied, .notDetermined:
                 self.requestPermission(completion: completion)
             @unknown default:
                 completion(false)

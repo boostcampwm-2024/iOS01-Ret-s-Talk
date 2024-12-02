@@ -11,9 +11,9 @@ struct UserSettingView<Manageable: UserSettingManageable>: View {
     @ObservedObject var userSettingManager: Manageable
     private let notificationManager: NotificationManageable
     
-    init(userSettingManager: Manageable, notificationManager: NotificationManageable) {
+    init(userSettingManager: Manageable) {
         self.userSettingManager = userSettingManager
-        self.notificationManager = notificationManager
+        notificationManager = NotificationManager()
     }
     
     var body: some View {
@@ -67,7 +67,7 @@ private extension UserSettingView {
     }
 
     func setNotification(_ isOn: Bool, at date: Date) {
-        notificationManager.requestNotification(isOn, date: date) { [userSettingManager] completion in
+        userSettingManager.updateNotificationStatus(isOn, at: date)
             userSettingManager.updateNotificationStatus(completion, at: date)
         }
     }

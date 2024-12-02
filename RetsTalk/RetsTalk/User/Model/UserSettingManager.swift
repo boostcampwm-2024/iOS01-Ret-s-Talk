@@ -11,11 +11,13 @@ import Foundation
 final class UserSettingManager: UserSettingManageable, @unchecked Sendable, ObservableObject {
     @Published var userData: UserData = .init(dictionary: [:])
     private let userDataStorage: Persistable
-    
+    private let notificationManager: NotificationManageable
+
     // MARK: Init method
     
     init(userDataStorage: Persistable) {
         self.userDataStorage = userDataStorage
+        notificationManager = NotificationManager()
     }
     
     // MARK: UserSettingManageable conformance
@@ -61,10 +63,14 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
     }
     
     func updateNotificationStatus(_ isOn: Bool, at date: Date) {
-        var updatingUserData = userData
-        updatingUserData.isNotificationOn = isOn
-        updatingUserData.notificationTime = date
-        update(to: updatingUserData)
+        notificationManager.requestNotification(isOn, date: date) { isNotificationAllowed in
+            if isNotificationAllowed {
+                var updatingUserData = self.userData
+                updatingUserData.isNotificationOn = isOn
+                updatingUserData.notificationTime = date
+                self.update(to: updatingUserData)
+            }
+        }
     }
     
     // MARK: UserData Handling Method
@@ -109,7 +115,6 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
         let noun = Texts.nicknameComposingNoun
         return adjective + " " + noun
     }
-    
 }
 
 // MARK: - Constants

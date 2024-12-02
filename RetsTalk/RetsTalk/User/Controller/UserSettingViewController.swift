@@ -11,16 +11,13 @@ import UIKit
 
 final class UserSettingViewController<T: UserSettingManageable>: UIHostingController<UserSettingView<T>> {
     private let userSettingManager: T
-    private let notificationManager: NotificationManageable
     
     // MARK: Init method
     
-    init(userSettingManager: T, notificationManager: NotificationManageable) {
+    init(userSettingManager: T) {
         self.userSettingManager = userSettingManager
-        self.notificationManager = notificationManager
         let userSettingView = UserSettingView(
-            userSettingManager: userSettingManager,
-            notificationManager: notificationManager
+            userSettingManager: userSettingManager
         )
         
         super.init(rootView: userSettingView)
