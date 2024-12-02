@@ -33,7 +33,7 @@ final class RetrospectListView: UIView {
             title: Texts.totalCountButtonTitle,
             subtitle: "2일"
         )
-        button.setImageColor(.blueBerry)
+        button.setImageColor(.lightGray)
         return button
     }()
     private let createRetrospectButton = CreateRetrospectButton()
