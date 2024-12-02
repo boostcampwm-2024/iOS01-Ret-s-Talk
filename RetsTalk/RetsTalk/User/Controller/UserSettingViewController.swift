@@ -53,7 +53,7 @@ final class UserSettingViewController<T: UserSettingManageable>:
 extension UserSettingViewController: UserSettingManageableDelegate {
     typealias Situation = UserSettingViewSituation
 
-    func alertNeedNotificationPermission() {
+    func alertNeedNotificationPermission(_ userSettingManageable: any UserSettingManageable) {
         let alertAction = UIAlertAction(title: UserSettingViewTexts.accept, style: .default) { _ in
             if let url = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(url)

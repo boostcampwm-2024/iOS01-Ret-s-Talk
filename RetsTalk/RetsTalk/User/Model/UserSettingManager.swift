@@ -10,7 +10,7 @@ import Foundation
 
 protocol UserSettingManageableDelegate: AnyObject {
     @MainActor
-    func alertNeedNotificationPermission()
+    func alertNeedNotificationPermission(_ userSettingManageable: any UserSettingManageable)
 }
 
 final class UserSettingManager: UserSettingManageable, @unchecked Sendable, ObservableObject {
@@ -79,7 +79,7 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
                 updatingUserData.isNotificationOn = false
                 self.update(to: updatingUserData)
                 Task {
-                    await self.delegate?.alertNeedNotificationPermission()
+                    await self.delegate?.alertNeedNotificationPermission(self)
                 }
             }
         }
