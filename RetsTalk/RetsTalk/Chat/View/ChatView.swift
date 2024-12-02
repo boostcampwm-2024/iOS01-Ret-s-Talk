@@ -12,75 +12,61 @@ protocol ChatViewDelegate: AnyObject {
     func sendMessage(_ chatView: ChatView, with text: String)
 }
 
-@MainActor
-final class ChatView: UIView {
-    private let chattingTableView = UITableView()
+final class ChatView: BaseView {
+    
+    // MARK: Subviews
+    
+    private let chattingTableView: UITableView = {
+        let tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.scrollsToTop = false
+        tableView.separatorStyle = .none
+        tableView.backgroundColor = .backgroundMain
+        tableView.allowsSelection = false
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "MessageCell")
+        return tableView
+    }()
     private let messageInputView = MessageInputView()
+    
+    // MARK: Layout constraint
+    
     private var messageInputViewHeightConstraint: NSLayoutConstraint?
     private var chatViewBottomConstraint: NSLayoutConstraint?
-    weak var delegate: ChatViewDelegate?
 
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-
+    // MARK: RetsTalk lifecycle
+    
+    override func setupStyles() {
+        super.setupStyles()
+        
         backgroundColor = .backgroundMain
-        messageInputViewSetUp()
-        chattingTableViewSetUp()
     }
     
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-
-        backgroundColor = .backgroundMain
-        messageInputViewSetUp()
-        chattingTableViewSetUp()
-    }
-    
-    private func messageInputViewSetUp() {
+    override func setupSubviews() {
+        super.setupSubviews()
+        
         addSubview(messageInputView)
-        
-        messageInputView.delegate = self
-        messageInputView.translatesAutoresizingMaskIntoConstraints = false
-        
-        messageInputViewHeightConstraint = messageInputView.heightAnchor.constraint(
-            equalToConstant: Metrics.messageInputViewHeight
-        )
-        chatViewBottomConstraint = messageInputView.bottomAnchor.constraint(
-            equalTo: bottomAnchor,
-            constant: Metrics.chatViewBottomFromBottom
-        )
-        
-        guard let messageInputViewHeightConstraint = messageInputViewHeightConstraint,
-              let chatViewBottomConstraint = chatViewBottomConstraint else {
-            fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
-        }
-        
-        NSLayoutConstraint.activate([
-            messageInputViewHeightConstraint,
-            chatViewBottomConstraint,
-            messageInputView.leftAnchor.constraint(equalTo: leftAnchor),
-            messageInputView.rightAnchor.constraint(equalTo: rightAnchor),
-        ])
-    }
-    
-    private func chattingTableViewSetUp() {
         addSubview(chattingTableView)
         
-        chattingTableView.scrollsToTop = false
-        chattingTableView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            chattingTableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            chattingTableView.bottomAnchor.constraint(equalTo: messageInputView.topAnchor),
-            chattingTableView.leftAnchor.constraint(equalTo: leftAnchor),
-            chattingTableView.rightAnchor.constraint(equalTo: rightAnchor),
-        ])
-        
-        chattingTableView.separatorStyle = .none
-        chattingTableView.backgroundColor = .backgroundMain
-        chattingTableView.allowsSelection = false
-        chattingTableView.register(UITableViewCell.self, forCellReuseIdentifier: "MessageCell")
+        messageInputView.delegate = self
     }
+    
+    override func setupSubviewLayouts() {
+        super.setupSubviewLayouts()
+        
+        setupChatTableViewLayouts()
+        setupMessageInputViewLayouts()
+    }
+    
+    // MARK: Delegate
+    
+    weak var delegate: ChatViewDelegate?
+    
+    func setTableViewDelegate(_ delegate: UITableViewDelegate & UITableViewDataSource) {
+        chattingTableView.delegate = delegate
+        chattingTableView.dataSource = delegate
+    }
+    
+    // MARK: TableView actions
     
     func scrollToBottom() {
         let rows = chattingTableView.numberOfRows(inSection: 0)
@@ -94,25 +80,24 @@ final class ChatView: UIView {
         )
     }
     
-    func setTableViewDelegate(_ delegate: UITableViewDelegate & UITableViewDataSource) {
-        chattingTableView.delegate = delegate
-        chattingTableView.dataSource = delegate
-    }
-
-    func updateBottomConstraintForKeyboard(height: CGFloat) {
-        chatViewBottomConstraint?.constant = -height
-        UIView.animate(withDuration: 0.3) {
-            self.layoutIfNeeded()
-        }
-    }
-
     func insertMessages(at indexPaths: [IndexPath]) {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         chattingTableView.insertRows(at: indexPaths, with: .none)
         CATransaction.commit()
     }
-
+    
+    // MARK: Keyboard action
+    
+    func updateLayoutForKeyboard(using keyboardInfo: KeyboardInfo) {
+        chatViewBottomConstraint?.constant = min(-(keyboardInfo.frame.height - safeAreaInsets.bottom), 0)
+        UIView.animate(withDuration: keyboardInfo.animationDuration) { [self] in
+            layoutIfNeeded()
+        }
+    }
+    
+    // MARK: Input state handling
+    
     func updateRequestInProgressState(_ state: Bool) {
         messageInputView.updateRequestInProgressState(state)
     }
@@ -134,6 +119,37 @@ extension ChatView: MessageInputViewDelegate {
         UIView.performWithoutAnimation {
             self.layoutIfNeeded()
         }
+    }
+}
+
+// MARK: - Subviews layouts
+
+fileprivate extension ChatView {
+    func setupChatTableViewLayouts() {
+        NSLayoutConstraint.activate([
+            chattingTableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            chattingTableView.bottomAnchor.constraint(equalTo: messageInputView.topAnchor),
+            chattingTableView.leftAnchor.constraint(equalTo: leftAnchor),
+            chattingTableView.rightAnchor.constraint(equalTo: rightAnchor),
+        ])
+    }
+    
+    func setupMessageInputViewLayouts() {
+        let messageInputViewHeightConstraint = messageInputView.heightAnchor.constraint(
+            equalToConstant: Metrics.messageInputViewHeight
+        )
+        let messageInputViewBottomConstraint = messageInputView.bottomAnchor.constraint(
+            equalTo: safeAreaLayoutGuide.bottomAnchor
+        )
+        NSLayoutConstraint.activate([
+            messageInputViewHeightConstraint,
+            messageInputViewBottomConstraint,
+            messageInputView.leftAnchor.constraint(equalTo: leftAnchor),
+            messageInputView.rightAnchor.constraint(equalTo: rightAnchor),
+        ])
+        
+        self.messageInputViewHeightConstraint = messageInputViewHeightConstraint
+        chatViewBottomConstraint = messageInputViewBottomConstraint
     }
 }
 
