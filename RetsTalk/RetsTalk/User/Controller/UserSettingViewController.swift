@@ -53,16 +53,14 @@ final class UserSettingViewController<T: UserSettingManageable>:
 extension UserSettingViewController: UserSettingManageableDelegate {
     typealias Situation = UserSettingViewSituation
 
-    nonisolated func alertNeedNotificationPermission() {
-        Task { @MainActor in
-            let alertAction = UIAlertAction(title: UserSettingViewTexts.accept, style: .default) { _ in
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                }
+    func alertNeedNotificationPermission() {
+        let alertAction = UIAlertAction(title: UserSettingViewTexts.accept, style: .default) { _ in
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
             }
-            let cancel = UIAlertAction(title: UserSettingViewTexts.cancel, style: .cancel)
-            presentAlert(for: .needNotifactionPermission, actions: [alertAction, cancel])
         }
+        let cancel = UIAlertAction(title: UserSettingViewTexts.cancel, style: .cancel)
+        presentAlert(for: .needNotifactionPermission, actions: [alertAction, cancel])
     }
 
     func presentAlert(for situation: UserSettingViewSituation, actions: [UIAlertAction]) {
