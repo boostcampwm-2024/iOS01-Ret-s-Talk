@@ -13,12 +13,13 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     private let retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
-    private var subscriptionSet: Set<AnyCancellable>
     private var retrospectsCache: [DateComponents: [Retrospect]] = [:]
     
-    private let retrospectCalendarView = RetrospectCalendarView()
-    
     private var retrospectTableViewController: RetrospectCalendarTableViewController?
+    
+    // MARK: View
+    
+    private let retrospectCalendarView = RetrospectCalendarView()
     
     // MARK: Initalization
     
@@ -27,7 +28,6 @@ final class RetrospectCalendarViewController: BaseViewController {
         
         retrospectsSubject = CurrentValueSubject([])
         errorSubject = CurrentValueSubject(nil)
-        subscriptionSet = []
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -43,21 +43,26 @@ final class RetrospectCalendarViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        retrospectCalendarView.setCalendarViewDelegate(self)
-        
-        subscribeRetrospects()
         loadRetrospects()
     }
     
-    // MARK: Navigation bar
+    // MARK: RetsTalk lifecycle
+    
+    override func setupDelegation() {
+        super.setupDelegation()
+        
+        retrospectCalendarView.setCalendarViewDelegate(self)
+    }
     
     override func setupNavigationBar() {
+        super.setupNavigationBar()
+        
         title = Texts.CalendarViewTitle
     }
     
-    // MARK: Subscription
-    
-    private func subscribeRetrospects() {
+    override func setupSubscription(on subscriptionSet: inout Set<AnyCancellable>) {
+        super.setupSubscription(on: &subscriptionSet)
+        
         retrospectsSubject
             .sink { [weak self] retrospects in
                 self?.retrospectsUpdateData(retrospects)
@@ -65,7 +70,7 @@ final class RetrospectCalendarViewController: BaseViewController {
             .store(in: &subscriptionSet)
     }
     
-    // MARK: RetrospectManager Action
+    // MARK: Retrospect Manager Action
     
     private func loadRetrospects() {
         Task { [weak self] in
