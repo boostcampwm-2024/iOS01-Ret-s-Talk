@@ -106,7 +106,6 @@ final class RetrospectListView: UIView {
             height: Metrics.fixedButtonAreaHeight
         ))
         
-        // Add buttons to the headerView
         headerView.addSubview(calendarButton)
         headerView.addSubview(totalCountButton)
         
@@ -158,7 +157,6 @@ private extension RetrospectListView {
     enum Metrics {
         static let diameter = 80.0
         static let buttonBottomAnchorConstant = -10.0
-        
         static let fixedButtonAreaHeight = 40.0
         static let calendarButtonMargin = 16.0
         static let totalCountButtonMargin = 32.0
