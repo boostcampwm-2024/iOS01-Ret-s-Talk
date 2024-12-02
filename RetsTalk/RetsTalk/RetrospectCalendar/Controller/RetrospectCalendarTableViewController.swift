@@ -12,12 +12,16 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     private typealias DataSource = UITableViewDiffableDataSource<Section, Retrospect>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Retrospect>
     
-    private var retrospects: [Retrospect]
-    
     private var dataSource: DataSource?
     private var snapshot: Snapshot?
     
+    private var retrospects: [Retrospect]
+    
+    // MARK: View
+    
     private let retrospectCalendarTableView = RetrospectCalendarTableView()
+    
+    // MARK: Initalization
     
     init(retrospects: [Retrospect]) {
         self.retrospects = retrospects
@@ -28,6 +32,8 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // MARK: RetsTalk Lifecycle
     
     override func loadView() {
         view = retrospectCalendarTableView
@@ -40,6 +46,8 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     }
     
     override func setupDataSource() {
+        super.setupDataSource()
+        
         dataSource = DataSource(
             tableView: retrospectCalendarTableView.retrospectListTableView
         ) { tableView, indexPath, retrospect in
@@ -47,18 +55,24 @@ final class RetrospectCalendarTableViewController: BaseViewController {
                 withIdentifier: Constants.Texts.retrospectCellIdentifier,
                 for: indexPath
             )
-            cell.selectionStyle = .none
-            cell.backgroundColor = .clear
-            cell.contentConfiguration = UIHostingConfiguration {
-                RetrospectCell(
-                    summary: retrospect.summary ?? Texts.defaultSummaryText,
-                    createdAt: retrospect.createdAt,
-                    isPinned: retrospect.isPinned
-                )
-            }
+            self.configureCell(cell: cell, retrospect: retrospect)
             return cell
         }
     }
+    
+    private func configureCell(cell: UITableViewCell, retrospect: Retrospect) {
+        cell.selectionStyle = .none
+        cell.backgroundColor = .clear
+        cell.contentConfiguration = UIHostingConfiguration {
+            RetrospectCell(
+                summary: retrospect.summary ?? Texts.defaultSummaryText,
+                createdAt: retrospect.createdAt,
+                isPinned: retrospect.isPinned
+            )
+        }
+    }
+    
+    // MARK: Update Data
     
     private func updateTableView() {
         var snapshot = Snapshot()

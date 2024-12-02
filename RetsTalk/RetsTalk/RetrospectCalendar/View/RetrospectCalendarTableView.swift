@@ -53,7 +53,7 @@ fileprivate extension RetrospectCalendarTableView {
 
 // MARK: - Constants
 
-extension RetrospectCalendarTableView {
+private extension RetrospectCalendarTableView {
     enum Metrics {
         static let topPadding = 16.0
     }
