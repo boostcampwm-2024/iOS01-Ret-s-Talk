@@ -7,42 +7,47 @@
 
 import UIKit
 
-final class RetrospectCalendarTableView: UIView {
-    let retrospectListTableView = UITableView()
+final class RetrospectCalendarTableView: BaseView {
+    let retrospectListTableView: UITableView = {
+        let tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.separatorStyle = .none
+        tableView.backgroundColor = .clear
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: Constants.Texts.retrospectCellIdentifier)
+        return tableView
+    }()
     
-    // MARK: Initalization
+    // MARK: RetsTalk lifecycle
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    override func setupStyles() {
+        super.setupStyles()
         
         backgroundColor = .backgroundMain
-        retrospectListTableVewSetUp()
     }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    // MARK: View SetUp
-    
-    private func retrospectListTableVewSetUp() {
+    override func setupSubviews() {
+        super.setupSubviews()
+        
         addSubview(retrospectListTableView)
+    }
+    
+    override func setupSubviewLayouts() {
+        super.setupSubviewLayouts()
         
-        retrospectListTableView.translatesAutoresizingMaskIntoConstraints = false
-        
+        setupChatTableViewLayouts()
+    }
+}
+
+// MARK: - Subviews layouts
+
+fileprivate extension RetrospectCalendarTableView {
+    func setupChatTableViewLayouts() {
         NSLayoutConstraint.activate([
             retrospectListTableView.topAnchor.constraint(equalTo: topAnchor, constant: Metrics.topPadding),
             retrospectListTableView.bottomAnchor.constraint(equalTo: bottomAnchor),
             retrospectListTableView.leftAnchor.constraint(equalTo: leftAnchor),
             retrospectListTableView.rightAnchor.constraint(equalTo: rightAnchor),
         ])
-        
-        retrospectListTableView.separatorStyle = .none
-        retrospectListTableView.backgroundColor = .clear
-        retrospectListTableView.register(
-            UITableViewCell.self,
-            forCellReuseIdentifier: Constants.Texts.retrospectCellIdentifier
-        )
     }
 }
 
