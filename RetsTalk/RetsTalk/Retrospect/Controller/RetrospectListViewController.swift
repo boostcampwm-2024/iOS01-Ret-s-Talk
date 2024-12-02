@@ -154,8 +154,8 @@ final class RetrospectListViewController: BaseViewController {
         presentAlert(
             for: .delete,
             actions: [
-                UIAlertAction(title: "취소", style: .cancel),
-                UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+                UIAlertAction(title: Texts.cancelAlertTitle, style: .cancel),
+                UIAlertAction(title: Texts.deleteAlertTitle, style: .destructive) { [weak self] _ in
                     guard let self else { return }
 
                     Task {
@@ -380,6 +380,9 @@ private extension RetrospectListViewController {
     }
     
     enum Texts {
+        static let cancelAlertTitle = "취소"
+        static let deleteAlertTitle = "삭제"
+        
         static let settingButtonImageName = "gearshape"
         static let deleteIconImageName = "trash.fill"
         static let pinIconImageName = "pin.fill"
