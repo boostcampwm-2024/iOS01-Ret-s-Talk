@@ -11,7 +11,7 @@ typealias RetrospectAssistantProvidable = AssistantMessageProvidable & SummaryPr
 
 final class RetrospectManager: RetrospectManageable {
     private let userID: UUID
-    private let retrospectStorage: Persistable
+    private var retrospectStorage: Persistable
     private let retrospectAssistantProvider: RetrospectAssistantProvidable
     
     private(set) var retrospects: [Retrospect]
@@ -119,7 +119,11 @@ final class RetrospectManager: RetrospectManageable {
             errorOccurred = error
         }
     }
-    
+
+    func replaceRetrospectStorage(_ newRetrospectStorage: Persistable) {
+        retrospectStorage = newRetrospectStorage
+    }
+
     // MARK: Support retrospect creation
     
     private func createNewRetrospect() async throws -> Retrospect {

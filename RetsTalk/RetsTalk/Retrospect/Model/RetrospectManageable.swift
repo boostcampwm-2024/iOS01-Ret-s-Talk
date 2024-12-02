@@ -16,4 +16,5 @@ protocol RetrospectManageable: Sendable {
     func togglePinRetrospect(_ retrospect: Retrospect) async
     func finishRetrospect(_ retrospect: Retrospect) async
     func deleteRetrospect(_ retrospect: Retrospect) async
+    func replaceRetrospectStorage(_ newRetrospectStorage: Persistable)
 }

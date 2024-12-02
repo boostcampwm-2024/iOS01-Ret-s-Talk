@@ -106,7 +106,11 @@ final class MockRetrospectManager: RetrospectManageable, RetrospectChatManagerLi
         retrospects.removeAll(where: { $0.id == retrospect.id })
         errorOccurred = nil
     }
-    
+
+    func replaceRetrospectStorage(_ newRetrospectStorage: any Persistable) {
+        
+    }
+
     // MARK: RetrospectChatManagerListener conformance
     
     func didUpdateRetrospect(_ retrospectChatManageable: any RetrospectChatManageable, retrospect: Retrospect) {

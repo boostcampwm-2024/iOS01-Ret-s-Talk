@@ -59,6 +59,7 @@ struct UserSettingView<Manageable: UserSettingManageable>: View {
 private extension UserSettingView {
     func setCloudSync(_ isOn: Bool) {
         userSettingManager.updateCloudSyncState(state: isOn)
+        NotificationCenter.default.post(name: .iCloudSyncStateChangeNotification, object: nil)
     }
     
     func setNickname(_ updatingNickname: String) {

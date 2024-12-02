@@ -9,7 +9,7 @@ import Combine
 import SwiftUI
 import UIKit
 
-final class RetrospectChatViewController: UIViewController {
+final class RetrospectChatViewController: BaseViewController {
     private let retrospectChatManager: RetrospectChatManageable
     
     private let renderingSubject: CurrentValueSubject<(retrospect: Retrospect, scrollToBottomNeeded: Bool), Never>
@@ -64,8 +64,7 @@ final class RetrospectChatViewController: UIViewController {
         
         chatView.setTableViewDelegate(self)
         chatView.delegate = self
-      
-        setUpNavigationBar()
+
         addTapGestureOfDismissingKeyboard()
         addKeyboardObservers()
 
@@ -81,24 +80,19 @@ final class RetrospectChatViewController: UIViewController {
         view.addGestureRecognizer(tapGestureRecognizer)
     }
     
-    // MARK: Navigation bar
-    
-    private func setUpNavigationBar() {
+    // MARK: RetsTalk lifecycle method
+
+    override func setupNavigationBar() {
         title = retrospect.createdAt.formattedToKoreanStyle
-        
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemImage: .leftChevron),
-            style: .plain,
-            target: self,
-            action: #selector(backwardButtonTapped)
-        )
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            title: Texts.rightBarButtonTitle,
+
+        let endChattingButton = UIBarButtonItem(
+            title: Texts.endChattingButtonTitle,
             style: .plain,
             target: self,
             action: #selector(endChattingButtonTapped)
         )
-        
+
+        navigationItem.rightBarButtonItem = endChattingButton
         navigationItem.leftBarButtonItem?.tintColor = .blazingOrange
         navigationItem.rightBarButtonItem?.tintColor = .blazingOrange
     }
@@ -172,10 +166,13 @@ final class RetrospectChatViewController: UIViewController {
     
     // MARK: Button actions
 
-    @objc private func backwardButtonTapped() {}
-    
-    @objc private func endChattingButtonTapped() {}
-    
+    @objc private func endChattingButtonTapped() {
+        Task { [weak self] in
+            await self?.retrospectChatManager.endRetrospect()
+            self?.navigationController?.popViewController(animated: true)
+        }
+    }
+
     // MARK: DataSource difference managing
     
     private func updateDataSourceDifference(from source: [Message], to updated: [Message]) {
@@ -197,7 +194,7 @@ extension RetrospectChatViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = retrospect.chat[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "MessageCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.Texts.messageCellIdentifier, for: indexPath)
         cell.contentConfiguration = UIHostingConfiguration {
             MessageCell(message: message.content, isUser: message.role == .user)
         }
@@ -273,7 +270,6 @@ fileprivate extension RetrospectChatViewController {
     }
     
     enum Texts {
-        static let leftBarButtonImageName = "chevron.left"
-        static let rightBarButtonTitle = "끝내기"
+        static let endChattingButtonTitle = "끝내기"
     }
 }

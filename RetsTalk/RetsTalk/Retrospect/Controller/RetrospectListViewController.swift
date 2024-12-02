@@ -1,5 +1,5 @@
 //
-//  RetrospectViewController.swift
+//  RetrospectListViewController.swift
 //  RetsTalk
 //
 //  Created by KimMinSeok on 11/18/24.
@@ -11,18 +11,23 @@ import UIKit
 
 final class RetrospectListViewController: BaseViewController {
     private let retrospectManager: RetrospectManageable
-    private let persistentStorage: Persistable
-    
+    private let userDefaultsManager: UserDefaultsManager
+    private let userSettingManager: UserSettingManager
+
     private var subscriptionSet: Set<AnyCancellable>
     private var retrospectsSubject: CurrentValueSubject<[[Retrospect]], Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
     
     private let retrospectListView: RetrospectListView
     
-    init(retrospectManager: RetrospectManageable, persistentStorage: Persistable) {
+    init(
+        retrospectManager: RetrospectManageable,
+        userDefaultsManager: UserDefaultsManager
+    ) {
         self.retrospectManager = retrospectManager
-        self.persistentStorage = persistentStorage
-        
+        self.userDefaultsManager = userDefaultsManager
+        userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
+
         retrospectListView = RetrospectListView()
         retrospectsSubject = CurrentValueSubject([])
         errorSubject = CurrentValueSubject(nil)
@@ -32,15 +37,16 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     required init?(coder: NSCoder) {
-        let coreDataManager = CoreDataManager(name: "RetsTalk", completion: { _ in })
+        let coreDataManager = CoreDataManager(name: Constants.Texts.CoreDataContainerName, completion: { _ in })
         let clovaStudioManager = CLOVAStudioManager(urlSession: .shared)
         retrospectManager = RetrospectManager(
             userID: UUID(),
             retrospectStorage: coreDataManager,
             retrospectAssistantProvider: clovaStudioManager
         )
-        persistentStorage = coreDataManager
-        
+        userDefaultsManager = UserDefaultsManager()
+        userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
+
         retrospectListView = RetrospectListView()
         retrospectsSubject = CurrentValueSubject([])
         errorSubject = CurrentValueSubject(nil)
@@ -57,7 +63,8 @@ final class RetrospectListViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
+        addObserver()
         retrospectListView.setTableViewDelegate(self)
         subscribeRetrospects()
         addCreateButtondidTapAction()
@@ -82,7 +89,39 @@ final class RetrospectListViewController: BaseViewController {
         navigationItem.rightBarButtonItem = settingsButton
         navigationItem.rightBarButtonItem?.tintColor = .black
     }
-    
+
+    // MARK: Regarding iCloud
+
+    private func addObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(refetchRetrospects),
+            name: .coreDataImportedNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(regenerateAndReplaceCoreDataManager),
+            name: .iCloudSyncStateChangeNotification,
+            object: nil
+        )
+    }
+
+    @objc private func refetchRetrospects() {
+        fetchInitialRetrospect()
+    }
+
+    @objc private func regenerateAndReplaceCoreDataManager() {
+        let userData = userSettingManager.userData
+        let isCloudSyncOn = userData.isCloudSyncOn
+        let newCoreDataManager = CoreDataManager(
+            isiCloudSynced: isCloudSyncOn,
+            name: Constants.Texts.CoreDataContainerName) { _ in }
+        Task {
+            await retrospectManager.replaceRetrospectStorage(newCoreDataManager)
+        }
+    }
+
     // MARK: Retrospect handling
     
     private func sortAndSendRetrospects() {
@@ -126,8 +165,10 @@ final class RetrospectListViewController: BaseViewController {
     // MARK: Action controls
 
     @objc private func didTapSettings() {
+        let notificationManager = NotificationManager()
         let userSettingViewController = UserSettingViewController(
-            userSettingManager: UserSettingManager(userDataStorage: UserDefaultsManager())
+            userSettingManager: userSettingManager,
+            notificationManager: notificationManager
         )
         navigationController?.pushViewController(userSettingViewController, animated: true)
     }
@@ -163,7 +204,10 @@ extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let data = retrospectsSubject.value[indexPath.section][indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.retrospectCellIdentifier, for: indexPath)
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: Constants.Texts.retrospectCellIdentifier,
+            for: indexPath
+        )
         cell.selectionStyle = .none
         cell.backgroundColor = .clear
         cell.contentConfiguration = UIHostingConfiguration {
