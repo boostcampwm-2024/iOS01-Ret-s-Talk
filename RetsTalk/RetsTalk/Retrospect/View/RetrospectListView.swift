@@ -19,23 +19,24 @@ final class RetrospectListView: UIView {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: Constants.Texts.retrospectCellIdentifier)
         return tableView
     }()
+    
     private let calendarButton: RetrospectCountButton = {
         let button = RetrospectCountButton(
             imageSystemName: Texts.calendarButtonImageName,
-            title: Texts.calendarButtonTitle,
-            subtitle: "2일"
+            title: Texts.calendarButtonTitle
         )
         return button
     }()
+    
     private let totalCountButton: RetrospectCountButton = {
         let button = RetrospectCountButton(
             imageSystemName: Texts.totalCountButtonImageName,
-            title: Texts.totalCountButtonTitle,
-            subtitle: "2일"
+            title: Texts.totalCountButtonTitle
         )
         button.setImageColor(.lightGray)
         return button
     }()
+    
     private let createRetrospectButton = CreateRetrospectButton()
     
     // MARK: Init method
@@ -145,9 +146,11 @@ final class RetrospectListView: UIView {
         calendarButton.addAction(action, for: .touchUpInside)
     }
     
-    func reloadData() {
-        retrospectListTableView.reloadData()
+    func updateButtonSubtitle(datesCount: Int, totalRetrospectCount: Int) {
+        calendarButton.setSubtitle("\(datesCount)일")
+        totalCountButton.setSubtitle("\(totalRetrospectCount)개")
     }
+
 }
 
 // MARK: - Constants
