@@ -36,6 +36,8 @@ final class RetrospectCalendarViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: ViewController lifecycle
+    
     override func loadView() {
         view = retrospectCalendarView
     }
