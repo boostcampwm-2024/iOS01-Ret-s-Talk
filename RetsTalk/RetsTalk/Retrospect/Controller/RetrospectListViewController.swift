@@ -10,15 +10,17 @@ import SwiftUI
 import UIKit
 
 final class RetrospectListViewController: BaseViewController {
+    private typealias RetrospectDataSource = UITableViewDiffableDataSource<RetrospectSection, Retrospect>
+    
     private let retrospectManager: RetrospectManageable
     private let userDefaultsManager: UserDefaultsManager
     private let userSettingManager: UserSettingManager
 
     private var subscriptionSet: Set<AnyCancellable>
-    private var retrospectsSubject: CurrentValueSubject<[[Retrospect]], Never>
+    private var retrospectsSubject: CurrentValueSubject<SortedRetrospects, Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
     
-    private var dataSource: UITableViewDiffableDataSource<RetrospectSection, Retrospect>?
+    private var dataSource: RetrospectDataSource?
 
     // MARK: UI Components
     
@@ -35,7 +37,7 @@ final class RetrospectListViewController: BaseViewController {
         userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
 
         retrospectListView = RetrospectListView()
-        retrospectsSubject = CurrentValueSubject([[], [], []])
+        retrospectsSubject = CurrentValueSubject(SortedRetrospects())
         errorSubject = CurrentValueSubject(nil)
         subscriptionSet = []
         
@@ -54,7 +56,7 @@ final class RetrospectListViewController: BaseViewController {
         userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
 
         retrospectListView = RetrospectListView()
-        retrospectsSubject = CurrentValueSubject([])
+        retrospectsSubject = CurrentValueSubject(SortedRetrospects())
         errorSubject = CurrentValueSubject(nil)
         subscriptionSet = []
 
@@ -97,6 +99,7 @@ final class RetrospectListViewController: BaseViewController {
             action: #selector(didTapSettings)
         )
         
+        navigationItem.largeTitleDisplayMode = .always
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.rightBarButtonItem = settingsButton
         navigationItem.rightBarButtonItem?.tintColor = .black
@@ -141,7 +144,8 @@ final class RetrospectListViewController: BaseViewController {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
-                updateSnapshot()
+                
+                self.updateSnapshot()
             }
             .store(in: &subscriptionSet)
     }
@@ -205,11 +209,11 @@ final class RetrospectListViewController: BaseViewController {
     }
 }
 
-// MARK: - UITableViewDelegate, UITableViewDiffableDataSource conformance
+// MARK: - UITableViewDiffableDataSource method
 
-extension RetrospectListViewController: UITableViewDelegate {
-    private func setupDataSource() {
-        dataSource = UITableViewDiffableDataSource<RetrospectSection, Retrospect>(
+private extension RetrospectListViewController {
+    func setupDataSource() {
+        dataSource = RetrospectDataSource(
             tableView: retrospectListView.retrospectListTableView
         ) { tableView, indexPath, retrospect in
             let cell = tableView.dequeueReusableCell(
@@ -230,26 +234,26 @@ extension RetrospectListViewController: UITableViewDelegate {
         }
     }
     
-    private func updateSnapshot() {
+    func updateSnapshot() {
         var snapshot = NSDiffableDataSourceSnapshot<RetrospectSection, Retrospect>()
         let sortedRetrospects = retrospectsSubject.value
-        
         for (index, sectionTitle) in RetrospectSection.allCases.enumerated() {
             let retrospects = sortedRetrospects[index]
-            
             if !retrospects.isEmpty {
                 snapshot.appendSections([sectionTitle])
                 snapshot.appendItems(retrospects, toSection: sectionTitle)
             }
         }
-        
         dataSource?.apply(snapshot, animatingDifferences: false)
     }
-    
+}
+
+// MARK: - UITableViewDelegate conformance
+
+extension RetrospectListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let sections = dataSource?.snapshot().sectionIdentifiers
         let headerView = SectionHeaderView(title: sections?[section].title)
-
         return headerView
     }
     
@@ -275,7 +279,6 @@ extension RetrospectListViewController: UITableViewDelegate {
                 retrospect: retrospect,
                 retrospectChatManager: retrospectChatManager
             )
-            
             navigationController?.pushViewController(chattingViewController, animated: true)
         }
     }
@@ -322,7 +325,6 @@ extension RetrospectListViewController: UITableViewDelegate {
             action: pinToggleAction,
             completionHandler: { _ in }
         )
-        
         let unpinAction = UIContextualAction.actionWithSystemImage(
             named: Texts.unpinIconImageName,
             tintColor: .blazingOrange,
