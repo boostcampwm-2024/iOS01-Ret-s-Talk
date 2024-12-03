@@ -10,34 +10,26 @@ import SwiftUI
 import UIKit
 
 final class RetrospectListViewController: BaseViewController {
-    private typealias RetrospectDataSource = UITableViewDiffableDataSource<RetrospectSection, Retrospect>
-    
     private let retrospectManager: RetrospectManageable
-    private let userDefaultsManager: Persistable
+    private let userDefaultsManager: UserDefaultsManager
     private let userSettingManager: UserSettingManager
 
     private var subscriptionSet: Set<AnyCancellable>
-    private var retrospectsSubject: CurrentValueSubject<SortedRetrospects, Never>
+    private var retrospectsSubject: CurrentValueSubject<[[Retrospect]], Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
-    
-    private var dataSource: RetrospectDataSource?
-
-    // MARK: UI Components
     
     private let retrospectListView: RetrospectListView
     
-    // MARK: Init Method
-    
     init(
         retrospectManager: RetrospectManageable,
-        userDefaultsManager: Persistable
+        userDefaultsManager: UserDefaultsManager
     ) {
         self.retrospectManager = retrospectManager
         self.userDefaultsManager = userDefaultsManager
         userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
 
         retrospectListView = RetrospectListView()
-        retrospectsSubject = CurrentValueSubject(SortedRetrospects())
+        retrospectsSubject = CurrentValueSubject([])
         errorSubject = CurrentValueSubject(nil)
         subscriptionSet = []
         
@@ -56,7 +48,7 @@ final class RetrospectListViewController: BaseViewController {
         userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
 
         retrospectListView = RetrospectListView()
-        retrospectsSubject = CurrentValueSubject(SortedRetrospects())
+        retrospectsSubject = CurrentValueSubject([])
         errorSubject = CurrentValueSubject(nil)
         subscriptionSet = []
 
@@ -73,17 +65,11 @@ final class RetrospectListViewController: BaseViewController {
         super.viewDidLoad()
 
         addObserver()
-        subscribeRetrospects()
         retrospectListView.setTableViewDelegate(self)
-        setupDataSource()
+        subscribeRetrospects()
         addCreateButtondidTapAction()
-        fetchInitialRetrospect()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
         
-        sortAndSendRetrospects()
+        fetchInitialRetrospect()
     }
     
     // MARK: RetsTalk lifecycle method
@@ -99,7 +85,6 @@ final class RetrospectListViewController: BaseViewController {
             action: #selector(didTapSettings)
         )
         
-        navigationItem.largeTitleDisplayMode = .always
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.rightBarButtonItem = settingsButton
         navigationItem.rightBarButtonItem?.tintColor = .black
@@ -139,28 +124,17 @@ final class RetrospectListViewController: BaseViewController {
 
     // MARK: Retrospect handling
     
-    private func subscribeRetrospects() {
-        retrospectsSubject
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                guard let self = self else { return }
-                
-                self.updateSnapshot()
-            }
-            .store(in: &subscriptionSet)
+    private func sortAndSendRetrospects() {
+        Task {
+            let sortedRetrospects = RetrospectSortingHelper.execute(await retrospectManager.retrospects)
+            retrospectsSubject.send(sortedRetrospects)
+        }
     }
     
     private func fetchInitialRetrospect() {
         Task {
             await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
             sortAndSendRetrospects()
-        }
-    }
-    
-    private func sortAndSendRetrospects() {
-        Task {
-            let sortedRetrospects = RetrospectSortingHelper.execute(await retrospectManager.retrospects)
-            retrospectsSubject.send(sortedRetrospects)
         }
     }
     
@@ -178,6 +152,16 @@ final class RetrospectListViewController: BaseViewController {
         }
     }
     
+    private func subscribeRetrospects() {
+        retrospectsSubject
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                retrospectListView.reloadData()
+            }
+            .store(in: &subscriptionSet)
+    }
+    
     // MARK: Action controls
 
     @objc private func didTapSettings() {
@@ -193,81 +177,86 @@ final class RetrospectListViewController: BaseViewController {
                     
                     Task {
                         guard let retrospectChatManager = await retrospectManager.createRetrospect() else { return }
-                        
-                        let retrospectChatViewController = await RetrospectChatViewController(
+                        let chattingViewController = await RetrospectChatViewController(
                             retrospect: retrospectChatManager.retrospect,
                             retrospectChatManager: retrospectChatManager
                         )
-                        navigationController?.pushViewController(retrospectChatViewController, animated: true)
+                        navigationController?.pushViewController(chattingViewController, animated: true)
                     }
                 })
         )
     }
 }
 
-// MARK: - UITableViewDiffableDataSource method
+// MARK: - UITableViewDelegate, UITableViewDataSource conformance
 
-private extension RetrospectListViewController {
-    func setupDataSource() {
-        dataSource = RetrospectDataSource(
-            tableView: retrospectListView.retrospectListTableView
-        ) { tableView, indexPath, retrospect in
-            let cell = tableView.dequeueReusableCell(
-                withIdentifier: Constants.Texts.retrospectCellIdentifier,
-                for: indexPath
-            )
-            cell.selectionStyle = .none
-            cell.backgroundColor = .clear
-            cell.contentConfiguration = UIHostingConfiguration {
-                RetrospectCell(
-                    summary: retrospect.summary ?? Texts.defaultSummaryText,
-                    createdAt: retrospect.createdAt,
-                    isPinned: retrospect.isPinned
-                )
-            }
-            .margins(.vertical, Metrics.cellVerticalMargin)
-            return cell
-        }
+extension RetrospectListViewController: UITableViewDelegate, UITableViewDataSource {
+    
+    // MARK: Datasource handling
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        retrospectsSubject.value[section].count
     }
     
-    func updateSnapshot() {
-        var snapshot = NSDiffableDataSourceSnapshot<RetrospectSection, Retrospect>()
-        let sortedRetrospects = retrospectsSubject.value
-        for (index, sectionTitle) in RetrospectSection.allCases.enumerated() {
-            let retrospects = sortedRetrospects[index]
-            if !retrospects.isEmpty {
-                snapshot.appendSections([sectionTitle])
-                snapshot.appendItems(retrospects, toSection: sectionTitle)
-            }
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let data = retrospectsSubject.value[indexPath.section][indexPath.row]
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: Constants.Texts.retrospectCellIdentifier,
+            for: indexPath
+        )
+        cell.selectionStyle = .none
+        cell.backgroundColor = .clear
+        cell.contentConfiguration = UIHostingConfiguration {
+            RetrospectCell(summary: data.summary ?? Texts.defaultSummaryText,
+                           createdAt: data.createdAt,
+                           isPinned: data.isPinned
+            )
         }
-        dataSource?.apply(snapshot, animatingDifferences: false)
+        .margins(.vertical, Metrics.cellVerticalMargin)
+        
+        return cell
     }
-}
-
-// MARK: - UITableViewDelegate conformance
-
-extension RetrospectListViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let sections = dataSource?.snapshot().sectionIdentifiers
-        let headerView = SectionHeaderView(title: sections?[section].title)
-        return headerView
+    
+    // MARK: Section handling
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        retrospectsSubject.value.count
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        guard retrospectsSubject.value[section].isNotEmpty else {
+            return nil
+        }
+        
+        switch section {
+        case 0:
+            return Texts.pinnedSectionTitle
+        case 1:
+            return Texts.inProgressSectionTitle
+        case 2:
+            return Texts.pastRetrospectSectionTitle
+        default:
+            return nil
+        }
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         Metrics.tableViewHeaderHeight
     }
     
+    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        if let header = view as? UITableViewHeaderFooterView {
+            header.textLabel?.font = UIFont.appFont(.title)
+            header.textLabel?.textColor = .black
+            header.contentView.backgroundColor = .clear
+        }
+    }
+    
     // MARK: SelectRow handling
     
-    func tableView(
-        _ tableView: UITableView,
-        didSelectRowAt indexPath: IndexPath
-    ) {
-        guard let sections = dataSource?.snapshot().sectionIdentifiers.map({ $0.rawValue }) else { return }
-        
-        let section = sections[indexPath.section]
-        let retrospect = retrospectsSubject.value[section][indexPath.row]
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         Task {
+            let retrospect = retrospectsSubject.value[indexPath.section][indexPath.row]
             guard let retrospectChatManager = await retrospectManager.retrospectChatManager(of: retrospect)
             else { return }
             
@@ -284,10 +273,7 @@ extension RetrospectListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView,
                    trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
-        guard let sections = dataSource?.snapshot().sectionIdentifiers.map({ $0.rawValue }) else { return nil }
-        
-        let section = sections[indexPath.section]
-        let selectedRetrospect = retrospectsSubject.value[section][indexPath.row]
+        let selectedRetrospect = retrospectsSubject.value[indexPath.section][indexPath.row]
         let configuration = UISwipeActionsConfiguration(actions: retrospectSwipeAction(selectedRetrospect))
         configuration.performsFirstActionWithFullSwipe = false
         return configuration
@@ -321,6 +307,7 @@ extension RetrospectListViewController: UITableViewDelegate {
             action: pinToggleAction,
             completionHandler: { _ in }
         )
+        
         let unpinAction = UIContextualAction.actionWithSystemImage(
             named: Texts.unpinIconImageName,
             tintColor: .blazingOrange,
@@ -335,23 +322,6 @@ extension RetrospectListViewController: UITableViewDelegate {
 // MARK: - Constants
 
 private extension RetrospectListViewController {
-    enum RetrospectSection: Int, CaseIterable, Hashable {
-        case pinned = 0
-        case inProgress
-        case finished
-        
-        var title: String {
-            switch self {
-            case .pinned:
-                "고정됨"
-            case .inProgress:
-                "진행 중인 회고"
-            case .finished:
-                "지난 날의 회고"
-            }
-        }
-    }
-    
     enum Metrics {
         static let cellVerticalMargin = 6.0
         static let tableViewHeaderHeight = 36.0
@@ -364,6 +334,10 @@ private extension RetrospectListViewController {
         static let unpinIconImageName = "pin.slash.fill"
         
         static let navigationTitle = "회고"
+        static let pinnedSectionTitle = "고정됨"
+        static let inProgressSectionTitle = "진행 중인 회고"
+        static let pastRetrospectSectionTitle = "지난 날의 회고"
+        
         static let defaultSummaryText = "대화를 종료해 요약을 확인하세요"
     }
 }

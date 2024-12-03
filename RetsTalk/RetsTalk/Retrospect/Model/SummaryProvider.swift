@@ -5,6 +5,6 @@
 //  Created by KimMinSeok on 11/21/24.
 //
 
-protocol SummaryProvider: Sendable {
+protocol SummaryProvider {
     func requestSummary(for chat: [Message]) async throws -> String
 }

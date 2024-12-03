@@ -7,7 +7,7 @@
 
 @preconcurrency import CoreData
 
-final class CoreDataManager: Persistable, @unchecked Sendable {
+actor CoreDataManager: Persistable {
     private let persistentContainer: NSPersistentCloudKitContainer
     private var lastHistoryDate: Date
     
@@ -17,7 +17,7 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
         inMemory: Bool = false,
         isiCloudSynced: Bool = false,
         name: String,
-        completion: @escaping (Result<Void, Swift.Error>) -> Void
+        completion: @Sendable @escaping (Result<Void, Swift.Error>) -> Void
     ) {
         persistentContainer = NSPersistentCloudKitContainer(name: name)
         lastHistoryDate = Date()
@@ -29,7 +29,7 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
                 if error != nil {
                     completion(.failure(Error.storeSetUpFailed))
                 } else {
-                    try? self?.deleteOldPersistentHistory()
+                    self?.deleteOldPersistentHistory()
                     completion(.success(()))
                 }
             }
@@ -38,7 +38,7 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
         }
     }
     
-    private func setUpPersistentContainer(inMemory: Bool, isiCloudSynced: Bool) throws {
+    private nonisolated func setUpPersistentContainer(inMemory: Bool, isiCloudSynced: Bool) throws {
         guard let description = persistentContainer.persistentStoreDescriptions.first
         else { throw Error.storeSetUpFailed }
         
@@ -57,7 +57,7 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
     
     // MARK: CloudKit observer
 
-    private func addObserver() {
+    private nonisolated func addObserver() {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleCloudKitEvent),
@@ -66,7 +66,7 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
         )
     }
     
-    @objc private func handleCloudKitEvent(_ notification: Notification) {
+    @objc nonisolated private func handleCloudKitEvent(_ notification: Notification) {
         guard let userInfo = notification.userInfo,
               let event = userInfo[NSPersistentCloudKitContainer.eventNotificationUserInfoKey]
                 as? NSPersistentCloudKitContainer.Event else {
@@ -89,25 +89,25 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
     
     // MARK: Persistable conformance
     
-    func add<Entity>(contentsOf entities: [Entity]) throws -> [Entity] where Entity: EntityRepresentable {
+    func add<Entity>(contentsOf entities: [Entity]) async throws -> [Entity] where Entity: EntityRepresentable {
         guard entities.isNotEmpty else { return [] }
         
         let taskContext = newTaskContext()
-        try taskContext.performAndWait { [weak self] in
+        try await taskContext.sendablePerform { [weak self] in
             guard let batchInsertRequest = self?.batchInsertRequest(for: entities),
                   let batchInsertResult = try? taskContext.execute(batchInsertRequest) as? NSBatchInsertResult,
                   let success = batchInsertResult.result as? Bool, success
             else { throw Error.additionFailed }
         }
-        try mergePersistentHistoryChanges()
+        try await mergePersistentHistoryChanges()
         return entities
     }
     
     func fetch<Entity>(
         by request: any PersistFetchRequestable<Entity>
-    ) throws -> [Entity] where Entity: EntityRepresentable {
+    ) async throws -> [Entity] where Entity: EntityRepresentable {
         let taskContext = newTaskContext()
-        let fetchedEntities = try taskContext.performAndWait { [weak self] in
+        let fetchedEntities = try await taskContext.sendablePerform { [weak self] in
             guard let fetchRequest = self?.fetchRequest(from: request),
                   let dictionaryList = try? taskContext.fetch(fetchRequest) as? [NSDictionary]
             else { throw Error.fetchingFailed }
@@ -120,29 +120,29 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
     func update<Entity>(
         from sourceEntity: Entity,
         to updatingEntity: Entity
-    ) throws -> Entity where Entity: EntityRepresentable {
+    ) async throws -> Entity where Entity: EntityRepresentable {
         let taskContext = newTaskContext()
-        try taskContext.performAndWait { [weak self] in
-                guard let batchUpdateRequest = self?.batchUpdateRequest(from: sourceEntity, to: updatingEntity),
-                      let batchUpdateResult = try? taskContext.execute(batchUpdateRequest) as? NSBatchUpdateResult,
-                      let success = batchUpdateResult.result as? Bool, success
-                else { throw Error.updateFailed }
+        try await taskContext.sendablePerform { [weak self] in
+            guard let batchUpdateRequest = self?.batchUpdateRequest(from: sourceEntity, to: updatingEntity),
+                  let batchUpdateResult = try? taskContext.execute(batchUpdateRequest) as? NSBatchUpdateResult,
+                  let success = batchUpdateResult.result as? Bool, success
+            else { throw Error.updateFailed }
         }
-        try mergePersistentHistoryChanges()
+        try await mergePersistentHistoryChanges()
         return updatingEntity
     }
     
-    func delete<Entity>(contentsOf entities: [Entity]) throws where Entity: EntityRepresentable {
+    func delete<Entity>(contentsOf entities: [Entity]) async throws where Entity: EntityRepresentable {
         let taskContext = newTaskContext()
         for entity in entities {
-            try taskContext.performAndWait { [weak self] in
+            try await taskContext.sendablePerform { [weak self] in
                 guard let batchDeleteRequest = self?.batchDeleteRequest(for: entity),
                       let batchDeleteResult = try taskContext.execute(batchDeleteRequest) as? NSBatchDeleteResult,
                       let success = batchDeleteResult.result as? Bool, success
                 else { throw Error.deletionFailed }
             }
         }
-        try mergePersistentHistoryChanges()
+        try await mergePersistentHistoryChanges()
     }
     
     // MARK: Supporting methods
@@ -153,7 +153,7 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
         return taskContext
     }
     
-    private func fetchRequest<Entity>(
+    private nonisolated func fetchRequest<Entity>(
         from request: any PersistFetchRequestable<Entity>
     ) -> NSFetchRequest<NSFetchRequestResult> where Entity: EntityRepresentable {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: Entity.entityName)
@@ -165,7 +165,7 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
         return fetchRequest
     }
     
-    private func entityPredicate<Entity>(
+    private nonisolated func entityPredicate<Entity>(
         _ entity: Entity
     ) -> NSPredicate where Entity: EntityRepresentable {
         let predicates = entity.mappingDictionary.map { (key, value) in
@@ -176,7 +176,7 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
     
     // MARK: Batch request
     
-    private func batchInsertRequest<Entity>(
+    private nonisolated func batchInsertRequest<Entity>(
         for entities: [Entity]
     ) -> NSBatchInsertRequest where Entity: EntityRepresentable {
         var index = 0
@@ -190,7 +190,7 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
         return batchInsertRequest
     }
     
-    private func batchUpdateRequest<Entity>(
+    private nonisolated func batchUpdateRequest<Entity>(
         from sourceEntity: Entity,
         to updatingEntity: Entity
     ) -> NSBatchUpdateRequest where Entity: EntityRepresentable {
@@ -200,7 +200,7 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
         return batchUpdateRequest
     }
     
-    private func batchDeleteRequest<Entity>(
+    private nonisolated func batchDeleteRequest<Entity>(
         for entity: Entity
     ) -> NSBatchDeleteRequest where Entity: EntityRepresentable {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: Entity.entityName)
@@ -210,10 +210,10 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
     
     // MARK: Context merge
     
-    private func mergePersistentHistoryChanges() throws {
+    private func mergePersistentHistoryChanges() async throws {
         let viewContext = persistentContainer.viewContext
-        let history = try fetchPersistentHistoryTransactionsAndChanges()
-        viewContext.performAndWait {
+        let history = try await fetchPersistentHistoryTransactionsAndChanges()
+        await viewContext.sendablePerform {
             for transaction in history {
                 viewContext.mergeChanges(fromContextDidSave: transaction.objectIDNotification())
             }
@@ -221,10 +221,10 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
         lastHistoryDate = history.last?.timestamp ?? Date()
     }
 
-    private func fetchPersistentHistoryTransactionsAndChanges() throws -> [NSPersistentHistoryTransaction] {
+    private func fetchPersistentHistoryTransactionsAndChanges() async throws -> [NSPersistentHistoryTransaction] {
         let taskContext = newTaskContext()
         let changeRequest = NSPersistentHistoryChangeRequest.fetchHistory(after: lastHistoryDate)
-        let historyChanges = try taskContext.performAndWait {
+        let historyChanges = try await taskContext.sendablePerform {
             let historyResult = try taskContext.execute(changeRequest) as? NSPersistentHistoryResult
             guard let history = historyResult?.result as? [NSPersistentHistoryTransaction]
             else { throw Error.persistentHistoryChangeError }
@@ -236,11 +236,13 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
     
     // MARK: Old history deletion
     
-    private func deleteOldPersistentHistory() throws {
-        let taskContext = newTaskContext()
-        let deleteRequest = NSPersistentHistoryChangeRequest.deleteHistory(before: Date().aMonthAgo())
-        _ = try taskContext.performAndWait {
-            try taskContext.execute(deleteRequest)
+    private nonisolated func deleteOldPersistentHistory() {
+        Task {
+            let taskContext = await newTaskContext()
+            let deleteRequest = NSPersistentHistoryChangeRequest.deleteHistory(before: Date().aMonthAgo())
+            _ = try await taskContext.perform {
+                try taskContext.execute(deleteRequest)
+            }
         }
     }
 }
@@ -274,6 +276,17 @@ extension CoreDataManager {
                 "데이터를 삭제하는데 실패했습니다."
             }
         }
+    }
+}
+
+// MARK: - Extends NSManagedObjectContext for @Sendable perform
+
+fileprivate extension NSManagedObjectContext {
+    func sendablePerform<T>(
+        schedule: NSManagedObjectContext.ScheduledTaskType = .immediate,
+        _ block: @Sendable @escaping () throws -> T
+    ) async rethrows -> T {
+        try await perform(block)
     }
 }
 

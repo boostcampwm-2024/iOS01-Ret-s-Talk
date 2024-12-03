@@ -9,12 +9,13 @@ import Combine
 import SwiftUI
 import UIKit
 
-final class RetrospectChatViewController: BaseKeyBoardViewController {
+final class RetrospectChatViewController: BaseViewController {
     private let retrospectChatManager: RetrospectChatManageable
     
     private let renderingSubject: CurrentValueSubject<(retrospect: Retrospect, scrollToBottomNeeded: Bool), Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
     private let chatPrependingSubject: PassthroughSubject<ScrollInfo, Never>
+    private var subscriptionSet: Set<AnyCancellable>
     
     private var isChatPrependable: Bool
     private var isChatViewDragging: Bool
@@ -22,7 +23,7 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
     
     // MARK: View
     
-    private let chatView = ChatView()
+    private let chatView: ChatView
     
     // MARK: Initialization
     
@@ -32,9 +33,12 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
         renderingSubject = CurrentValueSubject((retrospect, true))
         errorSubject = CurrentValueSubject(nil)
         chatPrependingSubject = PassthroughSubject<ScrollInfo, Never>()
+        subscriptionSet = []
         
         isChatPrependable = true
         isChatViewDragging = false
+        
+        chatView = ChatView()
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -58,41 +62,77 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        chatView.setTableViewDelegate(self)
+        chatView.delegate = self
+
         addTapGestureOfDismissingKeyboard()
+        addKeyboardObservers()
+
+        subscribeChatEvents()
+        
         fetchPreviousChat(isInitial: true)
     }
     
-    // MARK: RetsTalk lifecycle
-    
-    override func setupDelegation() {
-        super.setupDelegation()
-        
-        chatView.setChatTableViewDelegate(self)
-        chatView.delegate = self
+    // MARK: Tap gesture
+
+    private func addTapGestureOfDismissingKeyboard() {
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGestureRecognizer)
     }
     
-    override func setupDataSource() {
-        super.setupDataSource()
-        
-        chatView.setChatTableViewDataSource(self)
-    }
+    // MARK: RetsTalk lifecycle method
 
     override func setupNavigationBar() {
-        super.setupNavigationBar()
-        
         title = retrospect.createdAt.formattedToKoreanStyle
-        navigationItem.largeTitleDisplayMode = .never
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
+
+        let endChattingButton = UIBarButtonItem(
             title: Texts.endChattingButtonTitle,
             style: .plain,
             target: self,
             action: #selector(endChattingButtonTapped)
         )
+
+        navigationItem.rightBarButtonItem = endChattingButton
+        navigationItem.leftBarButtonItem?.tintColor = .blazingOrange
+        navigationItem.rightBarButtonItem?.tintColor = .blazingOrange
     }
     
-    override func setupSubscription(on subscriptionSet: inout Set<AnyCancellable>) {
-        super.setupSubscription(on: &subscriptionSet)
-        
+    // MARK: Keyboard control
+    
+    private func addKeyboardObservers() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow(_:)),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide(_:)),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        if let userInfo = notification.userInfo,
+           let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+            let keyboardHeight = keyboardFrame.height
+            chatView.updateBottomConstraintForKeyboard(height: keyboardHeight)
+        }
+    }
+    
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        chatView.updateBottomConstraintForKeyboard(height: 40)
+    }
+    
+    // MARK: Subscription
+
+    private func subscribeChatEvents() {
         renderingSubject
             .sink(receiveValue: { [weak self] (retrospect, scrollToBottomNeeded) in
                 self?.updateDataSourceDifference(from: self?.previousRetrospect?.chat ?? [], to: retrospect.chat)
@@ -109,29 +149,6 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
                 self?.fetchPreviousChat(isInitial: false)
             }
             .store(in: &subscriptionSet)
-    }
-    
-    // MARK: Keyboard control
-    
-    override func handleKeyboardWillShowEvent(using keyboardInfo: KeyboardInfo) {
-        super.handleKeyboardWillShowEvent(using: keyboardInfo)
-        
-        chatView.updateLayoutForKeyboard(using: keyboardInfo)
-    }
-    
-    override func handleKeyboardWillHideEvent(using keyboardInfo: KeyboardInfo) {
-        super.handleKeyboardWillHideEvent(using: keyboardInfo)
-        
-        chatView.updateLayoutForKeyboard(using: keyboardInfo)
-    }
-    
-    private func addTapGestureOfDismissingKeyboard() {
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        view.addGestureRecognizer(tapGestureRecognizer)
-    }
-    
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
     }
     
     // MARK: Message manager action
@@ -155,6 +172,17 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
             self?.navigationController?.popViewController(animated: true)
         }
     }
+
+    // MARK: DataSource difference managing
+    
+    private func updateDataSourceDifference(from source: [Message], to updated: [Message]) {
+        var newIndexPaths = [IndexPath]()
+        for (index, message) in updated.enumerated() where !source.contains(message) {
+            newIndexPaths.append(IndexPath(row: index, section: 0))
+        }
+        chatView.insertMessages(at: newIndexPaths)
+        isChatPrependable = newIndexPaths.isNotEmpty
+    }
 }
 
 // MARK: - UITableViewDataSource conformance
@@ -172,17 +200,6 @@ extension RetrospectChatViewController: UITableViewDataSource {
         }
         cell.backgroundColor = .clear
         return cell
-    }
-    
-    // MARK: DataSource difference managing
-    
-    private func updateDataSourceDifference(from source: [Message], to updated: [Message]) {
-        var newIndexPaths = [IndexPath]()
-        for (index, message) in updated.enumerated() where !source.contains(message) {
-            newIndexPaths.append(IndexPath(row: index, section: 0))
-        }
-        chatView.insertMessages(at: newIndexPaths)
-        isChatPrependable = newIndexPaths.isNotEmpty
     }
 }
 
