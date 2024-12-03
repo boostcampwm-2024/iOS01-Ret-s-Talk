@@ -92,6 +92,8 @@
 				Network/NetworkRequestable.swift,
 				Network/URLRequestComposable.swift,
 				Persistent/EntityRepresentable.swift,
+				Persistent/PersistFetchRequestable.swift,
+				Retrospect/Model/Retrospect.swift,
 				Retrospect/Model/SummaryProvider.swift,
 				"Utility/Extensions/Encodable+Extension.swift",
 			);
