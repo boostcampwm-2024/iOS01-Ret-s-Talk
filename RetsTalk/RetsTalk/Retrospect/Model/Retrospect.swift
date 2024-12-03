@@ -141,10 +141,11 @@ extension Retrospect: EntityRepresentable {
 // MARK: - Retrospect kind
 
 extension Retrospect {
-    enum Kind {
+    enum Kind: Hashable {
         case pinned
         case inProgress
         case finished
+        case previous(_ lastRetrospectCreatedDate: Date)
         
         func predicate(for userID: UUID) -> CustomPredicate {
             switch self {
@@ -160,6 +161,11 @@ extension Retrospect {
                     format: "userID = %@ AND status = %@ AND isPinned = %@",
                     argumentArray: [userID, Texts.retrospectFinished, false]
                 )
+            case .previous(let lastRetrospectCreatedDate):
+                CustomPredicate(
+                    format: "userID = %@ AND status = %@ AND isPinned = %@ AND createdAt < %@",
+                    argumentArray: [userID, Texts.retrospectFinished, false, lastRetrospectCreatedDate]
+                )
             }
         }
         
@@ -167,7 +173,7 @@ extension Retrospect {
             switch self {
             case .pinned, .inProgress:
                 2
-            case .finished:
+            case .finished, .previous:
                 30
             }
         }

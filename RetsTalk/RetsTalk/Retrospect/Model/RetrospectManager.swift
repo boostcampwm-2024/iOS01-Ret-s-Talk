@@ -182,14 +182,11 @@ final class RetrospectManager: RetrospectManageable {
     private func previousRetrospectFetchRequest(amount: Int) -> PersistFetchRequest<Retrospect> {
         let recentDateSorting = CustomSortDescriptor(key: Texts.retrospectSortKey, ascending: false)
         let lastRetrospectCreatedDate = retrospects.last?.createdAt ?? Date()
-        let predicate = CustomPredicate(
-            format: Texts.fetchPredicateFormat,
-            argumentArray: [userID, Texts.retrospectFinished, false, lastRetrospectCreatedDate]
-        )
+        let predicate = Retrospect.Kind.predicate(.previous(lastRetrospectCreatedDate))(for: userID)
         let request = PersistFetchRequest<Retrospect>(
             predicate: predicate,
             sortDescriptors: [recentDateSorting],
-            fetchLimit: Retrospect.Kind.finished.fetchLimit
+            fetchLimit: Retrospect.Kind.previous(lastRetrospectCreatedDate).fetchLimit
         )
         return request
     }
@@ -264,7 +261,6 @@ fileprivate extension RetrospectManager {
     
     enum Texts {
         static let retrospectFinished = "retrospectFinished"
-        static let fetchPredicateFormat = "userID = %@ AND status = %@ AND isPinned = %@ AND createdAt < %@"
         static let retrospectSortKey = "createdAt"
     }
 }
