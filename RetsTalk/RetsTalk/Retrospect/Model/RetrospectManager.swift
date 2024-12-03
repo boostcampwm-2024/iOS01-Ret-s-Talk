@@ -83,6 +83,17 @@ final class RetrospectManager: RetrospectManageable {
         }
     }
     
+    func fetchPreviousRetrospects() async {
+        do {
+            let request = previousRetrospectFetchRequest(amount: Numerics.retrospectFetchAmount)
+            let fetchedRetrospects = try await retrospectStorage.fetch(by: request)
+            retrospects.append(contentsOf: fetchedRetrospects)
+            errorOccurred = nil
+        } catch {
+            errorOccurred = error
+        }
+    }
+    
     func togglePinRetrospect(_ retrospect: Retrospect) async {
         do {
             guard retrospect.isPinned || isPinAvailable else { throw Error.reachInProgressLimit }
@@ -156,6 +167,21 @@ final class RetrospectManager: RetrospectManageable {
         )
     }
     
+    private func previousRetrospectFetchRequest(amount: Int) -> PersistFetchRequest<Retrospect> {
+        let recentDateSorting = CustomSortDescriptor(key: Texts.retrospectSortKey, ascending: false)
+        let lastRetrospectCreatedDate = retrospects.last?.createdAt ?? Date()
+        let predicate = CustomPredicate(
+            format: Texts.fetchPredicateFormat,
+            argumentArray: [userID, Texts.retrospectFinished, false, lastRetrospectCreatedDate]
+        )
+        let request = PersistFetchRequest<Retrospect>(
+            predicate: predicate,
+            sortDescriptors: [recentDateSorting],
+            fetchLimit: Retrospect.Kind.finished.fetchLimit
+        )
+        return request
+    }
+    
     // MARK: Manage retrospects
     
     private var isCreationAvailable: Bool {
@@ -221,5 +247,12 @@ fileprivate extension RetrospectManager {
     enum Numerics {
         static let pinLimit = 2
         static let inProgressLimit = 2
+        static let retrospectFetchAmount = 2
+    }
+    
+    enum Texts {
+        static let retrospectFinished = "retrospectFinished"
+        static let fetchPredicateFormat = "userID = %@ AND status = %@ AND isPinned = %@ AND createdAt < %@"
+        static let retrospectSortKey = "createdAt"
     }
 }
