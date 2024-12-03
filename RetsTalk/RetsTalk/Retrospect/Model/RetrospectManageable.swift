@@ -17,4 +17,5 @@ protocol RetrospectManageable: Sendable {
     func finishRetrospect(_ retrospect: Retrospect) async
     func deleteRetrospect(_ retrospect: Retrospect) async
     func replaceRetrospectStorage(_ newRetrospectStorage: Persistable)
+    func fetchMonthRetrospect(year: Int, month: Int)
 }
