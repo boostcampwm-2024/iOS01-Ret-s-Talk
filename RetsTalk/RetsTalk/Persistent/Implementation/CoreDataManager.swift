@@ -117,6 +117,20 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
         return fetchedEntities
     }
     
+    func fetchDataCount<Entity>(
+        by request: any PersistFetchRequestable<Entity>
+    ) throws -> Int where Entity: EntityRepresentable {
+        let taskContext = newTaskContext()
+        let fetchedCount = try taskContext.performAndWait { [weak self] in
+            guard let fetchRequest = self?.fetchCountRequest(from: request),
+                  let count = try? taskContext.count(for: fetchRequest)
+            else { throw Error.fetchingFailed }
+            
+            return count
+        }
+        return fetchedCount
+    }
+    
     func update<Entity>(
         from sourceEntity: Entity,
         to updatingEntity: Entity
@@ -165,10 +179,18 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
         return fetchRequest
     }
     
+    private func fetchCountRequest<Entity>(
+        from request: any PersistFetchRequestable<Entity>
+    ) -> NSFetchRequest<NSNumber> where Entity: EntityRepresentable {
+        let fetchRequest = NSFetchRequest<NSNumber>(entityName: Entity.entityName)
+        fetchRequest.resultType = .countResultType
+        return fetchRequest
+    }
+    
     private func entityPredicate<Entity>(
         _ entity: Entity
     ) -> NSPredicate where Entity: EntityRepresentable {
-        let predicates = entity.mappingDictionary.map { (key, value) in
+        let predicates = entity.identifyingDictionary.map { (key, value) in
             NSPredicate(format: "\(key) == %@", argumentArray: [value])
         }
         return NSCompoundPredicate(andPredicateWithSubpredicates: predicates)

@@ -84,6 +84,10 @@ extension Retrospect: EntityRepresentable {
         ]
     }
     
+    var identifyingDictionary: [String: Any] {
+        ["id": id]
+    }
+    
     /// - Status
     /// status를 통해 Value를 가져오고 mapping
     /// - Chat
@@ -142,6 +146,7 @@ extension Retrospect {
         case inProgress
         case finished
         case currentMonth(startDate: Date, endDate: Date)
+        case previous(_ lastRetrospectCreatedDate: Date)
         
         func predicate(for userID: UUID) -> CustomPredicate {
             switch self {
@@ -164,6 +169,10 @@ extension Retrospect {
                         startDate,
                         endDate,
                     ]
+            case .previous(let lastRetrospectCreatedDate):
+                CustomPredicate(
+                    format: "userID = %@ AND status = %@ AND isPinned = %@ AND createdAt < %@",
+                    argumentArray: [userID, Texts.retrospectFinished, false, lastRetrospectCreatedDate]
                 )
             }
         }
@@ -172,7 +181,7 @@ extension Retrospect {
             switch self {
             case .pinned, .inProgress:
                 2
-            case .finished:
+            case .finished, .previous:
                 30
             case .currentMonth:
                 0

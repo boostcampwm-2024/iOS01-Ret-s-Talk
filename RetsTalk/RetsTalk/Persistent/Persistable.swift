@@ -18,6 +18,12 @@ protocol Persistable: Sendable {
     func fetch<Entity>(
         by request: any PersistFetchRequestable<Entity>
     ) throws -> [Entity] where Entity: EntityRepresentable
+    /// 로컬 저장소에서 요청 조건에 맞는 엔티티 데이터 개수를 불러옵니다.
+    /// - Parameter request: 요청 조건.
+    /// - Returns: 엔티티 데이터 개수.
+    func fetchDataCount<Entity>(
+        by request: any PersistFetchRequestable<Entity>
+    ) throws -> Int where Entity: EntityRepresentable
     /// 로컬 저장소의 엔티티 데이터에 대한 최신화를 수행합니다.
     /// - Parameters:
     ///   - entity: 최신화할 엔티티 값.
