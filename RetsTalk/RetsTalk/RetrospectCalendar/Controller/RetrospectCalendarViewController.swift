@@ -45,7 +45,11 @@ final class RetrospectCalendarViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        loadRetrospects()
+        let currentDate = Date()
+        let calendar = Calendar.current
+        let year = calendar.component(.year, from: currentDate)
+        let month = calendar.component(.month, from: currentDate)
+        
        loadRetrospects(year: year, month: month)
     }
     
