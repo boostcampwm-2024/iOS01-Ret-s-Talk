@@ -13,7 +13,7 @@ protocol UserSettingManageableDelegate: AnyObject {
     func alertNeedNotificationPermission(_ userSettingManageable: any UserSettingManageable)
 }
 
-final class UserSettingManager: UserSettingManageable, @unchecked Sendable, ObservableObject {
+final class UserSettingManager: UserSettingManageable, ObservableObject {
     @Published var userData: UserData = .init(dictionary: [:])
     private let userDataStorage: Persistable
     private let notificationManager: NotificationManageable
@@ -70,16 +70,16 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
     
     func updateNotificationStatus(_ isOn: Bool, at date: Date) {
         notificationManager.requestNotification(isOn, date: date) { isNotificationAllowed in
-            var updatingUserData = self.userData
-            if isNotificationAllowed {
-                updatingUserData.isNotificationOn = isOn
-                updatingUserData.notificationTime = date
-                self.update(to: updatingUserData)
-            } else {
-                updatingUserData.isNotificationOn = false
-                self.update(to: updatingUserData)
-                Task {
-                    await self.delegate?.alertNeedNotificationPermission(self)
+            Task { @MainActor in
+                var updatingUserData = self.userData
+                if isNotificationAllowed {
+                    updatingUserData.isNotificationOn = isOn
+                    updatingUserData.notificationTime = date
+                    self.update(to: updatingUserData)
+                } else {
+                    updatingUserData.isNotificationOn = false
+                    self.update(to: updatingUserData)
+                    self.delegate?.alertNeedNotificationPermission(self)
                 }
             }
         }

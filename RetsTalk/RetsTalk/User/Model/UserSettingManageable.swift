@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 
+@MainActor
 protocol UserSettingManageable: Sendable, ObservableObject {
     var userData: UserData { get set }
     var delegate: UserSettingManageableDelegate? { get set }
