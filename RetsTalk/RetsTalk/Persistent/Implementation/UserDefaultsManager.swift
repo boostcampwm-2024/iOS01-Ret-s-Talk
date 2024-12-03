@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class UserDefaultsManager: Persistable, @unchecked Sendable {
+actor UserDefaultsManager: Persistable {
     private let userDefaultsContainer: UserDefaults
 
     init(container: UserDefaults = .standard) {

@@ -13,7 +13,7 @@ final class RetrospectListViewController: BaseViewController {
     private typealias RetrospectDataSource = UITableViewDiffableDataSource<RetrospectSection, Retrospect>
     
     private let retrospectManager: RetrospectManageable
-    private let userDefaultsManager: Persistable
+    private let userDefaultsManager: UserDefaultsManager
     private let userSettingManager: UserSettingManager
 
     private var subscriptionSet: Set<AnyCancellable>
@@ -30,7 +30,7 @@ final class RetrospectListViewController: BaseViewController {
     
     init(
         retrospectManager: RetrospectManageable,
-        userDefaultsManager: Persistable
+        userDefaultsManager: UserDefaultsManager
     ) {
         self.retrospectManager = retrospectManager
         self.userDefaultsManager = userDefaultsManager
