@@ -71,8 +71,6 @@ final class RetrospectListViewController: BaseViewController {
         super.viewDidLoad()
 
         addObserver()
-        retrospectListView.setTableViewDelegate(self)
-        setupDataSource()
         addCreateButtondidTapAction()
         fetchInitialRetrospect()
     }
@@ -168,7 +166,6 @@ final class RetrospectListViewController: BaseViewController {
             
             retrospectListView.updateButtonSubtitle(count)
         }
-
     }
 
     private func fetchInitialRetrospect() {
