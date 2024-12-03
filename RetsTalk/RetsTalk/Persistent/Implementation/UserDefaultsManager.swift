@@ -30,6 +30,10 @@ final class UserDefaultsManager: Persistable, @unchecked Sendable {
         return [Entity(dictionary: entityDictionary)]
     }
     
+    func fetchDataCount<Entity>(
+        by request: any PersistFetchRequestable<Entity>
+    ) -> Int where Entity: EntityRepresentable { 0 }
+    
     func update<Entity>(
         from sourceEntity: Entity,
         to updatingEntity: Entity
