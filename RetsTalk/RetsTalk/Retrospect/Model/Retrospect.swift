@@ -46,7 +46,7 @@ struct Retrospect {
 // MARK: - Retrospect State
 
 extension Retrospect {
-    enum Status: Equatable {
+    enum Status: Hashable {
         case finished
         case inProgress(ProgressState)
     }
@@ -63,10 +63,18 @@ extension Retrospect {
 extension Retrospect: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+        hasher.combine(chat)
+        hasher.combine(status)
+        hasher.combine(summary)
+        hasher.combine(isPinned)
     }
     
     static func == (lhs: Retrospect, rhs: Retrospect) -> Bool {
         lhs.id == rhs.id
+        && lhs.chat == rhs.chat
+        && lhs.status == rhs.status
+        && lhs.summary == rhs.summary
+        && lhs.isPinned == rhs.isPinned
     }
 }
 
