@@ -1,0 +1,26 @@
+name: Build Test
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  Build:
+    runs-on: macos-15
+
+    steps:
+      # 저장소의 코드를 체크아웃
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Start xcode build 🛠
+        run: |
+          xcodebuild \
+            -project RetsTalk/RetsTalk.xcodeproj \
+            -scheme RetsTalk \
+            -sdk iphonesimulator \
+            -skipPackagePluginValidation \
+            clean build
+

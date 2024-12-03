@@ -10,6 +10,7 @@ import SwiftUI
 import UIKit
 
 final class RetrospectListViewController: BaseViewController {
+    typealias Situation = RetrospectListSituation
     private typealias RetrospectDataSource = UITableViewDiffableDataSource<RetrospectSection, Retrospect>
     
     private let retrospectManager: RetrospectManageable
@@ -173,10 +174,20 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     private func deleteRetrospect(_ retrospect: Retrospect) {
-        Task {
-            await self.retrospectManager.deleteRetrospect(retrospect)
-            self.sortAndSendRetrospects()
-        }
+        presentAlert(
+            for: .delete,
+            actions: [
+                UIAlertAction(title: Texts.cancelAlertTitle, style: .cancel),
+                UIAlertAction(title: Texts.deleteAlertTitle, style: .destructive) { [weak self] _ in
+                    guard let self else { return }
+
+                    Task {
+                        await self.retrospectManager.deleteRetrospect(retrospect)
+                        self.sortAndSendRetrospects()
+                    }
+                },
+            ]
+        )
     }
     
     private func togglepPinRetrospect(_ retrospect: Retrospect) {
@@ -191,8 +202,10 @@ final class RetrospectListViewController: BaseViewController {
     @objc private func didTapSettings() {
         let notificationManager = NotificationManager()
         let userSettingViewController = UserSettingViewController(
-            userSettingManager: userSettingManager,
-            notificationManager: notificationManager
+            userSettingManager: UserSettingManager(
+                userDataStorage: UserDefaultsManager()
+            ),
+            notificationManager: NotificationManager()
         )
         navigationController?.pushViewController(userSettingViewController, animated: true)
     }
@@ -344,11 +357,33 @@ extension RetrospectListViewController: UITableViewDelegate {
     }
 }
 
+// MARK: - AlertPresentable conformance
+
+extension RetrospectListViewController: AlertPresentable {
+    enum RetrospectListSituation: AlertSituation {
+        case delete
+        
+        var title: String {
+            switch self {
+            case .delete:
+                "회고를 삭제하시겠습니까?"
+            }
+        }
+        
+        var message: String {
+            switch self {
+            case .delete:
+                "삭제된 회고는 복구할 수 없습니다."
+            }
+        }
+    }
+}
+
 // MARK: - Constants
 
 private extension RetrospectListViewController {
     enum RetrospectSection: Int, CaseIterable, Hashable {
-        case pinned = 0
+        case pinned
         case inProgress
         case finished
         
@@ -370,6 +405,9 @@ private extension RetrospectListViewController {
     }
     
     enum Texts {
+        static let cancelAlertTitle = "취소"
+        static let deleteAlertTitle = "삭제"
+        
         static let settingButtonImageName = "gearshape"
         static let deleteIconImageName = "trash.fill"
         static let pinIconImageName = "pin.fill"
