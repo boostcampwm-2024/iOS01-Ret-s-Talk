@@ -86,7 +86,7 @@ final class RetrospectManager: RetrospectManageable {
     func fetchPreviousRetrospects() async {
         do {
             let request = previousRetrospectFetchRequest(amount: Numerics.retrospectFetchAmount)
-            let fetchedRetrospects = try await retrospectStorage.fetch(by: request)
+            let fetchedRetrospects = try retrospectStorage.fetch(by: request)
             retrospects.append(contentsOf: fetchedRetrospects)
             errorOccurred = nil
         } catch {
@@ -94,12 +94,16 @@ final class RetrospectManager: RetrospectManageable {
         }
     }
     
-    func fetchRetrospectsCount() async -> Int? {
+    func fetchRetrospectsCount() async -> (totalCount: Int, monthlyCount: Int)? {
         do {
-            let request = PersistFetchRequest<Retrospect>(fetchLimit: Numerics.fetchTotalDataCountLimit)
-            let fetchedCount = try retrospectStorage.fetchDataCount(by: request)
+            let totalFetchRequest = PersistFetchRequest<Retrospect>(fetchLimit: Numerics.fetchTotalDataCountLimit)
+            let monthlyFetchRequest = monthlyRetrospectCountFetchRequest()
+            
+            let totalCount = try retrospectStorage.fetchDataCount(by: totalFetchRequest)
+            let monthlyCount = try retrospectStorage.fetchDataCount(by: monthlyFetchRequest)
+            
             errorOccurred = nil
-            return fetchedCount
+            return (totalCount, monthlyCount)
         } catch {
             errorOccurred = error
             return nil
@@ -183,12 +187,26 @@ final class RetrospectManager: RetrospectManageable {
         let recentDateSorting = CustomSortDescriptor(key: Texts.retrospectSortKey, ascending: false)
         let lastRetrospectCreatedDate = retrospects.last?.createdAt ?? Date()
         let predicate = Retrospect.Kind.predicate(.previous(lastRetrospectCreatedDate))(for: userID)
-        let request = PersistFetchRequest<Retrospect>(
+        return PersistFetchRequest<Retrospect>(
             predicate: predicate,
             sortDescriptors: [recentDateSorting],
             fetchLimit: Retrospect.Kind.previous(lastRetrospectCreatedDate).fetchLimit
         )
-        return request
+    }
+    
+    private func monthlyRetrospectCountFetchRequest() -> PersistFetchRequest<Retrospect> {
+        let calendar = Calendar.current
+        guard let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: Date())),
+              let startOfNextMonth = calendar.date(byAdding: DateComponents(month: 1), to: startOfMonth)
+        else {
+            return PersistFetchRequest<Retrospect>(fetchLimit: 0)
+        }
+        
+        let predicate = Retrospect.Kind.predicate(.monthly(from: startOfMonth, to: startOfNextMonth))(for: userID)
+        return PersistFetchRequest(
+            predicate: predicate,
+            fetchLimit: Retrospect.Kind.monthly(from: startOfMonth, to: startOfNextMonth).fetchLimit
+        )
     }
     
     // MARK: Manage retrospects
