@@ -146,6 +146,7 @@ extension Retrospect {
         case inProgress
         case finished
         case previous(_ lastRetrospectCreatedDate: Date)
+        case monthly(from: Date, to: Date)
         
         func predicate(for userID: UUID) -> CustomPredicate {
             switch self {
@@ -166,6 +167,11 @@ extension Retrospect {
                     format: "userID = %@ AND status = %@ AND isPinned = %@ AND createdAt < %@",
                     argumentArray: [userID, Texts.retrospectFinished, false, lastRetrospectCreatedDate]
                 )
+            case .monthly(let startOfMonth, let startOfNextMonth):
+                CustomPredicate(
+                    format: "userID == %@ AND createdAt >= %@ AND createdAt < %@",
+                    argumentArray: [userID, startOfMonth, startOfNextMonth]
+                )
             }
         }
         
@@ -175,6 +181,8 @@ extension Retrospect {
                 2
             case .finished, .previous:
                 30
+            case .monthly:
+                0
             }
         }
     }
