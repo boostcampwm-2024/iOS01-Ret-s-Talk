@@ -200,7 +200,6 @@ final class RetrospectListViewController: BaseViewController {
     // MARK: Action controls
 
     @objc private func didTapSettings() {
-        let notificationManager = NotificationManager()
         let userSettingViewController = UserSettingViewController(
             userSettingManager: UserSettingManager(
                 userDataStorage: UserDefaultsManager()

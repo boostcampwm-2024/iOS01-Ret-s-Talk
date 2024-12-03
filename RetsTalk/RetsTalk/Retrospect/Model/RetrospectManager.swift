@@ -33,9 +33,9 @@ final class RetrospectManager: RetrospectManageable {
     
     // MARK: RetrospectManageable conformance
     
-    func createRetrospect() async -> RetrospectChatManageable? {
+    func createRetrospect() -> RetrospectChatManageable? {
         do {
-            let newRetrospect = try await createNewRetrospect()
+            let newRetrospect = try createNewRetrospect()
             retrospects.append(newRetrospect)
             let retrospectChatManager = RetrospectChatManager(
                 retrospect: newRetrospect,
@@ -126,24 +126,14 @@ final class RetrospectManager: RetrospectManageable {
 
     // MARK: Support retrospect creation
     
-    private func createNewRetrospect() async throws -> Retrospect {
+    private func createNewRetrospect() throws -> Retrospect {
         guard isCreationAvailable else { throw Error.reachInProgressLimit }
         
-        var newRetrospect = Retrospect(userID: userID)
-        let initialAssistentMessage = try await requestInitialAssistentMessage(for: newRetrospect)
-        newRetrospect.append(contentsOf: [initialAssistentMessage])
+        let newRetrospect = Retrospect(userID: userID)
         guard let addedRetrospect = try retrospectStorage.add(contentsOf: [newRetrospect]).first
         else { throw Error.creationFailed }
         
         return addedRetrospect
-    }
-    
-    private func requestInitialAssistentMessage(for retrospect: Retrospect) async throws -> Message {
-        let emptyUserMessage = Message(retrospectID: retrospect.id, role: .user, content: "")
-        let initialAssistentMessage = try await retrospectAssistantProvider.requestAssistantMessage(
-            for: [emptyUserMessage]
-        )
-        return initialAssistentMessage
     }
     
     // MARK: Support retrospect fetching
@@ -180,9 +170,10 @@ extension RetrospectManager: RetrospectChatManagerListener {
         guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id })
         else { return }
         
-        let updatedRetrospect = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
-        
-        retrospects[matchingIndex] = updatedRetrospect
+        if retrospects[matchingIndex] != retrospect {
+            _ = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+        }
+        retrospects[matchingIndex] = retrospect
     }
     
     func shouldTogglePin(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) -> Bool {
