@@ -146,8 +146,7 @@ final class RetrospectListView: UIView {
         calendarButton.addAction(action, for: .touchUpInside)
     }
     
-    func updateButtonSubtitle(datesCount: Int, totalRetrospectCount: Int) {
-        calendarButton.setSubtitle("\(datesCount)일")
+    func updateButtonSubtitle(_ totalRetrospectCount: Int) {
         totalCountView.setSubtitle("\(totalRetrospectCount)개")
     }
 
