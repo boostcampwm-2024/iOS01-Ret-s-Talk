@@ -23,7 +23,7 @@ final class ChatView: BaseView {
         tableView.separatorStyle = .none
         tableView.backgroundColor = .backgroundMain
         tableView.allowsSelection = false
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "MessageCell")
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: Texts.messageCellIdentifier)
         return tableView
     }()
     private let messageInputView = MessageInputView()
@@ -114,11 +114,7 @@ extension ChatView: MessageInputViewDelegate {
     }
     
     func updateMessageInputViewHeight(_ messageInputView: MessageInputView, to height: CGFloat) {
-        guard let messageInputViewHeightConstraint = messageInputViewHeightConstraint else {
-            fatalError("chatViewBottomConstraint가 초기화되지 않았습니다.")
-        }
-        
-        messageInputViewHeightConstraint.constant = height
+        messageInputViewHeightConstraint?.constant = height
         UIView.performWithoutAnimation {
             self.layoutIfNeeded()
         }
@@ -162,5 +158,9 @@ private extension ChatView {
     enum Metrics {
         static let messageInputViewHeight = 54.0
         static let chatViewBottomFromBottom = -40.0
+    }
+    
+    enum Texts {
+        static let messageCellIdentifier = "MessageCell"
     }
 }
