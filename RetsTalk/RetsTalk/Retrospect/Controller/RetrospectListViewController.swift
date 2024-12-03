@@ -141,17 +141,6 @@ final class RetrospectListViewController: BaseViewController {
         fetchInitialRetrospect()
     }
 
-    @objc private func regenerateAndReplaceCoreDataManager() {
-        let userData = userSettingManager.userData
-        let isCloudSyncOn = userData.isCloudSyncOn
-        let newCoreDataManager = CoreDataManager(
-            isiCloudSynced: isCloudSyncOn,
-            name: Constants.Texts.CoreDataContainerName) { _ in }
-        Task {
-            await retrospectManager.replaceRetrospectStorage(newCoreDataManager)
-        }
-    }
-
     // MARK: Retrospect handling
     
     private func fetchInitialRetrospect() {
@@ -350,13 +339,10 @@ extension RetrospectListViewController: UITableViewDelegate {
 
 extension RetrospectListViewController: UserSettingManageableCloudDelegate {
     func didCloudSyncStateChange(_ userSettingManageable: any UserSettingManageable) {
-        let userData = userSettingManager.userData
-        let isCloudSyncOn = userData.isCloudSyncOn
-        let newCoreDataManager = CoreDataManager(
-            isiCloudSynced: isCloudSyncOn,
-            name: Constants.Texts.CoreDataContainerName) { _ in }
         Task {
-            await retrospectManager.replaceRetrospectStorage(newCoreDataManager)
+            let userData = userSettingManager.userData
+            let isCloudSyncOn = userData.isCloudSyncOn
+            await retrospectManager.refreshRetrospectStorage(iCloudEnabled: isCloudSyncOn)
         }
     }
 }
