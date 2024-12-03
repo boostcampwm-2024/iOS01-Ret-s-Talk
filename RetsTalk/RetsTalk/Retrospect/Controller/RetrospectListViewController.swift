@@ -127,7 +127,10 @@ final class RetrospectListViewController: BaseViewController {
 
     @objc private func didTapSettings() {
         let userSettingViewController = UserSettingViewController(
-            userSettingManager: UserSettingManager(userDataStorage: UserDefaultsManager())
+            userSettingManager: UserSettingManager(
+                userDataStorage: UserDefaultsManager()
+            ),
+            notificationManager: NotificationManager()
         )
         navigationController?.pushViewController(userSettingViewController, animated: true)
     }
