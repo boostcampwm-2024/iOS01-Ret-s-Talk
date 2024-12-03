@@ -13,6 +13,7 @@ protocol RetrospectManageable: Sendable {
     func createRetrospect() async -> RetrospectChatManageable?
     func retrospectChatManager(of retrospect: Retrospect) -> RetrospectChatManageable?
     func fetchRetrospects(of kindSet: Set<Retrospect.Kind>) async
+    func fetchRetrospectDatesAndTotalCount() async -> (dates: Int, total: Int)?
     func togglePinRetrospect(_ retrospect: Retrospect) async
     func finishRetrospect(_ retrospect: Retrospect) async
     func deleteRetrospect(_ retrospect: Retrospect) async

@@ -83,6 +83,20 @@ final class RetrospectManager: RetrospectManageable {
         }
     }
     
+    func fetchRetrospectDatesAndTotalCount() async -> (dates: Int, total: Int)? {
+        do {
+            let request = PersistFetchRequest<Retrospect>(fetchLimit: Numerics.fetchAllLimit)
+            let fetchedRetrospects = try await retrospectStorage.fetch(by: request)
+            let datesCount = RetrospectSortingHelper.datesCount(fetchedRetrospects)
+            let totalCount = RetrospectSortingHelper.totalCount(fetchedRetrospects)
+            errorOccurred = nil
+            return (datesCount, totalCount)
+        } catch {
+            errorOccurred = error
+            return nil
+        }
+    }
+    
     func togglePinRetrospect(_ retrospect: Retrospect) async {
         do {
             guard retrospect.isPinned || isPinAvailable else { throw Error.reachInProgressLimit }
@@ -221,5 +235,6 @@ fileprivate extension RetrospectManager {
     enum Numerics {
         static let pinLimit = 2
         static let inProgressLimit = 2
+        static let fetchAllLimit = 999
     }
 }
