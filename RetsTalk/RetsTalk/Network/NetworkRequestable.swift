@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol NetworkRequestable: Actor {
+protocol NetworkRequestable: Sendable {
     var urlSession: URLSession { get }
     
     func request(with urlRequestComposer: any URLRequestComposable) async throws -> Data

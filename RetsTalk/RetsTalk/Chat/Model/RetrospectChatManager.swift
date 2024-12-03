@@ -9,7 +9,7 @@ import Foundation
 
 final class RetrospectChatManager: RetrospectChatManageable {
     private(set) var retrospect: Retrospect {
-        didSet { retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect) }
+        didSet { try? retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect) }
     }
     private(set) var errorOccurred: Swift.Error?
     
@@ -37,7 +37,7 @@ final class RetrospectChatManager: RetrospectChatManageable {
     func sendMessage(_ text: String) async {
         do {
             let userMessage = Message(retrospectID: retrospect.id, role: .user, content: text)
-            let addedUserMessage = try await messageStorage.add(contentsOf: [userMessage])
+            let addedUserMessage = try messageStorage.add(contentsOf: [userMessage])
             retrospect.append(contentsOf: addedUserMessage)
         } catch {
             errorOccurred = error
@@ -51,10 +51,10 @@ final class RetrospectChatManager: RetrospectChatManageable {
         await requestAssistentMessage()
     }
     
-    func fetchPreviousMessages() async {
+    func fetchPreviousMessages() {
         do {
             let request = recentMessageFetchRequest(offset: retrospect.chat.count, amount: Numeric.messageFetchAmount)
-            let fetchedMessages = try await messageStorage.fetch(by: request)
+            let fetchedMessages = try messageStorage.fetch(by: request)
             retrospect.prepend(contentsOf: fetchedMessages)
         } catch {
             errorOccurred = error
@@ -80,7 +80,7 @@ final class RetrospectChatManager: RetrospectChatManageable {
     private func requestAssistentMessage() async {
         do {
             let assistantMessage = try await assistantMessageProvider.requestAssistantMessage(for: retrospect.chat)
-            let addedAssistantMessage = try await messageStorage.add(contentsOf: [assistantMessage])
+            let addedAssistantMessage = try messageStorage.add(contentsOf: [assistantMessage])
             retrospect.append(contentsOf: addedAssistantMessage)
             retrospect.status = .inProgress(.waitingForUserInput)
         } catch {

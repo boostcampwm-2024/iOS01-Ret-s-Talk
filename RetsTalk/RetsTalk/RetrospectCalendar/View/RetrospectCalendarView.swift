@@ -7,71 +7,65 @@
 
 import UIKit
 
-final class RetrospectCalendarView: UIView {
-    private let calendarView = UICalendarView()
-    let retrospectListTableView = UITableView()
-    
-    // MARK: Initalization
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        
-        backgroundColor = .backgroundMain
-        calendarViewSetUp()
-        retrospectListTableViewSetUp()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    // MARK: View SetUp
-    
-    private func calendarViewSetUp() {
-        addSubview(calendarView)
+final class RetrospectCalendarView: BaseView {
+    private let retrospectCalendarView: UICalendarView = {
+        let calendarView = UICalendarView()
         calendarView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            calendarView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            calendarView.leftAnchor.constraint(equalTo: leftAnchor, constant: Metrics.horizontalMargin),
-            calendarView.rightAnchor.constraint(equalTo: rightAnchor, constant: -Metrics.horizontalMargin),
-        ])
-        
         calendarView.wantsDateDecorations = true
         calendarView.fontDesign = .rounded
         calendarView.tintColor = .blazingOrange
+        return calendarView
+    }()
+    
+    // MARK: RetsTalk lifecycle
+    
+    override func setupStyles() {
+        super.setupStyles()
+        
+        backgroundColor = .backgroundMain
     }
     
-    private func retrospectListTableViewSetUp() {
-        addSubview(retrospectListTableView)
-        retrospectListTableView.translatesAutoresizingMaskIntoConstraints = false
+    override func setupSubviews() {
+        super.setupSubviews()
         
-        NSLayoutConstraint.activate([
-            retrospectListTableView.topAnchor.constraint(equalTo: calendarView.bottomAnchor),
-            retrospectListTableView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            retrospectListTableView.leftAnchor.constraint(equalTo: leftAnchor),
-            retrospectListTableView.rightAnchor.constraint(equalTo: rightAnchor),
-        ])
-        
-        retrospectListTableView.separatorStyle = .none
-        retrospectListTableView.backgroundColor = .backgroundMain
-        retrospectListTableView.register(
-            UITableViewCell.self,
-            forCellReuseIdentifier: Constants.Texts.retrospectCellIdentifier
-        )
+        addSubview(retrospectCalendarView)
     }
     
-    func reloadDecorations(forDateComponents dateCompoenents: [DateComponents]) {
-        calendarView.reloadDecorations(forDateComponents: dateCompoenents, animated: true)
+    override func setupSubviewLayouts() {
+        super.setupSubviewLayouts()
+        
+        setupRetrospectCalendarViewLayouts()
     }
+    
+    // MARK: Delegation
     
     func setCalendarViewDelegate(_ delegate: UICalendarViewDelegate & UICalendarSelectionSingleDateDelegate) {
-        calendarView.delegate = delegate
+        retrospectCalendarView.delegate = delegate
         
         let dateSelection = UICalendarSelectionSingleDate(delegate: delegate)
-        calendarView.selectionBehavior = dateSelection
+        retrospectCalendarView.selectionBehavior = dateSelection
+    }
+    
+    // MARK: Reload decorations
+    
+    func reloadDecorations(forDateComponents dateCompoenents: [DateComponents]) {
+        retrospectCalendarView.reloadDecorations(forDateComponents: dateCompoenents, animated: true)
     }
 }
+
+// MARK: - Subviews layouts
+
+fileprivate extension RetrospectCalendarView {
+    func setupRetrospectCalendarViewLayouts() {
+        NSLayoutConstraint.activate([
+            retrospectCalendarView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            retrospectCalendarView.leftAnchor.constraint(equalTo: leftAnchor, constant: Metrics.horizontalMargin),
+            retrospectCalendarView.rightAnchor.constraint(equalTo: rightAnchor, constant: -Metrics.horizontalMargin),
+        ])
+    }
+}
+
+// MARK: - Constants
 
 private extension RetrospectCalendarView {
     enum Metrics {

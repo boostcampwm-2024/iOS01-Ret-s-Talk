@@ -14,7 +14,7 @@ final class RetrospectListViewController: BaseViewController {
     private typealias RetrospectDataSource = UITableViewDiffableDataSource<RetrospectSection, Retrospect>
     
     private let retrospectManager: RetrospectManageable
-    private let userDefaultsManager: UserDefaultsManager
+    private let userDefaultsManager: Persistable
     private let userSettingManager: UserSettingManager
 
     private var subscriptionSet: Set<AnyCancellable>
@@ -31,7 +31,7 @@ final class RetrospectListViewController: BaseViewController {
     
     init(
         retrospectManager: RetrospectManageable,
-        userDefaultsManager: UserDefaultsManager
+        userDefaultsManager: Persistable
     ) {
         self.retrospectManager = retrospectManager
         self.userDefaultsManager = userDefaultsManager
@@ -179,8 +179,10 @@ final class RetrospectListViewController: BaseViewController {
     @objc private func didTapSettings() {
         let notificationManager = NotificationManager()
         let userSettingViewController = UserSettingViewController(
-            userSettingManager: userSettingManager,
-            notificationManager: notificationManager
+            userSettingManager: UserSettingManager(
+                userDataStorage: UserDefaultsManager()
+            ),
+            notificationManager: NotificationManager()
         )
         navigationController?.pushViewController(userSettingViewController, animated: true)
     }
