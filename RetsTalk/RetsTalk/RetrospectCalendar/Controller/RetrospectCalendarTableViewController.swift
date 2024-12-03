@@ -12,6 +12,8 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     private typealias DataSource = UITableViewDiffableDataSource<Section, Retrospect>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Retrospect>
     
+    private var retrospectManager: RetrospectManageable
+    
     private var dataSource: DataSource?
     private var snapshot: Snapshot?
     
@@ -23,8 +25,9 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     
     // MARK: Initalization
     
-    init(retrospects: [Retrospect]) {
+    init(retrospects: [Retrospect], retrospectManager: RetrospectManageable) {
         self.retrospects = retrospects
+        self.retrospectManager = retrospectManager
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -43,6 +46,12 @@ final class RetrospectCalendarTableViewController: BaseViewController {
         super.viewDidLoad()
     
         updateTableView()
+    }
+    
+    override func setupDelegation() {
+        super.setupDelegation()
+        
+        retrospectCalendarTableView.setupretrospectListTableViewDelegate(self)
     }
     
     override func setupDataSource() {
@@ -91,7 +100,21 @@ final class RetrospectCalendarTableViewController: BaseViewController {
 // MARK: - UITableViewDelegate conformance
 
 extension RetrospectCalendarTableViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) { }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let retrospect = dataSource?.itemIdentifier(for: indexPath) else { return }
+        
+        Task {
+            guard let retrospectChatManager = await retrospectManager.retrospectChatManager(of: retrospect)
+            else { return }
+            
+            let chattingViewController = RetrospectChatViewController(
+                retrospect: retrospect,
+                retrospectChatManager: retrospectChatManager
+            )
+            let navigationController = UINavigationController(rootViewController: chattingViewController)
+            present(navigationController, animated: true)
+        }
+    }
 }
 
 // MARK: - Table section

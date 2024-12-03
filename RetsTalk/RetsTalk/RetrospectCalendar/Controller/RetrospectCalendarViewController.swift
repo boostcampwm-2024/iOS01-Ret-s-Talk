@@ -185,7 +185,10 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
     
     private func createRetrospectTableViewController(retrospects: [Retrospect])
     -> RetrospectCalendarTableViewController {
-        let controller = RetrospectCalendarTableViewController(retrospects: retrospects)
+        let controller = RetrospectCalendarTableViewController(
+            retrospects: retrospects,
+            retrospectManager: retrospectManager
+        )
         if let sheet = controller.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
             sheet.largestUndimmedDetentIdentifier = .medium
