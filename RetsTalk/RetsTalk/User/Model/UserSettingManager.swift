@@ -63,47 +63,36 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     }
     
     func updateNickname(_ nickname: String) {
-        var updatingUserData = userData
-        updatingUserData.nickname = nickname
-        update(to: updatingUserData)
+        updateUserData { $0.nickname = nickname }
     }
     
     func updateCloudSyncState(state isOn: Bool) {
-        Task {
-            var updatingUserData = userData
-            updatingUserData.isCloudSyncOn = isOn
-            update(to: updatingUserData)
-            cloudDelegate?.didCloudSyncStateChange(self)
-        }
+        updateUserData { $0.isCloudSyncOn = isOn }
+        cloudDelegate?.didCloudSyncStateChange(self)
     }
     
     func updateNotificationStatus(_ isOn: Bool, at date: Date) {
         Task {
             let isNotificationAllowed = await notificationManager.requestNotification(isOn, date: date)
-            var updatingUserData = self.userData
-            if isNotificationAllowed {
-                updatingUserData.isNotificationOn = isOn
-                updatingUserData.notificationTime = date
-                self.update(to: updatingUserData)
-            } else {
-                updatingUserData.isNotificationOn = false
-                self.update(to: updatingUserData)
-                self.permissionAlertDelegate?.alertNeedNotificationPermission(self)
+            updateUserData { userData in
+                userData.isNotificationOn = isNotificationAllowed ? isOn : false
+                userData.notificationTime = date
             }
+            if !isNotificationAllowed { permissionAlertDelegate?.alertNeedNotificationPermission(self) }
         }
     }
     
     // MARK: UserData Handling Method
-    
-    private func update(to updatingData: UserData) {
-        Task {
-            let updatedData = try userDataStorage.update(from: updatingData, to: updatingData)
-            await MainActor.run {
-                userData = updatedData
-            }
+
+    private func updateUserData(_ updateBlock: @escaping (inout UserData) -> Void) {
+        Task { @MainActor in
+            var latestUserData = userData
+            updateBlock(&latestUserData)
+            let updatedData = try userDataStorage.update(from: userData, to: latestUserData)
+            userData = updatedData
         }
     }
-    
+
     private func initializeUserData() -> UUID {
         let newUserID = UUID()
         let newNickname = randomNickname()
