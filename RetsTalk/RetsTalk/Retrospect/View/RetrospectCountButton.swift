@@ -39,9 +39,9 @@ class RetrospectCountButton: UIButton {
         return label
     }()
     
-    // MARK: Init method
+    // MARK: Init Method
     
-    init(imageSystemName: String, title: String, subtitle: String) {
+    init(imageSystemName: String, title: String, subtitle: String? = nil) {
         super.init(frame: .zero)
         
         setupStyle(imageSystemName: imageSystemName, title: title, subtitle: subtitle)
@@ -53,13 +53,19 @@ class RetrospectCountButton: UIButton {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: Style Setting Method
+
     func setImageColor(_ color: UIColor) {
         iconImageView.tintColor = color
     }
     
+    func setSubtitle(_ title: String) {
+        buttonSubtitleLabel.text = title
+    }
+    
     // MARK: Setup Method
     
-    private func setupStyle(imageSystemName: String, title: String, subtitle: String) {
+    private func setupStyle(imageSystemName: String, title: String, subtitle: String?) {
         backgroundColor = .clear
         clipsToBounds = true
         iconImageView.image = UIImage(systemName: imageSystemName)
