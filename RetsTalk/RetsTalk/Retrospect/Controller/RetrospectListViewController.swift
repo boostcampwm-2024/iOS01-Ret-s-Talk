@@ -16,7 +16,6 @@ final class RetrospectListViewController: BaseViewController {
     private let userDefaultsManager: Persistable
     private let userSettingManager: UserSettingManager
 
-    private var subscriptionSet: Set<AnyCancellable>
     private var retrospectsSubject: CurrentValueSubject<SortedRetrospects, Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
     
@@ -39,7 +38,6 @@ final class RetrospectListViewController: BaseViewController {
         retrospectListView = RetrospectListView()
         retrospectsSubject = CurrentValueSubject(SortedRetrospects())
         errorSubject = CurrentValueSubject(nil)
-        subscriptionSet = []
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -58,12 +56,11 @@ final class RetrospectListViewController: BaseViewController {
         retrospectListView = RetrospectListView()
         retrospectsSubject = CurrentValueSubject(SortedRetrospects())
         errorSubject = CurrentValueSubject(nil)
-        subscriptionSet = []
 
         super.init(coder: coder)
     }
     
-    // MARK: ViewController lifecycle method
+    // MARK: ViewController lifecycle
     
     override func loadView() {
         view = retrospectListView
@@ -73,9 +70,6 @@ final class RetrospectListViewController: BaseViewController {
         super.viewDidLoad()
 
         addObserver()
-        subscribeRetrospects()
-        retrospectListView.setTableViewDelegate(self)
-        setupDataSource()
         addCreateButtondidTapAction()
         fetchInitialRetrospect()
     }
@@ -103,6 +97,31 @@ final class RetrospectListViewController: BaseViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.rightBarButtonItem = settingsButton
         navigationItem.rightBarButtonItem?.tintColor = .black
+    }
+    
+    override func setupDelegation() {
+        super.setupDelegation()
+        
+        retrospectListView.setTableViewDelegate(self)
+    }
+    
+    override func setupDataSource() {
+        super.setupDataSource()
+        
+        setupDiffableDataSource()
+    }
+    
+    override func setupSubscription() {
+        super.setupSubscription()
+        
+        retrospectsSubject
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                
+                self.updateSnapshot()
+            }
+            .store(in: &subscriptionSet)
     }
 
     // MARK: Regarding iCloud
@@ -138,17 +157,6 @@ final class RetrospectListViewController: BaseViewController {
     }
 
     // MARK: Retrospect handling
-    
-    private func subscribeRetrospects() {
-        retrospectsSubject
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                guard let self = self else { return }
-                
-                self.updateSnapshot()
-            }
-            .store(in: &subscriptionSet)
-    }
     
     private func fetchInitialRetrospect() {
         Task {
@@ -212,7 +220,7 @@ final class RetrospectListViewController: BaseViewController {
 // MARK: - UITableViewDiffableDataSource method
 
 private extension RetrospectListViewController {
-    func setupDataSource() {
+    func setupDiffableDataSource() {
         dataSource = RetrospectDataSource(
             tableView: retrospectListView.retrospectListTableView
         ) { tableView, indexPath, retrospect in
