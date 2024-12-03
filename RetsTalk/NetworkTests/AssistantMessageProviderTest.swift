@@ -32,4 +32,21 @@ final class AssistantMessageProviderTest: XCTestCase {
             }
         }
     }
+    
+    func test_유효하지_않은_API_키를_검증하는지() async throws {
+        let assistantMessageProvider = try XCTUnwrap(assistantMessageProvider)
+        let chat = [Message(retrospectID: UUID(), role: .user, content: "", createdAt: Date())]
+        
+        do {
+            _ = try await assistantMessageProvider.requestAssistantMessage(for: chat)
+            XCTFail("정상적으로 요청이 되지 말아야 하는데 성공함.")
+        } catch {
+            if let error = error as? LocalizedError,
+               let description = error.errorDescription {
+                print(description)
+            } else {
+                XCTFail(error.localizedDescription)
+            }
+        }
+    }
 }

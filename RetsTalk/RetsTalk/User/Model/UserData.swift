@@ -30,10 +30,6 @@ extension UserData: EntityRepresentable {
         ]
     }
     
-    var identifyingDictionary: [String: Any] {
-        ["userID": userID]
-    }
-    
     init(dictionary: [String: Any]) {
         userID = dictionary["userID"] as? String ?? ""
         isCloudSyncOn = dictionary["isCloudSyncOn"] as? Bool ?? false

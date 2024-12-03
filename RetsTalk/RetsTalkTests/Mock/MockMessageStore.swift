@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class MockMessageStore: Persistable, @unchecked Sendable {
+actor MockMessageStore: Persistable {
     var messages: [Message]
     
     init() {
@@ -18,13 +18,13 @@ final class MockMessageStore: Persistable, @unchecked Sendable {
         self.messages = messages
     }
     
-    func add<Entity>(contentsOf entities: [Entity]) throws -> [Entity] {
+    func add<Entity>(contentsOf entities: [Entity]) async throws -> [Entity] {
         entities
     }
     
     func fetch<Entity>(
         by request: any PersistFetchRequestable<Entity>
-    ) throws -> [Entity] where Entity: EntityRepresentable {
+    ) async throws -> [Entity] where Entity: EntityRepresentable {
         let startIndex = request.fetchOffset
         let endIndex = min(request.fetchOffset + request.fetchLimit, messages.count)
         let fetchMessages = Array(messages[startIndex..<endIndex])
@@ -33,9 +33,9 @@ final class MockMessageStore: Persistable, @unchecked Sendable {
         return result
     }
     
-    func update<Entity>(from sourceEntity: Entity, to updatingEntity: Entity) throws -> Entity {
+    func update<Entity>(from sourceEntity: Entity, to updatingEntity: Entity) async throws -> Entity {
         updatingEntity
     }
     
-    func delete<Entity>(contentsOf entities: [Entity]) throws {}
+    func delete<Entity>(contentsOf entities: [Entity]) async throws {}
 }

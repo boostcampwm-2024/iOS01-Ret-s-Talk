@@ -7,14 +7,14 @@
 
 import XCTest
 
-final class MockRetrospectStore: Persistable {
-    nonisolated(unsafe) static var fetchHadler: ((any PersistFetchRequestable) -> [Retrospect])?
+actor MockRetrospectStore: Persistable {
+    static var fetchHadler: ((any PersistFetchRequestable) -> [Retrospect])?
     
-    func add<Entity>(contentsOf entities: [Entity]) throws -> [Entity] {
+    func add<Entity>(contentsOf entities: [Entity]) async throws -> [Entity] {
         entities
     }
     
-    func fetch<Entity>(by request: any PersistFetchRequestable<Entity>) throws -> [Entity] {
+    func fetch<Entity>(by request: any PersistFetchRequestable<Entity>) async throws -> [Entity] {
         guard let fetchHadler = MockRetrospectStore.fetchHadler
         else {
             XCTFail("fetchHadler가 설정되지 않았습니다.")
@@ -24,9 +24,9 @@ final class MockRetrospectStore: Persistable {
         return (fetchHadler(request) as? [Entity]) ?? []
     }
     
-    func update<Entity>(from sourceEntity: Entity, to updatingEntity: Entity) throws -> Entity {
+    func update<Entity>(from sourceEntity: Entity, to updatingEntity: Entity) async throws -> Entity {
         updatingEntity
     }
     
-    func delete<Entity>(contentsOf entities: [Entity]) throws {}
+    func delete<Entity>(contentsOf entities: [Entity]) async throws {}
 }

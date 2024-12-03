@@ -8,7 +8,9 @@
 import Foundation
 
 final class RetrospectChatManager: RetrospectChatManageable {
-    private(set) var retrospect: Retrospect
+    private(set) var retrospect: Retrospect {
+        didSet { try? retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect) }
+    }
     private(set) var errorOccurred: Swift.Error?
     
     private let messageStorage: Persistable
@@ -60,13 +62,7 @@ final class RetrospectChatManager: RetrospectChatManageable {
     }
     
     func endRetrospect() {
-        do {
-            retrospect.status = .finished
-            try retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect)
-            errorOccurred = nil
-        } catch {
-            errorOccurred = error
-        }
+        retrospect.status = .finished
     }
     
     func toggleRetrospectPin() {
@@ -76,13 +72,7 @@ final class RetrospectChatManager: RetrospectChatManageable {
             return
         }
         
-        do {
-            retrospect.isPinned.toggle()
-            try retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect)
-            errorOccurred = nil
-        } catch {
-            errorOccurred = error
-        }
+        retrospect.isPinned.toggle()
     }
     
     // MARK: Supporting methods

@@ -38,13 +38,6 @@ extension Message: EntityRepresentable {
         ]
     }
     
-    var identifyingDictionary: [String: Any] {
-        [
-            "retrospectID": retrospectID,
-            "createdAt": createdAt,
-        ]
-    }
-    
     init(dictionary: [String: Any]) {
         retrospectID = dictionary["retrospectID"] as? UUID ?? UUID()
         let isUser = dictionary["isUser"] as? Bool ?? true
