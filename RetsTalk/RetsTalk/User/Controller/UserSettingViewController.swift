@@ -23,27 +23,20 @@ final class UserSettingViewController<T: UserSettingManageable>:
     }
     
     required init?(coder: NSCoder) { fatalError() }
-    
-    // MARK: ViewController lifecycle method
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        setUpNavigationBar()
-        userSettingManager.permissionAlertDelegate = self
-    }
-    
-    // MARK: Custom method
-    
-    private func setUpNavigationBar() {
+
+    // MARK: RetsTalk lifecycle method
+
+    override func setupNavigationBar() {
         title = UserSettingViewTexts.navigationBarTitle
-        
+
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.leftBarButtonItem?.tintColor = .blazingOrange
         navigationItem.rightBarButtonItem?.tintColor = .blazingOrange
     }
-    
-    @objc private func backwardButtonTapped() {}
+
+    override func setupDelegation() {
+        userSettingManager.permissionAlertDelegate = self
+    }
 }
 
 // MARK: - UserSettingManageableDelegate conformance
