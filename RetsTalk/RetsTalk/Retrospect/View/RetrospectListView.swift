@@ -11,7 +11,7 @@ final class RetrospectListView: UIView {
     
     // MARK: UI components
     
-    private let retrospectListTableView: UITableView = {
+    let retrospectListTableView: UITableView = {
         let tableView = UITableView()
         tableView.separatorStyle = .none
         tableView.backgroundColor = .backgroundMain
@@ -33,7 +33,7 @@ final class RetrospectListView: UIView {
             title: Texts.totalCountButtonTitle,
             subtitle: "2일"
         )
-        button.setImageColor(.blueBerry)
+        button.setImageColor(.lightGray)
         return button
     }()
     private let createRetrospectButton = CreateRetrospectButton()
@@ -45,7 +45,6 @@ final class RetrospectListView: UIView {
         
         backgroundColor = .backgroundMain
         setupTableViewLayout()
-        setupFixedButtonLayout()
         setupFloatingButtonLayout()
     }
     
@@ -53,9 +52,8 @@ final class RetrospectListView: UIView {
         super.init(coder: coder)
         
         backgroundColor = .backgroundMain
-        setupTableViewLayout()
-        setupFixedButtonLayout()
         setupFloatingButtonLayout()
+        setupTableViewLayout()
     }
     
     // MARK: Custom Method
@@ -64,30 +62,14 @@ final class RetrospectListView: UIView {
         addSubview(retrospectListTableView)
         retrospectListTableView.translatesAutoresizingMaskIntoConstraints = false
         
+        let headerView = createHeaderView()
+        retrospectListTableView.tableHeaderView = headerView
+        
         NSLayoutConstraint.activate([
-            retrospectListTableView.topAnchor.constraint(
-                equalTo: safeAreaLayoutGuide.topAnchor,
-                constant: Metrics.fixedButtonAreaHeight
-            ),
+            retrospectListTableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             retrospectListTableView.bottomAnchor.constraint(equalTo: bottomAnchor),
             retrospectListTableView.leftAnchor.constraint(equalTo: leftAnchor),
             retrospectListTableView.rightAnchor.constraint(equalTo: rightAnchor),
-        ])
-    }
-    
-    private func setupFixedButtonLayout() {
-        addSubview(calendarButton)
-        addSubview(totalCountButton)
-        
-        calendarButton.translatesAutoresizingMaskIntoConstraints = false
-        totalCountButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            calendarButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            calendarButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Metrics.calendarButtonMargin),
-            
-            totalCountButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            totalCountButton.leadingAnchor.constraint(equalTo: centerXAnchor, constant: Metrics.totalCountButtonMargin),
         ])
     }
     
@@ -111,13 +93,48 @@ final class RetrospectListView: UIView {
                 equalToConstant: Metrics.diameter
             ),
         ])
+        
         sendSubviewToBack(retrospectListTableView)
         bringSubviewToFront(createRetrospectButton)
     }
-    
-    func setTableViewDelegate(_ delegate: UITableViewDelegate & UITableViewDataSource) {
+  
+    private func createHeaderView() -> UIView {
+        let headerView = UIView(frame: CGRect(
+            x: 0,
+            y: 0,
+            width: retrospectListTableView.frame.width,
+            height: Metrics.fixedButtonAreaHeight
+        ))
+        
+        headerView.addSubview(calendarButton)
+        headerView.addSubview(totalCountButton)
+        
+        calendarButton.translatesAutoresizingMaskIntoConstraints = false
+        totalCountButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            calendarButton.topAnchor.constraint(
+                equalTo: headerView.topAnchor
+            ),
+            calendarButton.leadingAnchor.constraint(
+                equalTo: headerView.leadingAnchor,
+                constant: Metrics.calendarButtonMargin
+            ),
+
+            totalCountButton.topAnchor.constraint(
+                equalTo: headerView.topAnchor
+            ),
+            totalCountButton.leadingAnchor.constraint(
+                equalTo: headerView.centerXAnchor,
+                constant: Metrics.totalCountButtonMargin
+            ),
+        ])
+        
+        return headerView
+    }
+
+    func setTableViewDelegate(_ delegate: UITableViewDelegate) {
         retrospectListTableView.delegate = delegate
-        retrospectListTableView.dataSource = delegate
     }
     
     func addCreateButtonAction(_ action: UIAction) {
@@ -139,7 +156,6 @@ private extension RetrospectListView {
     enum Metrics {
         static let diameter = 80.0
         static let buttonBottomAnchorConstant = -10.0
-        
         static let fixedButtonAreaHeight = 40.0
         static let calendarButtonMargin = 16.0
         static let totalCountButtonMargin = 32.0

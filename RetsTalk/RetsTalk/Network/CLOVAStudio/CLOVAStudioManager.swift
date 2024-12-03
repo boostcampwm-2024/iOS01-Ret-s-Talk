@@ -7,7 +7,7 @@
 
 import Foundation
 
-actor CLOVAStudioManager: NetworkRequestable {
+final class CLOVAStudioManager: NetworkRequestable {
     let urlSession: URLSession
     
     init(urlSession: URLSession) {
