@@ -8,23 +8,14 @@
 import Combine
 import Foundation
 
-protocol UserSettingManageableDelegate: AnyObject {
-    @MainActor
-    func alertNeedNotificationPermission(_ userSettingManageable: any UserSettingManageable)
-}
-
-@MainActor
-final class UserSettingManager: UserSettingManageable, ObservableObject {
+final class UserSettingManager: UserSettingManageable, @unchecked Sendable, ObservableObject {
     @Published var userData: UserData = .init(dictionary: [:])
     private let userDataStorage: Persistable
-    private let notificationManager: NotificationManageable
-    weak var delegate: UserSettingManageableDelegate?
-
+    
     // MARK: Init method
     
     init(userDataStorage: Persistable) {
         self.userDataStorage = userDataStorage
-        notificationManager = NotificationManager()
     }
     
     // MARK: UserSettingManageable conformance
@@ -32,7 +23,7 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     func initialize() async -> UUID? {
         do {
             let request = PersistFetchRequest<UserData>(fetchLimit: 1)
-            let fetchedData = try await userDataStorage.fetch(by: request)
+            let fetchedData = try userDataStorage.fetch(by: request)
             guard let storedUserData = fetchedData.first
             else { return initializeUserData() }
             
@@ -48,7 +39,7 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     func fetch() {
         let request = PersistFetchRequest<UserData>(fetchLimit: 1)
         Task {
-            let fetchedData = try await userDataStorage.fetch(by: request)
+            let fetchedData = try userDataStorage.fetch(by: request)
             guard let storedUserData = fetchedData.first else { return }
             
             await MainActor.run {
@@ -70,29 +61,17 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     }
     
     func updateNotificationStatus(_ isOn: Bool, at date: Date) {
-        notificationManager.requestNotification(isOn, date: date) { [weak self] isNotificationAllowed in
-            guard let self else { return }
-
-            Task { @MainActor in
-                var updatingUserData = self.userData
-                if isNotificationAllowed {
-                    updatingUserData.isNotificationOn = isOn
-                    updatingUserData.notificationTime = date
-                    self.update(to: updatingUserData)
-                } else {
-                    updatingUserData.isNotificationOn = false
-                    self.update(to: updatingUserData)
-                    self.delegate?.alertNeedNotificationPermission(self)
-                }
-            }
-        }
+        var updatingUserData = userData
+        updatingUserData.isNotificationOn = isOn
+        updatingUserData.notificationTime = date
+        update(to: updatingUserData)
     }
     
     // MARK: UserData Handling Method
     
     private func update(to updatingData: UserData) {
         Task {
-            let updatedData = try await userDataStorage.update(from: updatingData, to: updatingData)
+            let updatedData = try userDataStorage.update(from: updatingData, to: updatingData)
             await MainActor.run {
                 userData = updatedData
             }
@@ -104,7 +83,7 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
         let newNickname = randomNickname()
         let newUserData = UserData(dictionary: ["userID": newUserID.uuidString, "nickname": newNickname])
         Task {
-            let addedData = try await userDataStorage.add(contentsOf: [newUserData])
+            let addedData = try userDataStorage.add(contentsOf: [newUserData])
             guard let addedData = addedData.first else { return }
             
             await MainActor.run {
@@ -116,7 +95,7 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     
     private func initiateUserData() {
         Task {
-            let addedData = try await userDataStorage.add(contentsOf: [UserData(dictionary: [:])])
+            let addedData = try userDataStorage.add(contentsOf: [UserData(dictionary: [:])])
             guard let addedData = addedData.first else { return }
             
             await MainActor.run {
@@ -130,6 +109,7 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
         let noun = Texts.nicknameComposingNoun
         return adjective + " " + noun
     }
+    
 }
 
 // MARK: - Constants

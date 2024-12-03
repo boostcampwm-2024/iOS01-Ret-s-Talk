@@ -8,10 +8,8 @@
 import Combine
 import Foundation
 
-@MainActor
 protocol UserSettingManageable: Sendable, ObservableObject {
     var userData: UserData { get set }
-    var delegate: UserSettingManageableDelegate? { get set }
     /// 사용자 정보를 초기화하거나 가져오는 함수입니다.
     ///
     /// 비동기적으로 저장된 사용자 정보를 가져오고 아이디를 반환합니다.

@@ -59,6 +59,7 @@
 				Retrospect/Model/RetrospectActor.swift,
 				Retrospect/Model/RetrospectManageable.swift,
 				Retrospect/Model/RetrospectManager.swift,
+				Retrospect/Model/SortedRetrospects.swift,
 				Retrospect/Model/SummaryProvider.swift,
 				User/Model/NotificationManageable.swift,
 				User/Model/NotificationManager.swift,

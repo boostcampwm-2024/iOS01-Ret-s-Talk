@@ -11,20 +11,20 @@ struct UserSettingView<Manageable: UserSettingManageable>: View {
     @ObservedObject var userSettingManager: Manageable
     private let notificationManager: NotificationManageable
     
-    init(userSettingManager: Manageable) {
+    init(userSettingManager: Manageable, notificationManager: NotificationManageable) {
         self.userSettingManager = userSettingManager
-        notificationManager = NotificationManager()
+        self.notificationManager = notificationManager
     }
     
     var body: some View {
         List {
-            Section(UserSettingViewTexts.userInfo) {
+            Section(UserSettingViewTexts.firstSectionTitle) {
                 NicknameSettingView(nickname: $userSettingManager.userData.nickname) { updatingNickname in
                     setNickname(updatingNickname)
                 }
             }
             
-            Section(UserSettingViewTexts.iCloud) {
+            Section(UserSettingViewTexts.secondSectionTitle) {
                 CloudSettingView(
                     isCloudSyncOn: $userSettingManager.userData.isCloudSyncOn,
                     cloudAddress: $userSettingManager.userData.cloudAddress,
@@ -34,7 +34,7 @@ struct UserSettingView<Manageable: UserSettingManageable>: View {
                 )
             }
             
-            Section(UserSettingViewTexts.notification) {
+            Section(UserSettingViewTexts.thirdSectionTitle) {
                 NotificationSettingView(
                     isNotificationOn: $userSettingManager.userData.isNotificationOn,
                     selectedDate: $userSettingManager.userData.notificationTime,
@@ -44,7 +44,7 @@ struct UserSettingView<Manageable: UserSettingManageable>: View {
                 )
             }
             
-            Section(UserSettingViewTexts.applicationInfo) {
+            Section(UserSettingViewTexts.fourthSectionTitle) {
                 AppVersionView()
             }
         }
@@ -67,15 +67,17 @@ private extension UserSettingView {
     }
 
     func setNotification(_ isOn: Bool, at date: Date) {
-        userSettingManager.updateNotificationStatus(isOn, at: date)
+        notificationManager.requestNotification(isOn, date: date) { [userSettingManager] completion in
+            userSettingManager.updateNotificationStatus(completion, at: date)
+        }
     }
 }
 
 // MARK: - Constants
 
 private extension UserSettingViewTexts {
-    static let userInfo = "사용자 정보"
-    static let iCloud = "클라우드"
-    static let notification = "알림"
-    static let applicationInfo = "앱 정보"
+    static let firstSectionTitle = "사용자 정보"
+    static let secondSectionTitle = "클라우드"
+    static let thirdSectionTitle = "알림"
+    static let fourthSectionTitle = "앱 정보"
 }
