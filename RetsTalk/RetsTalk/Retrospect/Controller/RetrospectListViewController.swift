@@ -104,6 +104,7 @@ final class RetrospectListViewController: BaseViewController {
         super.setupDelegation()
         
         retrospectListView.setTableViewDelegate(self)
+        userSettingManager.cloudDelegate = self
     }
     
     override func setupDataSource() {
@@ -132,12 +133,6 @@ final class RetrospectListViewController: BaseViewController {
             self,
             selector: #selector(refetchRetrospects),
             name: .coreDataImportedNotification,
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(regenerateAndReplaceCoreDataManager),
-            name: .iCloudSyncStateChangeNotification,
             object: nil
         )
     }
@@ -348,6 +343,21 @@ extension RetrospectListViewController: UITableViewDelegate {
         )
         
         return retrospect.isPinned ? unpinAction : pinAction
+    }
+}
+
+// MARK: - UserSettingManageableCloudDelegete conformance
+
+extension RetrospectListViewController: UserSettingManageableCloudDelegate {
+    func didCloudSyncStateChange(_ userSettingManageable: any UserSettingManageable) {
+        let userData = userSettingManager.userData
+        let isCloudSyncOn = userData.isCloudSyncOn
+        let newCoreDataManager = CoreDataManager(
+            isiCloudSynced: isCloudSyncOn,
+            name: Constants.Texts.CoreDataContainerName) { _ in }
+        Task {
+            await retrospectManager.replaceRetrospectStorage(newCoreDataManager)
+        }
     }
 }
 

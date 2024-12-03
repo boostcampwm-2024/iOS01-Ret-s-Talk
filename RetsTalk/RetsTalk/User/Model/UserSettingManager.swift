@@ -8,16 +8,22 @@
 import Combine
 import Foundation
 
+@MainActor
 protocol UserSettingManageableDelegate: AnyObject {
-    @MainActor
     func alertNeedNotificationPermission(_ userSettingManageable: any UserSettingManageable)
+}
+
+@MainActor
+protocol UserSettingManageableCloudDelegate: AnyObject {
+    func didCloudSyncStateChange(_ userSettingManageable: any UserSettingManageable)
 }
 
 final class UserSettingManager: UserSettingManageable, ObservableObject {
     @Published var userData: UserData = .init(dictionary: [:])
     private let userDataStorage: Persistable
     private let notificationManager: NotificationManageable
-    weak var delegate: UserSettingManageableDelegate?
+    weak var permissionAlertDelegate: UserSettingManageableDelegate?
+    weak var cloudDelegate: UserSettingManageableCloudDelegate?
 
     // MARK: Init method
     
@@ -63,9 +69,12 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     }
     
     func updateCloudSyncState(state isOn: Bool) {
-        var updatingUserData = userData
-        updatingUserData.isCloudSyncOn = isOn
-        update(to: updatingUserData)
+        Task { @MainActor in
+            var updatingUserData = userData
+            updatingUserData.isCloudSyncOn = isOn
+            update(to: updatingUserData)
+            cloudDelegate?.didCloudSyncStateChange(self)
+        }
     }
     
     func updateNotificationStatus(_ isOn: Bool, at date: Date) {
@@ -79,7 +88,7 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
                 } else {
                     updatingUserData.isNotificationOn = false
                     self.update(to: updatingUserData)
-                    self.delegate?.alertNeedNotificationPermission(self)
+                    self.permissionAlertDelegate?.alertNeedNotificationPermission(self)
                 }
             }
         }

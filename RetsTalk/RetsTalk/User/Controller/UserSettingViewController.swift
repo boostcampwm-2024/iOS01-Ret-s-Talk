@@ -30,7 +30,7 @@ final class UserSettingViewController<T: UserSettingManageable>:
         super.viewDidLoad()
         
         setUpNavigationBar()
-        userSettingManager.delegate = self
+        userSettingManager.permissionAlertDelegate = self
     }
     
     // MARK: Custom method
