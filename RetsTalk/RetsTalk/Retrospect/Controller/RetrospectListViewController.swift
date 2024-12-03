@@ -163,9 +163,12 @@ final class RetrospectListViewController: BaseViewController {
     
     private func updateTotalRetrospectCount() {
         Task {
-            guard let count = await retrospectManager.fetchRetrospectsCount() else { return }
+            guard let fetchedCount = await retrospectManager.fetchRetrospectsCount() else { return }
             
-            retrospectListView.updateButtonSubtitle(count)
+            retrospectListView.updateHeaderContent(
+                totalCount: fetchedCount.totalCount,
+                monthlyCount: fetchedCount.monthlyCount
+            )
         }
     }
 
