@@ -165,10 +165,8 @@ extension Retrospect {
             case .currentMonth(let startDate, let endDate):
                 CustomPredicate(
                     format: "createdAt >= %@ AND createdAt < %@",
-                    argumentArray: [
-                        startDate,
-                        endDate,
-                    ]
+                    argumentArray: [startDate, endDate]
+                )
             case .previous(let lastRetrospectCreatedDate):
                 CustomPredicate(
                     format: "userID = %@ AND status = %@ AND isPinned = %@ AND createdAt < %@",
