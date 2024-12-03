@@ -72,7 +72,7 @@ final class RetrospectCalendarViewController: BaseViewController {
             .store(in: &subscriptionSet)
     }
     
-    // MARK: Retrospect Manager Action
+    // MARK: Retrospect manager action
     
     private func loadRetrospects() {
         Task { [weak self] in
@@ -83,7 +83,7 @@ final class RetrospectCalendarViewController: BaseViewController {
         }
     }
     
-    // MARK: Retrospect Data Changed Action
+    // MARK: Retrospect data changed action
     
     private func retrospectsUpdateData(_ retrospects: [Retrospect]) {
         var dateComponents: Set<DateComponents> = []
@@ -103,7 +103,7 @@ final class RetrospectCalendarViewController: BaseViewController {
     }
 }
 
-// MARK: - CalendarViewDelegate
+// MARK: - CalendarViewDelegate conformance
 
 extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelegate {
     func calendarView(
@@ -117,11 +117,11 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelega
     }
 }
 
-// MARK: - CalendarSelectionSingleDateDelegate
+// MARK: - CalendarSelectionSingleDateDelegate conformance
 
 extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionSingleDateDelegate {
     func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
-        guard let dateComponents = dateComponents else { return }
+        guard let dateComponents else { return }
         
         let selectedDate = normalizedDateComponents(from: dateComponents)
         if let currentDateRetrospects = retrospectsCache[selectedDate] {
@@ -133,7 +133,7 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
         }
     }
     
-    // MARK: Present Retrospect TableView 
+    // MARK: Present retrospect TableView
     
     private func presentRetrospectsList(retrospects: [Retrospect]) {
         let controller = retrospectTableViewController ?? createRetrospectTableViewController(retrospects: retrospects)
@@ -158,18 +158,17 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
     }
 }
 
-// MARK: - UIAdaptivePresentationControllerDelegate
+// MARK: - UIAdaptivePresentationControllerDelegate conformance
 
 extension RetrospectCalendarViewController: UIAdaptivePresentationControllerDelegate {
     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-        // 모달이 닫히면 retrospectTableViewController를 nil로 설정
         if presentationController.presentedViewController === retrospectTableViewController {
             retrospectTableViewController = nil
         }
     }
 }
 
-// MARK: - DateComponents Helper
+// MARK: - DateComponents helper
 
 extension RetrospectCalendarViewController {
     private func normalizedDateComponents(from dateComponents: DateComponents) -> DateComponents {

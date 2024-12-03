@@ -33,7 +33,7 @@ final class RetrospectCalendarTableViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: RetsTalk Lifecycle
+    // MARK: RetsTalk lifecycle
     
     override func loadView() {
         view = retrospectCalendarTableView
@@ -70,9 +70,10 @@ final class RetrospectCalendarTableViewController: BaseViewController {
                 isPinned: retrospect.isPinned
             )
         }
+        .margins(.vertical, Metrics.cellVerticalPadding)
     }
     
-    // MARK: Update Data
+    // MARK: Update data
     
     private func updateTableView() {
         var snapshot = Snapshot()
@@ -87,13 +88,13 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     }
 }
 
-// MARK: - UITableViewDelegate
+// MARK: - UITableViewDelegate conformance
 
 extension RetrospectCalendarTableViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) { }
 }
 
-// MARK: - Table Section
+// MARK: - Table section
 
 private extension RetrospectCalendarTableViewController {
     enum Section {
@@ -106,5 +107,9 @@ private extension RetrospectCalendarTableViewController {
 private extension RetrospectCalendarTableViewController {
     enum Texts {
         static let defaultSummaryText = "대화를 종료해 요약을 확인하세요"
+    }
+    
+    enum Metrics {
+        static let cellVerticalPadding = 8.0
     }
 }

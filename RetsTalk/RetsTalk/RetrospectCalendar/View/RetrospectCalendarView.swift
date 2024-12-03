@@ -46,7 +46,7 @@ final class RetrospectCalendarView: BaseView {
         retrospectCalendarView.selectionBehavior = dateSelection
     }
     
-    // MARK: Reload Decorations
+    // MARK: Reload decorations
     
     func reloadDecorations(forDateComponents dateCompoenents: [DateComponents]) {
         retrospectCalendarView.reloadDecorations(forDateComponents: dateCompoenents, animated: true)
