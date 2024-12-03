@@ -13,14 +13,10 @@ struct SortedRetrospects {
     }
     
     subscript(row: Int, column: Int) -> Retrospect {
-        get {
-            return retrospects[row][column]
-        }
+        retrospects[row][column]
     }
     
     subscript(row: Int) -> [Retrospect] {
-        get {
-            return retrospects[row]
-        }
+        retrospects[row]
     }
 }

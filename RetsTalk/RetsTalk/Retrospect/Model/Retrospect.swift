@@ -84,6 +84,10 @@ extension Retrospect: EntityRepresentable {
         ]
     }
     
+    var identifyingDictionary: [String: Any] {
+        ["id": id]
+    }
+    
     /// - Status
     /// status를 통해 Value를 가져오고 mapping
     /// - Chat
