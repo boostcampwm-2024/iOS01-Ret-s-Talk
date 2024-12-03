@@ -90,8 +90,8 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
         )
     }
     
-    override func setupSubscription(on subscriptionSet: inout Set<AnyCancellable>) {
-        super.setupSubscription(on: &subscriptionSet)
+    override func setupSubscription() {
+        super.setupSubscription()
         
         renderingSubject
             .sink(receiveValue: { [weak self] (retrospect, scrollToBottomNeeded) in

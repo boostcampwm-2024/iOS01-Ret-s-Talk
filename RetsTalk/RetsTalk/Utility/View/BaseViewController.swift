@@ -9,7 +9,7 @@ import Combine
 import UIKit
 
 class BaseViewController: UIViewController {
-    private var subscriptionSet: Set<AnyCancellable>
+    var subscriptionSet: Set<AnyCancellable>
     
     // MARK: Initialization
     
@@ -38,7 +38,7 @@ class BaseViewController: UIViewController {
         super.viewWillAppear(animated)
         
         setupNavigationBar()
-        setupSubscription(on: &subscriptionSet)
+        setupSubscription()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -57,5 +57,5 @@ class BaseViewController: UIViewController {
         navigationController?.navigationBar.tintColor = .blazingOrange
     }
     
-    func setupSubscription(on subscriptionSet: inout Set<AnyCancellable>) {}
+    func setupSubscription() {}
 }

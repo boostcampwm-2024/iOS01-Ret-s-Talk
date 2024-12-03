@@ -190,7 +190,7 @@ final class CoreDataManager: Persistable, @unchecked Sendable {
     private func entityPredicate<Entity>(
         _ entity: Entity
     ) -> NSPredicate where Entity: EntityRepresentable {
-        let predicates = entity.mappingDictionary.map { (key, value) in
+        let predicates = entity.identifyingDictionary.map { (key, value) in
             NSPredicate(format: "\(key) == %@", argumentArray: [value])
         }
         return NSCompoundPredicate(andPredicateWithSubpredicates: predicates)

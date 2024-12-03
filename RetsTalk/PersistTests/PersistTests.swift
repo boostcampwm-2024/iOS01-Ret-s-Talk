@@ -40,7 +40,7 @@ final class PersistTests: XCTestCase {
         let targetContent = try XCTUnwrap(testableContents.randomElement())
         let targetEntity = TestEntity(content: targetContent)
         
-        let addedEntities = try await persistentManager.add(contentsOf: [targetEntity])
+        let addedEntities = try persistentManager.add(contentsOf: [targetEntity])
         
         XCTAssertEqual(addedEntities.first?.content, targetContent)
     }
@@ -52,7 +52,7 @@ final class PersistTests: XCTestCase {
         
         let predicate = CustomPredicate(format: "content = %@ AND integer = %@", argumentArray: [targetContent, 0])
         let request = PersistFetchRequest<TestEntity>(predicate: predicate, fetchLimit: 5)
-        let fetchedEntities = try await persistentManager.fetch(by: request)
+        let fetchedEntities = try persistentManager.fetch(by: request)
         
         XCTAssertEqual(fetchedEntities.count, 1)
         XCTAssertEqual(fetchedEntities.first?.content, targetContent)
@@ -65,7 +65,7 @@ final class PersistTests: XCTestCase {
         let sourceEntity = TestEntity(content: targetContent)
         let updatingEntity = TestEntity(content: "아파트아파트")
         
-        let updatedEntity = try await persistentManager.update(from: sourceEntity, to: updatingEntity)
+        let updatedEntity = try persistentManager.update(from: sourceEntity, to: updatingEntity)
         
         XCTAssertEqual(updatedEntity.content, updatingEntity.content)
     }
@@ -76,9 +76,9 @@ final class PersistTests: XCTestCase {
         let targetContent = try XCTUnwrap(testableContents.randomElement())
         let targetEntity = TestEntity(content: targetContent)
         
-        try await persistentManager.delete(contentsOf: [targetEntity])
+        try persistentManager.delete(contentsOf: [targetEntity])
         
-        let allEntities = try await persistentManager.fetch(by: PersistFetchRequest<TestEntity>(fetchLimit: 5))
+        let allEntities = try persistentManager.fetch(by: PersistFetchRequest<TestEntity>(fetchLimit: 5))
         XCTAssertEqual(allEntities.count, testableContents.count - 1)
         XCTAssertFalse(allEntities.contains(where: { $0.content == targetContent }))
     }
@@ -87,6 +87,6 @@ final class PersistTests: XCTestCase {
     
     private func addMultipleEntities(ofContents contents: [String]) async throws {
         let persistentManager = try XCTUnwrap(persistentManager)
-        _ = try await persistentManager.add(contentsOf: contents.map({ TestEntity(content: $0) }))
+        _ = try persistentManager.add(contentsOf: contents.map({ TestEntity(content: $0) }))
     }
 }
