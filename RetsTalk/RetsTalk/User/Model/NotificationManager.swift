@@ -8,52 +8,46 @@
 import UserNotifications
 
 final class NotificationManager: NotificationManageable {
-    func requestNotification(_ isOn: Bool, date: Date, completion: @Sendable @escaping (Bool) -> Void) {
+    func requestNotification(_ isOn: Bool, date: Date) async -> Bool {
         if isOn {
-            checkAndRequestPermission { [weak self] didAllowed in
-                switch didAllowed {
-                case true:
-                    self?.scheduleNotification(date: date)
-                    completion(true)
-                case false:
-                    self?.cancelNotification()
-                    completion(false)
-                }
+            let isPermissionAllowed = await checkAndRequestPermission()
+            if isPermissionAllowed {
+                scheduleNotification(date: date)
+            } else {
+                cancelNotification()
+                return false
             }
+            return true
         } else {
             cancelNotification()
-            completion(true)
-        }
-    }
-    
-    func checkAndRequestPermission(completion: @escaping (Bool) -> Void) {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            switch settings.authorizationStatus {
-            case .authorized, .provisional, .ephemeral:
-                completion(true)
-            case .denied:
-                completion(false)
-            case .notDetermined:
-                self.requestPermission(completion: completion)
-            @unknown default:
-                completion(false)
-            }
+            return true
         }
     }
 
-    private func requestPermission(completion: @escaping (Bool) -> Void) {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            guard error == nil
-            else {
-                completion(false)
-                return
-            }
-            
-            completion(granted)
+    private func checkAndRequestPermission() async -> Bool {
+        let center = UNUserNotificationCenter.current()
+        let settings = await center.notificationSettings()
+        switch settings.authorizationStatus {
+        case .notDetermined:
+            return await self.requestPermission()
+        case .denied:
+            return false
+        case .authorized, .provisional, .ephemeral:
+            return true
+        @unknown default:
+            return false
         }
     }
-    
-    func scheduleNotification(date: Date) {
+
+    private func requestPermission() async -> Bool {
+        let center = UNUserNotificationCenter.current()
+        do {
+            return try await center.requestAuthorization(options: [.alert, .sound, .badge])
+        } catch {}
+        return false
+    }
+
+    private func scheduleNotification(date: Date) {
         let center = UNUserNotificationCenter.current()
         let request = UNNotificationRequest(
             identifier: Texts.notificationIdentifier,
@@ -63,7 +57,7 @@ final class NotificationManager: NotificationManageable {
         center.add(request) { _ in }
     }
     
-    func cancelNotification() {
+    private func cancelNotification() {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
     }
     

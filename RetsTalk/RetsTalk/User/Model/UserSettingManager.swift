@@ -69,7 +69,7 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     }
     
     func updateCloudSyncState(state isOn: Bool) {
-        Task { @MainActor in
+        Task {
             var updatingUserData = userData
             updatingUserData.isCloudSyncOn = isOn
             update(to: updatingUserData)
@@ -78,18 +78,17 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     }
     
     func updateNotificationStatus(_ isOn: Bool, at date: Date) {
-        notificationManager.requestNotification(isOn, date: date) { isNotificationAllowed in
-            Task { @MainActor in
-                var updatingUserData = self.userData
-                if isNotificationAllowed {
-                    updatingUserData.isNotificationOn = isOn
-                    updatingUserData.notificationTime = date
-                    self.update(to: updatingUserData)
-                } else {
-                    updatingUserData.isNotificationOn = false
-                    self.update(to: updatingUserData)
-                    self.permissionAlertDelegate?.alertNeedNotificationPermission(self)
-                }
+        Task {
+            let isNotificationAllowed = await notificationManager.requestNotification(isOn, date: date)
+            var updatingUserData = self.userData
+            if isNotificationAllowed {
+                updatingUserData.isNotificationOn = isOn
+                updatingUserData.notificationTime = date
+                self.update(to: updatingUserData)
+            } else {
+                updatingUserData.isNotificationOn = false
+                self.update(to: updatingUserData)
+                self.permissionAlertDelegate?.alertNeedNotificationPermission(self)
             }
         }
     }
