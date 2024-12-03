@@ -62,8 +62,8 @@ final class RetrospectCalendarViewController: BaseViewController {
         title = Texts.CalendarViewTitle
     }
     
-    override func setupSubscription(on subscriptionSet: inout Set<AnyCancellable>) {
-        super.setupSubscription(on: &subscriptionSet)
+    override func setupSubscription() {
+        super.setupSubscription()
         
         retrospectsSubject
             .sink { [weak self] retrospects in

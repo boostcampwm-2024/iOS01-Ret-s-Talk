@@ -12,6 +12,11 @@ struct SortedRetrospects {
         self.retrospects = retrospects
     }
     
-    subscript(row: Int) -> [Retrospect] { retrospects[row] }
-    subscript(row: Int, column: Int) -> Retrospect { retrospects[row][column] }
+    subscript(row: Int, column: Int) -> Retrospect {
+        retrospects[row][column]
+    }
+    
+    subscript(row: Int) -> [Retrospect] {
+        retrospects[row]
+    }
 }
