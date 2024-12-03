@@ -5,6 +5,6 @@
 //  Created on 11/19/24.
 //
 
-protocol AssistantMessageProvidable: Actor {
+protocol AssistantMessageProvidable: Sendable {
     func requestAssistantMessage(for chat: [Message]) async throws -> Message
 }

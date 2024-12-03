@@ -78,12 +78,15 @@ class RetrospectCountButton: UIButton {
         iconImageView.translatesAutoresizingMaskIntoConstraints = false
         textStackView.translatesAutoresizingMaskIntoConstraints = false
         
+        iconImageView.isUserInteractionEnabled = false
+        textStackView.isUserInteractionEnabled = false
+        
         NSLayoutConstraint.activate([
             iconImageView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             iconImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            iconImageView.widthAnchor.constraint(equalToConstant: Metrics.iconImageHeight),
+            iconImageView.widthAnchor.constraint(equalToConstant: Metrics.iconImageWidth),
             iconImageView.heightAnchor.constraint(equalTo: iconImageView.widthAnchor),
-
+            
             textStackView.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: Metrics.spacing),
             textStackView.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             textStackView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
@@ -93,10 +96,12 @@ class RetrospectCountButton: UIButton {
     }
 }
 
+// MARK: - Constants
+
 private extension RetrospectCountButton {
     enum Metrics {
         static let buttonHeight = 60.0
-        static let iconImageHeight = 40.0
+        static let iconImageWidth = 40.0
         static let spacing = 4.0
     }
 }

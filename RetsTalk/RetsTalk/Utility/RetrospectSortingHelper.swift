@@ -6,7 +6,7 @@
 //
 
 enum RetrospectSortingHelper {
-    static func execute(_ retrospects: [Retrospect]) -> [[Retrospect]] {
+    static func execute(_ retrospects: [Retrospect]) -> SortedRetrospects {
         let pinnedRetrospects = retrospects
             .filter { $0.isPinned }
             .sorted(by: { $0.createdAt > $1.createdAt })
@@ -17,6 +17,6 @@ enum RetrospectSortingHelper {
             .filter { ($0.status == .finished) && !$0.isPinned }
             .sorted(by: { $0.createdAt > $1.createdAt })
         
-        return [pinnedRetrospects, inProgressRetrospects, finishedRetrospects]
+        return SortedRetrospects([pinnedRetrospects, inProgressRetrospects, finishedRetrospects])
     }
 }
