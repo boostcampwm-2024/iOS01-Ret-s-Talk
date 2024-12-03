@@ -137,10 +137,11 @@ extension Retrospect: EntityRepresentable {
 // MARK: - Retrospect kind
 
 extension Retrospect {
-    enum Kind {
+    enum Kind: Hashable {
         case pinned
         case inProgress
         case finished
+        case currentMonth(startDate: Date, endDate: Date)
         
         func predicate(for userID: UUID) -> CustomPredicate {
             switch self {
@@ -156,6 +157,14 @@ extension Retrospect {
                     format: "userID = %@ AND status = %@ AND isPinned = %@",
                     argumentArray: [userID, Texts.retrospectFinished, false]
                 )
+            case .currentMonth(let startDate, let endDate):
+                CustomPredicate(
+                    format: "createdAt >= %@ AND createdAt < %@",
+                    argumentArray: [
+                        startDate,
+                        endDate,
+                    ]
+                )
             }
         }
         
@@ -165,6 +174,19 @@ extension Retrospect {
                 2
             case .finished:
                 30
+            case .currentMonth:
+                0
+            }
+        }
+        
+        func hash(into hasher: inout Hasher) {
+            switch self {
+            case .currentMonth(let startDate, let endDate):
+                hasher.combine(self)
+                hasher.combine(startDate)
+                hasher.combine(endDate)
+            default:
+                hasher.combine(self)
             }
         }
     }
