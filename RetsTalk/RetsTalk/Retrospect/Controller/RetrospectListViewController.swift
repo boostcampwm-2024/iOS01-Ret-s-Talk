@@ -15,13 +15,14 @@ final class RetrospectListViewController: BaseViewController {
     private let retrospectManager: RetrospectManageable
     private let userDefaultsManager: Persistable
     private let userSettingManager: UserSettingManager
-
+    
     private var subscriptionSet: Set<AnyCancellable>
     private var retrospectsSubject: CurrentValueSubject<SortedRetrospects, Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
     
     private var dataSource: RetrospectDataSource?
-
+    private var isRetrospectFetching = false
+    
     // MARK: UI Components
     
     private let retrospectListView: RetrospectListView
@@ -54,12 +55,12 @@ final class RetrospectListViewController: BaseViewController {
         )
         userDefaultsManager = UserDefaultsManager()
         userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
-
+        
         retrospectListView = RetrospectListView()
         retrospectsSubject = CurrentValueSubject(SortedRetrospects())
         errorSubject = CurrentValueSubject(nil)
         subscriptionSet = []
-
+        
         super.init(coder: coder)
     }
     
@@ -71,7 +72,7 @@ final class RetrospectListViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         addObserver()
         subscribeRetrospects()
         retrospectListView.setTableViewDelegate(self)
@@ -104,9 +105,9 @@ final class RetrospectListViewController: BaseViewController {
         navigationItem.rightBarButtonItem = settingsButton
         navigationItem.rightBarButtonItem?.tintColor = .black
     }
-
+    
     // MARK: Regarding iCloud
-
+    
     private func addObserver() {
         NotificationCenter.default.addObserver(
             self,
@@ -121,11 +122,11 @@ final class RetrospectListViewController: BaseViewController {
             object: nil
         )
     }
-
+    
     @objc private func refetchRetrospects() {
         fetchInitialRetrospect()
     }
-
+    
     @objc private func regenerateAndReplaceCoreDataManager() {
         let userData = userSettingManager.userData
         let isCloudSyncOn = userData.isCloudSyncOn
@@ -136,7 +137,7 @@ final class RetrospectListViewController: BaseViewController {
             await retrospectManager.replaceRetrospectStorage(newCoreDataManager)
         }
     }
-
+    
     // MARK: Retrospect handling
     
     private func subscribeRetrospects() {
@@ -154,6 +155,14 @@ final class RetrospectListViewController: BaseViewController {
         Task {
             await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
             sortAndSendRetrospects()
+        }
+    }
+    
+    private func fetchPreviousRetrospects() {
+        Task {
+            await retrospectManager.fetchPreviousRetrospects()
+            sortAndSendRetrospects()
+            self.isRetrospectFetching = false
         }
     }
     
@@ -179,7 +188,7 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     // MARK: Action controls
-
+    
     @objc private func didTapSettings() {
         let notificationManager = NotificationManager()
         let userSettingViewController = UserSettingViewController(
@@ -214,7 +223,7 @@ final class RetrospectListViewController: BaseViewController {
 // MARK: - UITableViewDiffableDataSource method
 
 private extension RetrospectListViewController {
-    func setupDataSource() {
+    func setUpDataSource() {
         dataSource = RetrospectDataSource(
             tableView: retrospectListView.retrospectListTableView
         ) { tableView, indexPath, retrospect in
@@ -253,6 +262,16 @@ private extension RetrospectListViewController {
 // MARK: - UITableViewDelegate conformance
 
 extension RetrospectListViewController: UITableViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        
+        if offsetY > contentHeight - scrollView.frame.height, !isRetrospectFetching {
+            isRetrospectFetching = true
+            fetchPreviousRetrospects()
+        }
+    }
+    
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let sections = dataSource?.snapshot().sectionIdentifiers
         let headerView = SectionHeaderView(title: sections?[section].title)
