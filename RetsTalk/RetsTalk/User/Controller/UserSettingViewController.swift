@@ -52,13 +52,13 @@ extension UserSettingViewController: UserSettingManageableDelegate {
     typealias Situation = UserSettingViewSituation
 
     func alertNeedNotificationPermission(_ userSettingManageable: any UserSettingManageable) {
-        let alertAction = UIAlertAction(title: Texts.accept, style: .default) { _ in
+        let acceptAction = UIAlertAction(title: Texts.accept, style: .default) { _ in
             if let url = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(url)
             }
         }
-        let cancel = UIAlertAction(title: Texts.cancel, style: .cancel)
-        presentAlert(for: .needNotifactionPermission, actions: [alertAction, cancel])
+        let cancelAction = UIAlertAction(title: Texts.cancel, style: .cancel)
+        presentAlert(for: .needNotifactionPermission, actions: [acceptAction, cancelAction])
     }
 
     enum UserSettingViewSituation: AlertSituation {
