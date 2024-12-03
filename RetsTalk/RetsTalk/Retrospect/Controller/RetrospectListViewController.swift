@@ -75,7 +75,6 @@ final class RetrospectListViewController: BaseViewController {
         addObserver()
         subscribeRetrospects()
         retrospectListView.setTableViewDelegate(self)
-        setupDataSource()
         addCreateButtondidTapAction()
         fetchInitialRetrospect()
     }
@@ -103,6 +102,12 @@ final class RetrospectListViewController: BaseViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.rightBarButtonItem = settingsButton
         navigationItem.rightBarButtonItem?.tintColor = .black
+    }
+    
+    override func setupDataSource() {
+        super.setupDataSource()
+        
+        setupDiffableDataSource()
     }
 
     // MARK: Regarding iCloud
@@ -212,7 +217,7 @@ final class RetrospectListViewController: BaseViewController {
 // MARK: - UITableViewDiffableDataSource method
 
 private extension RetrospectListViewController {
-    func setupDataSource() {
+    func setupDiffableDataSource() {
         dataSource = RetrospectDataSource(
             tableView: retrospectListView.retrospectListTableView
         ) { tableView, indexPath, retrospect in
