@@ -51,6 +51,10 @@ final class RetrospectCalendarView: BaseView {
     func reloadDecorations(forDateComponents dateCompoenents: [DateComponents]) {
         retrospectCalendarView.reloadDecorations(forDateComponents: dateCompoenents, animated: true)
     }
+    
+    func currentDataComponents() -> DateComponents {
+        retrospectCalendarView.visibleDateComponents
+    }
 }
 
 // MARK: - Subviews layouts

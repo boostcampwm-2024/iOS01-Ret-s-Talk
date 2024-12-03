@@ -46,6 +46,7 @@ final class RetrospectCalendarViewController: BaseViewController {
         super.viewDidLoad()
         
         loadRetrospects()
+       loadRetrospects(year: year, month: month)
     }
     
     // MARK: RetsTalk lifecycle
@@ -74,9 +75,9 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     // MARK: Retrospect manager action
     
-    private func loadRetrospects() {
+    private func loadRetrospects(year: Int, month: Int) {
         Task { [weak self] in
-            await self?.retrospectManager.fetchRetrospects(of: [.finished])
+            await self?.retrospectManager.fetchMonthRetrospect(year: year, month: month)
             if let fetchRetrospects = await self?.retrospectManager.retrospects {
                 self?.retrospectsSubject.send(fetchRetrospects)
             }
@@ -114,6 +115,16 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelega
         guard let resultRetrospects = retrospectsCache[normalizedDate], !resultRetrospects.isEmpty else { return nil }
         
         return .default(color: .blazingOrange)
+    }
+    
+    func calendarView(
+        _ calendarView: UICalendarView,
+        didChangeVisibleDateComponentsFrom previousDateComponents: DateComponents
+    ) {
+        let currentDateComponents = retrospectCalendarView.currentDataComponents()
+        guard let currentYear = currentDateComponents.year,
+              let currentMonth = currentDateComponents.month else { return }
+        loadRetrospects(year: currentYear, month: currentMonth)
     }
 }
 
