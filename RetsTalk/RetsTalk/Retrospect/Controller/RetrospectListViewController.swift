@@ -22,6 +22,8 @@ final class RetrospectListViewController: BaseViewController {
     private let errorSubject: CurrentValueSubject<Error?, Never>
     
     private var dataSource: RetrospectDataSource?
+    
+    private var isRetrospectFetching = false
 
     // MARK: UI Components
     
@@ -151,6 +153,14 @@ final class RetrospectListViewController: BaseViewController {
         }
     }
     
+    private func fetchPreviousRetrospects() {
+        Task {
+            await retrospectManager.fetchPreviousRetrospects()
+            sortAndSendRetrospects()
+            self.isRetrospectFetching = false
+        }
+    }
+    
     private func sortAndSendRetrospects() {
         Task {
             let sortedRetrospects = RetrospectSortingHelper.execute(await retrospectManager.retrospects)
@@ -255,6 +265,16 @@ private extension RetrospectListViewController {
 // MARK: - UITableViewDelegate conformance
 
 extension RetrospectListViewController: UITableViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        
+        if offsetY > contentHeight - scrollView.frame.height, !isRetrospectFetching {
+            isRetrospectFetching = true
+            fetchPreviousRetrospects()
+        }
+    }
+    
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let sections = dataSource?.snapshot().sectionIdentifiers
         let headerView = SectionHeaderView(title: sections?[section].title)
