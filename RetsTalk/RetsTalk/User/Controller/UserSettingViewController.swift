@@ -10,7 +10,7 @@ import SwiftUI
 import UIKit
 
 final class UserSettingViewController<T: UserSettingManageable>:
-    UIHostingController<UserSettingView<T>>, AlertPresentable {
+    BaseHostingViewController<UserSettingView<T>>, AlertPresentable {
     private let userSettingManager: T
     
     // MARK: Init method
@@ -63,12 +63,6 @@ extension UserSettingViewController: UserSettingManageableDelegate {
         presentAlert(for: .needNotifactionPermission, actions: [alertAction, cancel])
     }
 
-    func presentAlert(for situation: UserSettingViewSituation, actions: [UIAlertAction]) {
-        let alert = UIAlertController(title: situation.title, message: situation.message, preferredStyle: .alert)
-        actions.forEach { alert.addAction($0) }
-        present(alert, animated: true)
-    }
-
     enum UserSettingViewSituation: AlertSituation {
         case needNotifactionPermission
 
@@ -88,7 +82,7 @@ enum UserSettingViewTexts {
     static let leftBarButtonItemTitle = "회고"
 }
 
-fileprivate enum Texts {
+private enum Texts {
     static let accept = "확인"
     static let cancel = "취소"
     static let needNotificationPermissonTitle = "알림 권한 요청"
