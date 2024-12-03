@@ -28,7 +28,7 @@ final class RetrospectListView: UIView {
         return button
     }()
     
-    private let totalCountButton: RetrospectCountButton = {
+    private let totalCountView: RetrospectCountButton = {
         let button = RetrospectCountButton(
             imageSystemName: Texts.totalCountButtonImageName,
             title: Texts.totalCountButtonTitle
@@ -108,10 +108,10 @@ final class RetrospectListView: UIView {
         ))
         
         headerView.addSubview(calendarButton)
-        headerView.addSubview(totalCountButton)
+        headerView.addSubview(totalCountView)
         
         calendarButton.translatesAutoresizingMaskIntoConstraints = false
-        totalCountButton.translatesAutoresizingMaskIntoConstraints = false
+        totalCountView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             calendarButton.topAnchor.constraint(
@@ -122,10 +122,10 @@ final class RetrospectListView: UIView {
                 constant: Metrics.calendarButtonMargin
             ),
 
-            totalCountButton.topAnchor.constraint(
+            totalCountView.topAnchor.constraint(
                 equalTo: headerView.topAnchor
             ),
-            totalCountButton.leadingAnchor.constraint(
+            totalCountView.leadingAnchor.constraint(
                 equalTo: headerView.centerXAnchor,
                 constant: Metrics.totalCountButtonMargin
             ),
@@ -148,7 +148,7 @@ final class RetrospectListView: UIView {
     
     func updateButtonSubtitle(datesCount: Int, totalRetrospectCount: Int) {
         calendarButton.setSubtitle("\(datesCount)일")
-        totalCountButton.setSubtitle("\(totalRetrospectCount)개")
+        totalCountView.setSubtitle("\(totalRetrospectCount)개")
     }
 
 }
