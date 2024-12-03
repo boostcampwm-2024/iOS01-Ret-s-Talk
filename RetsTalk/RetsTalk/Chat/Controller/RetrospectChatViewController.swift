@@ -132,8 +132,6 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
                 self?.updateDataSourceDifference(to: retrospect.chat)
                 self?.previousRetrospect = retrospect
                 self?.updateUI()
-                
-                print(self?.retrospect.status ?? "상태 없음")
             })
             .store(in: &subscriptionSet)
     }
