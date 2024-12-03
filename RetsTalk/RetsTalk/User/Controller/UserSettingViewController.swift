@@ -17,9 +17,7 @@ final class UserSettingViewController<T: UserSettingManageable>:
     
     init(userSettingManager: T) {
         self.userSettingManager = userSettingManager
-        let userSettingView = UserSettingView(
-            userSettingManager: userSettingManager
-        )
+        let userSettingView = UserSettingView(userSettingManager: userSettingManager)
 
         super.init(rootView: userSettingView)
     }

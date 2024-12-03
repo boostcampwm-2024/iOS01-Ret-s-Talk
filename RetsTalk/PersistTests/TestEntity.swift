@@ -23,6 +23,13 @@ extension TestEntity: EntityRepresentable {
         ]
     }
     
+    var identifyingDictionary: [String: Any] {
+        [
+            "content": content,
+            "integer": integer,
+        ]
+    }
+    
     init(dictionary: [String: Any]) {
         content = dictionary["content"] as? String ?? ""
         integer = dictionary["integer"] as? Int ?? 0
