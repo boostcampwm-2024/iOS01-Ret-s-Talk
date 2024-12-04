@@ -19,23 +19,24 @@ final class RetrospectListView: UIView {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: Constants.Texts.retrospectCellIdentifier)
         return tableView
     }()
+    
     private let calendarButton: RetrospectCountButton = {
         let button = RetrospectCountButton(
             imageSystemName: Texts.calendarButtonImageName,
-            title: Texts.calendarButtonTitle,
-            subtitle: "2일"
+            title: Texts.calendarButtonTitle
         )
         return button
     }()
-    private let totalCountButton: RetrospectCountButton = {
+    
+    private let totalCountView: RetrospectCountButton = {
         let button = RetrospectCountButton(
             imageSystemName: Texts.totalCountButtonImageName,
-            title: Texts.totalCountButtonTitle,
-            subtitle: "2일"
+            title: Texts.totalCountButtonTitle
         )
         button.setImageColor(.lightGray)
         return button
     }()
+    
     private let createRetrospectButton = CreateRetrospectButton()
     
     // MARK: Init method
@@ -107,10 +108,10 @@ final class RetrospectListView: UIView {
         ))
         
         headerView.addSubview(calendarButton)
-        headerView.addSubview(totalCountButton)
+        headerView.addSubview(totalCountView)
         
         calendarButton.translatesAutoresizingMaskIntoConstraints = false
-        totalCountButton.translatesAutoresizingMaskIntoConstraints = false
+        totalCountView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             calendarButton.topAnchor.constraint(
@@ -121,10 +122,10 @@ final class RetrospectListView: UIView {
                 constant: Metrics.calendarButtonMargin
             ),
 
-            totalCountButton.topAnchor.constraint(
+            totalCountView.topAnchor.constraint(
                 equalTo: headerView.topAnchor
             ),
-            totalCountButton.leadingAnchor.constraint(
+            totalCountView.leadingAnchor.constraint(
                 equalTo: headerView.centerXAnchor,
                 constant: Metrics.totalCountButtonMargin
             ),
@@ -145,9 +146,10 @@ final class RetrospectListView: UIView {
         calendarButton.addAction(action, for: .touchUpInside)
     }
     
-    func reloadData() {
-        retrospectListTableView.reloadData()
+    func updateButtonSubtitle(_ totalRetrospectCount: Int) {
+        totalCountView.setSubtitle("\(totalRetrospectCount)개")
     }
+
 }
 
 // MARK: - Constants

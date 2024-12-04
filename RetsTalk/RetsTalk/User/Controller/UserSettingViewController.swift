@@ -35,6 +35,8 @@ final class UserSettingViewController<T: UserSettingManageable>:
     }
 
     override func setupDelegation() {
+        super.setupDelegation()
+        
         userSettingManager.permissionAlertDelegate = self
     }
 }

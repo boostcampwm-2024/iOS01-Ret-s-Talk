@@ -21,7 +21,8 @@ final class RetrospectListViewController: BaseViewController {
     private let errorSubject: CurrentValueSubject<Error?, Never>
     
     private var dataSource: RetrospectDataSource?
-
+    private var isRetrospectFetching = false
+    
     // MARK: UI Components
     
     private let retrospectListView: RetrospectListView
@@ -69,7 +70,7 @@ final class RetrospectListViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         addObserver()
         addCreateButtondidTapAction()
         fetchInitialRetrospect()
@@ -122,12 +123,13 @@ final class RetrospectListViewController: BaseViewController {
                 guard let self = self else { return }
                 
                 self.updateSnapshot()
+                self.updateTotalRetrospectCount()
             }
             .store(in: &subscriptionSet)
     }
 
     // MARK: Regarding iCloud
-
+    
     private func addObserver() {
         NotificationCenter.default.addObserver(
             self,
@@ -136,17 +138,33 @@ final class RetrospectListViewController: BaseViewController {
             object: nil
         )
     }
-
+    
     @objc private func refetchRetrospects() {
         fetchInitialRetrospect()
     }
 
     // MARK: Retrospect handling
     
+    private func updateTotalRetrospectCount() {
+        Task {
+            guard let count = await retrospectManager.fetchRetrospectsCount() else { return }
+            
+            retrospectListView.updateButtonSubtitle(count)
+        }
+    }
+
     private func fetchInitialRetrospect() {
         Task {
             await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
             sortAndSendRetrospects()
+        }
+    }
+    
+    private func fetchPreviousRetrospects() {
+        Task {
+            await retrospectManager.fetchPreviousRetrospects()
+            sortAndSendRetrospects()
+            self.isRetrospectFetching = false
         }
     }
     
@@ -182,7 +200,7 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     // MARK: Action controls
-
+    
     @objc private func didTapSettings() {
         let userSettingViewController = UserSettingViewController(userSettingManager: userSettingManager)
         navigationController?.pushViewController(userSettingViewController, animated: true)
@@ -250,6 +268,16 @@ private extension RetrospectListViewController {
 // MARK: - UITableViewDelegate conformance
 
 extension RetrospectListViewController: UITableViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        
+        if offsetY > contentHeight - scrollView.frame.height, !isRetrospectFetching {
+            isRetrospectFetching = true
+            fetchPreviousRetrospects()
+        }
+    }
+    
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let sections = dataSource?.snapshot().sectionIdentifiers
         let headerView = SectionHeaderView(title: sections?[section].title)
