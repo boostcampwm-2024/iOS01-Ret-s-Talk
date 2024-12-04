@@ -11,6 +11,7 @@ import UIKit
 
 final class RetrospectListViewController: BaseViewController {
     typealias Situation = RetrospectListSituation
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<RetrospectSection, Retrospect>
     private typealias RetrospectDataSource = UITableViewDiffableDataSource<RetrospectSection, Retrospect>
     
     private let retrospectManager: RetrospectManageable
@@ -22,6 +23,7 @@ final class RetrospectListViewController: BaseViewController {
     
     private var dataSource: RetrospectDataSource?
     private var isRetrospectFetching = false
+    private var isRetrospectAppendable = false
     
     // MARK: UI Components
     
@@ -118,6 +120,7 @@ final class RetrospectListViewController: BaseViewController {
         super.setupSubscription()
         
         retrospectsSubject
+            .dropFirst()
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
@@ -157,14 +160,22 @@ final class RetrospectListViewController: BaseViewController {
         Task {
             await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
             sortAndSendRetrospects()
+            isRetrospectAppendable = true
         }
     }
     
     private func fetchPreviousRetrospects() {
         Task {
-            await retrospectManager.fetchPreviousRetrospects()
+            let appendedCount = await retrospectManager.fetchPreviousRetrospects()
+            guard appendedCount != 0
+            else {
+                isRetrospectAppendable = false
+                isRetrospectFetching = false
+                return
+            }
+            
             sortAndSendRetrospects()
-            self.isRetrospectFetching = false
+            isRetrospectFetching = false
         }
     }
     
@@ -252,7 +263,7 @@ private extension RetrospectListViewController {
     }
     
     func updateSnapshot() {
-        var snapshot = NSDiffableDataSourceSnapshot<RetrospectSection, Retrospect>()
+        var snapshot = Snapshot()
         let sortedRetrospects = retrospectsSubject.value
         for (index, sectionTitle) in RetrospectSection.allCases.enumerated() {
             let retrospects = sortedRetrospects[index]
@@ -272,7 +283,7 @@ extension RetrospectListViewController: UITableViewDelegate {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         
-        if offsetY > contentHeight - scrollView.frame.height, !isRetrospectFetching {
+        if offsetY > contentHeight - scrollView.frame.height, !isRetrospectFetching, isRetrospectAppendable {
             isRetrospectFetching = true
             fetchPreviousRetrospects()
         }

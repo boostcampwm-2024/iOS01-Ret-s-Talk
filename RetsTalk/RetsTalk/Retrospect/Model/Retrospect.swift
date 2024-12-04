@@ -72,7 +72,7 @@ extension Retrospect: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
         hasher.combine(userID)
-        hasher.combine(chat.last)
+        hasher.combine(chat.count)
         hasher.combine(status)
         hasher.combine(summary)
         hasher.combine(isPinned)
@@ -81,7 +81,7 @@ extension Retrospect: Hashable {
     static func == (lhs: Retrospect, rhs: Retrospect) -> Bool {
         lhs.id == rhs.id
         && lhs.userID == rhs.userID
-        && lhs.chat.last == rhs.chat.last
+        && lhs.chat.count == rhs.chat.count
         && lhs.status == rhs.status
         && lhs.summary == rhs.summary
         && lhs.isPinned == rhs.isPinned
