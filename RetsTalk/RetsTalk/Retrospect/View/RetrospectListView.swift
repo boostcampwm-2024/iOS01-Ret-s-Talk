@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class RetrospectListView: UIView {
+final class RetrospectListView: BaseView {
     
     // MARK: UI components
     
@@ -19,6 +19,17 @@ final class RetrospectListView: UIView {
         tableView.rowHeight = UITableView.automaticDimension
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: Constants.Texts.retrospectCellIdentifier)
         return tableView
+    }()
+    
+    private let headerView: BaseView = {
+        let view = BaseView()
+        view.frame = CGRect(
+            x: Metrics.headerViewX,
+            y: Metrics.headerViewY,
+            width: view.frame.width,
+            height: Metrics.fixedButtonAreaHeight
+        )
+        return view
     }()
     
     private let calendarButton: RetrospectCountButton = {
@@ -40,32 +51,35 @@ final class RetrospectListView: UIView {
     
     private let createRetrospectButton = CreateRetrospectButton()
     
-    // MARK: Init method
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    // MARK: RetsTalk lifecycle
+
+    override func setupStyles() {
+        super.setupStyles()
         
         backgroundColor = .backgroundMain
-        setupTableViewLayout()
-        setupFloatingButtonLayout()
     }
     
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
+    override func setupSubviews() {
+        super.setupSubviews()
         
-        backgroundColor = .backgroundMain
-        setupFloatingButtonLayout()
-        setupTableViewLayout()
+        addSubview(retrospectListTableView)
+        addSubview(createRetrospectButton)
+
+        retrospectListTableView.tableHeaderView = headerView
+        headerView.addSubview(calendarButton)
+        headerView.addSubview(totalCountView)
     }
     
-    // MARK: Custom Method
+    override func setupSubviewLayouts() {
+        super.setupSubviewLayouts()
+        
+        setupTableViewLayout()
+        setupCreateButtonLayout()
+        setupHeaderViewLayout()
+    }
     
     private func setupTableViewLayout() {
-        addSubview(retrospectListTableView)
         retrospectListTableView.translatesAutoresizingMaskIntoConstraints = false
-        
-        let headerView = createHeaderView()
-        retrospectListTableView.tableHeaderView = headerView
         
         NSLayoutConstraint.activate([
             retrospectListTableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
@@ -75,15 +89,13 @@ final class RetrospectListView: UIView {
         ])
     }
     
-    private func setupFloatingButtonLayout() {
-        addSubview(createRetrospectButton)
-        
+    private func setupCreateButtonLayout() {
         createRetrospectButton.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             createRetrospectButton.bottomAnchor.constraint(
                 equalTo: safeAreaLayoutGuide.bottomAnchor,
-                constant: Metrics.buttonBottomAnchorConstant
+                constant: Metrics.buttonBottomAnchor
             ),
             createRetrospectButton.centerXAnchor.constraint(
                 equalTo: centerXAnchor
@@ -95,22 +107,9 @@ final class RetrospectListView: UIView {
                 equalToConstant: Metrics.diameter
             ),
         ])
-        
-        sendSubviewToBack(retrospectListTableView)
-        bringSubviewToFront(createRetrospectButton)
     }
-  
-    private func createHeaderView() -> UIView {
-        let headerView = UIView(frame: CGRect(
-            x: 0,
-            y: 0,
-            width: retrospectListTableView.frame.width,
-            height: Metrics.fixedButtonAreaHeight
-        ))
-        
-        headerView.addSubview(calendarButton)
-        headerView.addSubview(totalCountView)
-        
+    
+    private func setupHeaderViewLayout() {
         calendarButton.translatesAutoresizingMaskIntoConstraints = false
         totalCountView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -132,8 +131,11 @@ final class RetrospectListView: UIView {
             ),
         ])
         
-        return headerView
+        sendSubviewToBack(retrospectListTableView)
+        bringSubviewToFront(createRetrospectButton)
     }
+
+    // MARK: Custom Method
 
     func setTableViewDelegate(_ delegate: UITableViewDelegate) {
         retrospectListTableView.delegate = delegate
@@ -147,8 +149,9 @@ final class RetrospectListView: UIView {
         calendarButton.addAction(action, for: .touchUpInside)
     }
     
-    func updateButtonSubtitle(_ totalRetrospectCount: Int) {
-        totalCountView.setSubtitle("\(totalRetrospectCount)개")
+    func updateHeaderContent(totalCount: Int, monthlyCount: Int) {
+        totalCountView.setSubtitle("\(totalCount)개")
+        calendarButton.setSubtitle("\(monthlyCount)개")
     }
 
 }
@@ -159,17 +162,20 @@ private extension RetrospectListView {
     enum Metrics {
         static let tableViewBottonPadding = 60.0
         static let diameter = 80.0
-        static let buttonBottomAnchorConstant = -10.0
+        static let buttonBottomAnchor = -10.0
         static let fixedButtonAreaHeight = 40.0
         static let calendarButtonMargin = 16.0
         static let totalCountButtonMargin = 32.0
+        
+        static let headerViewX = 0.0
+        static let headerViewY = 0.0
     }
     
     enum Texts {
         static let foregroundImageName = "plus"
         
         static let calendarButtonImageName = "calendar"
-        static let calendarButtonTitle = "회고 쓴 일수"
+        static let calendarButtonTitle = "이달의 회고"
         
         static let totalCountButtonImageName = "tray.full.fill"
         static let totalCountButtonTitle = "총 회고 수"
