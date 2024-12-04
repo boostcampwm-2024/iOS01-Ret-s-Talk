@@ -167,10 +167,10 @@ extension Retrospect {
                     format: "userID = %@ AND status = %@ AND isPinned = %@ AND createdAt < %@",
                     argumentArray: [userID, Texts.retrospectFinished, false, lastRetrospectCreatedDate]
                 )
-            case .monthly(let startOfMonth, let startOfNextMonth):
+            case .monthly(let currentMonth, let nextMonth):
                 CustomPredicate(
                     format: "userID == %@ AND createdAt >= %@ AND createdAt < %@",
-                    argumentArray: [userID, startOfMonth, startOfNextMonth]
+                    argumentArray: [userID, currentMonth, nextMonth]
                 )
             }
         }

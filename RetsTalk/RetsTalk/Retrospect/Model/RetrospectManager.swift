@@ -196,16 +196,16 @@ final class RetrospectManager: RetrospectManageable {
     
     private func monthlyRetrospectCountFetchRequest() -> PersistFetchRequest<Retrospect> {
         let calendar = Calendar.current
-        guard let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: Date())),
-              let startOfNextMonth = calendar.date(byAdding: DateComponents(month: 1), to: startOfMonth)
+        guard let currentMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: Date())),
+              let nextMonth = calendar.date(byAdding: DateComponents(month: 1), to: currentMonth)
         else {
             return PersistFetchRequest<Retrospect>(fetchLimit: 0)
         }
         
-        let predicate = Retrospect.Kind.predicate(.monthly(from: startOfMonth, to: startOfNextMonth))(for: userID)
+        let predicate = Retrospect.Kind.predicate(.monthly(from: currentMonth, to: nextMonth))(for: userID)
         return PersistFetchRequest(
             predicate: predicate,
-            fetchLimit: Retrospect.Kind.monthly(from: startOfMonth, to: startOfNextMonth).fetchLimit
+            fetchLimit: Retrospect.Kind.monthly(from: currentMonth, to: nextMonth).fetchLimit
         )
     }
     
