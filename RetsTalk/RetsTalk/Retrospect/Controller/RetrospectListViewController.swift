@@ -170,8 +170,12 @@ final class RetrospectListViewController: BaseViewController {
         }
         errorSubject
             .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                guard let self = self else { return }
+            .sink { [weak self] error in
+                guard let self, let error else { return }
+                
+                self.presentAlert(for: Situation.error(error),
+                                  actions: [UIAlertAction(title: Texts.confirmAlertTitle, style: .default)]
+                )
             }
             .store(in: &subscriptionSet)
     }
@@ -185,7 +189,6 @@ final class RetrospectListViewController: BaseViewController {
             .store(in: &subscriptionSet)
     }
     
-
     // MARK: Retrospect handling
     
     private func updateTotalRetrospectCount() {
@@ -427,11 +430,16 @@ extension RetrospectListViewController: UserSettingManageableCloudDelegate {
 extension RetrospectListViewController: AlertPresentable {
     enum RetrospectListSituation: AlertSituation {
         case delete
+        case error(Error)
         
         var title: String {
             switch self {
             case .delete:
                 "회고를 삭제하시겠습니까?"
+            case .error(let error as LocalizedError):
+                error.errorDescription ?? "오류"
+            default:
+                "오류"
             }
         }
         
@@ -439,6 +447,10 @@ extension RetrospectListViewController: AlertPresentable {
             switch self {
             case .delete:
                 "삭제된 회고는 복구할 수 없습니다."
+            case .error(let error as LocalizedError):
+                error.failureReason ?? ""
+            default:
+                ""
             }
         }
     }
@@ -477,6 +489,7 @@ private extension RetrospectListViewController {
     enum Texts {
         static let cancelAlertTitle = "취소"
         static let deleteAlertTitle = "삭제"
+        static let confirmAlertTitle = "확인"
         
         static let settingButtonImageName = "gearshape"
         static let deleteIconImageName = "trash.fill"
