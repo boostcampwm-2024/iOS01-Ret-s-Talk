@@ -23,8 +23,8 @@ final class RetrospectListViewController: BaseViewController {
     private let errorSubject: CurrentValueSubject<Error?, Never>
     
     private var dataSource: RetrospectDataSource?
-    private var isRetrospectFetching = false
-    private var isRetrospectAppendable = false
+    private var isRetrospectFetching: Bool
+    private var isRetrospectAppendable: Bool
     
     // MARK: UI Components
     
@@ -44,6 +44,9 @@ final class RetrospectListViewController: BaseViewController {
         retrospectsSubject = CurrentValueSubject(SortedRetrospects())
         errorSubject = CurrentValueSubject(nil)
         
+        isRetrospectFetching = false
+        isRetrospectAppendable = false
+        
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -62,6 +65,9 @@ final class RetrospectListViewController: BaseViewController {
         retrospectsSubject = CurrentValueSubject(SortedRetrospects())
         errorSubject = CurrentValueSubject(nil)
 
+        isRetrospectFetching = false
+        isRetrospectAppendable = false
+        
         super.init(coder: coder)
     }
     
@@ -175,15 +181,14 @@ final class RetrospectListViewController: BaseViewController {
     private func fetchPreviousRetrospects() {
         Task {
             let appendedCount = await retrospectManager.fetchPreviousRetrospects()
+            isRetrospectFetching = false
             guard appendedCount != 0
             else {
                 isRetrospectAppendable = false
-                isRetrospectFetching = false
                 return
             }
             
             sortAndSendRetrospects()
-            isRetrospectFetching = false
         }
     }
     
@@ -290,7 +295,8 @@ extension RetrospectListViewController: UITableViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
-        guard offsetY > contentHeight - scrollView.frame.height - Metrics.fetchingOffsetThreshold,
+        let isNearBottom = offsetY > contentHeight - scrollView.frame.height - Metrics.fetchingOffsetThreshold
+        guard isNearBottom,
               !isRetrospectFetching,
               isRetrospectAppendable
         else { return }

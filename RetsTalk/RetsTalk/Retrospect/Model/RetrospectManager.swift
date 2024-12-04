@@ -68,9 +68,9 @@ final class RetrospectManager: RetrospectManageable {
         return retrospectChatManager
     }
     
-    func fetchRetrospects(of kindSet: [Retrospect.Kind]) {
+    func fetchRetrospects(of kindList: [Retrospect.Kind]) {
         do {
-            for kind in kindSet {
+            for kind in kindList {
                 let request = retrospectFetchRequest(for: kind)
                 let fetchedRetrospects = try retrospectStorage.fetch(by: request)
                 for retrospect in fetchedRetrospects where !retrospects.contains(retrospect) {
