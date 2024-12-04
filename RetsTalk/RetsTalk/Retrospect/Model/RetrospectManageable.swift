@@ -17,7 +17,7 @@ protocol RetrospectManageable: Sendable {
     func fetchPreviousRetrospects()
     func togglePinRetrospect(_ retrospect: Retrospect)
     func finishRetrospect(_ retrospect: Retrospect) async
-    func deleteRetrospect(_ retrospect: Retrospect) async
+    func deleteRetrospect(_ retrospect: Retrospect)
     func fetchMonthRetrospect(year: Int, month: Int)
     func refreshRetrospectStorage(iCloudEnabled: Bool)
 }
