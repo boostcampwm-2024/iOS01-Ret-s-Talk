@@ -99,10 +99,14 @@ final class RetrospectCalendarViewController: BaseViewController {
     }
     
     private func filterNewRetrospects(_ fetchedRetrospects: [Retrospect]) -> [Retrospect] {
-        fetchedRetrospects.filter { fetched in
-            let dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: fetched.createdAt)
+        fetchedRetrospects.filter { fetchedretrospects in
+            let dateComponents = Calendar.current.dateComponents(
+                [.year, .month, .day],
+                from: fetchedretrospects.createdAt
+            )
             guard let cachedRetrospects = retrospectsCache[dateComponents] else { return true }
-            return !cachedRetrospects.contains(where: { $0.id == fetched.id })
+            
+            return !cachedRetrospects.contains(where: { $0.id == fetchedretrospects.id })
         }
     }
     
