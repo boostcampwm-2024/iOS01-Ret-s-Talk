@@ -25,7 +25,6 @@ final class MessageInputView: BaseView {
         let view = UIView()
         view.backgroundColor = .systemGray6
         view.layer.cornerRadius = Metrics.backgroundCornerRadius
-        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     private var textInputView: UITextView = {
@@ -36,7 +35,6 @@ final class MessageInputView: BaseView {
         textView.backgroundColor = .clear
         textView.textContainerInset = UIEdgeInsets(top: 1, left: 0, bottom: 0, right: 0)
         textView.isScrollEnabled = false
-        textView.translatesAutoresizingMaskIntoConstraints = false
         return textView
     }()
     private var sendButton: UIButton = {
@@ -48,17 +46,10 @@ final class MessageInputView: BaseView {
         button.setImage(icon, for: .normal)
         button.tintColor = .blazingOrange
         button.isEnabled = false
-        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
     // MARK: RetsTalk lifecycle
-    
-    override func setupStyles() {
-        super.setupStyles()
-        
-        translatesAutoresizingMaskIntoConstraints = false
-    }
     
     override func setupSubviews() {
         super.setupSubviews()
@@ -161,6 +152,8 @@ extension MessageInputView: UITextViewDelegate {
 
 fileprivate extension MessageInputView {
     private func setUpBackgroundViewLayout() {
+        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             backgroundView.leftAnchor.constraint(
                 equalTo: leftAnchor,
@@ -181,6 +174,8 @@ fileprivate extension MessageInputView {
     }
     
     private func setUpSendButtonLayout() {
+        sendButton.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             sendButton.heightAnchor.constraint(
                 equalToConstant: Metrics.sendButtonSideLength
@@ -200,6 +195,8 @@ fileprivate extension MessageInputView {
     }
     
     private func setUpTextInputViewLayout() {
+        textInputView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             textInputView.topAnchor.constraint(
                 equalTo: backgroundView.topAnchor,

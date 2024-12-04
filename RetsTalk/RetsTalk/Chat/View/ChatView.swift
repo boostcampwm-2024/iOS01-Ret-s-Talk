@@ -19,7 +19,6 @@ final class ChatView: BaseView {
     
     private let chatTableView: UITableView = {
         let tableView = UITableView()
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.scrollsToTop = false
         tableView.separatorStyle = .none
         tableView.backgroundColor = .backgroundMain
@@ -30,7 +29,6 @@ final class ChatView: BaseView {
     private let activityIndicatorView: UIActivityIndicatorView = {
         let activityIndicatorView = UIActivityIndicatorView(style: .medium)
         activityIndicatorView.color = .blazingOrange
-        activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
         return activityIndicatorView
     }()
     private let retryView: RetryView = {
@@ -173,6 +171,8 @@ extension ChatView: MessageInputViewDelegate {
 
 fileprivate extension ChatView {
     func setupChatTableViewLayouts() {
+        chatTableView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             chatTableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             chatTableView.bottomAnchor.constraint(equalTo: messageInputView.topAnchor),
@@ -182,6 +182,8 @@ fileprivate extension ChatView {
     }
     
     func setupMessageInputViewLayouts() {
+        messageInputView.translatesAutoresizingMaskIntoConstraints = false
+        
         let messageInputViewHeightConstraint = messageInputView.heightAnchor.constraint(
             equalToConstant: Metrics.messageInputViewHeight
         )
@@ -200,6 +202,8 @@ fileprivate extension ChatView {
     }
     
     func setupActivityIndicatorViewLayouts() {
+        activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             activityIndicatorView.bottomAnchor.constraint(
                 equalTo: messageInputView.topAnchor,
@@ -213,6 +217,8 @@ fileprivate extension ChatView {
     }
     
     func setupRetryViewLayouts() {
+        retryView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             retryView.bottomAnchor.constraint(
                 equalTo: messageInputView.topAnchor,

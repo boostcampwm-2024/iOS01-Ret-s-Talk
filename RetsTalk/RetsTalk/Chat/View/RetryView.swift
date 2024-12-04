@@ -16,7 +16,6 @@ final class RetryView: BaseView {
         label.text = Texts.backgroundLabelText
         label.textColor = .blazingOrange
         label.font = UIFont.appFont(.body)
-        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
@@ -26,7 +25,6 @@ final class RetryView: BaseView {
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .blazingOrange
         button.layer.cornerRadius = Metrics.cornerRadius
-        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
@@ -39,7 +37,6 @@ final class RetryView: BaseView {
         layer.borderWidth = Metrics.backgroundBorderWidth
         layer.borderColor = UIColor.blazingOrange.cgColor
         layer.cornerRadius = Metrics.cornerRadius
-        translatesAutoresizingMaskIntoConstraints = false
     }
     
     override func setupSubviews() {
@@ -51,6 +48,9 @@ final class RetryView: BaseView {
     
     override func setupSubviewLayouts() {
         super.setupSubviewLayouts()
+        
+        retryButton.translatesAutoresizingMaskIntoConstraints = false
+        backgroundLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             retryButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Metrics.padding),
