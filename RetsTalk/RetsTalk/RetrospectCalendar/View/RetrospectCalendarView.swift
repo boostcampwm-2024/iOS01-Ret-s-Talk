@@ -14,6 +14,7 @@ final class RetrospectCalendarView: BaseView {
         calendarView.wantsDateDecorations = true
         calendarView.fontDesign = .rounded
         calendarView.tintColor = .blazingOrange
+        calendarView.locale = Locale(identifier: "ko_KR")
         return calendarView
     }()
     
