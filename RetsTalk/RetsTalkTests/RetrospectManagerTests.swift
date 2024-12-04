@@ -34,8 +34,8 @@ final class RetrospectManagerTests: XCTestCase {
     
     func test_회고_생성_성공으로_회고_대화_매니저를_생성하는지() async throws {
         let retrospectManager = try XCTUnwrap(retrospectManager)
-        MockRetrospectAssistantProvider.requestAssistantMessageHandler = { _ in
-            Message(retrospectID: UUID(), role: .assistant, content: "회고 도움 메시지")
+        MockRetrospectStore.fetchHadler = { _ in
+            []
         }
         
         let newRetrospectChatManager = await retrospectManager.createRetrospect()

@@ -45,7 +45,7 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     required init?(coder: NSCoder) {
-        let coreDataManager = CoreDataManager(name: Constants.Texts.CoreDataContainerName, completion: { _ in })
+        let coreDataManager = CoreDataManager(name: Constants.Texts.coreDataContainerName, completion: { _ in })
         let clovaStudioManager = CLOVAStudioManager(urlSession: .shared)
         retrospectManager = RetrospectManager(
             userID: UUID(),
@@ -105,6 +105,7 @@ final class RetrospectListViewController: BaseViewController {
         super.setupDelegation()
         
         retrospectListView.setTableViewDelegate(self)
+        userSettingManager.cloudDelegate = self
     }
     
     override func setupDataSource() {
@@ -136,34 +137,17 @@ final class RetrospectListViewController: BaseViewController {
             name: .coreDataImportedNotification,
             object: nil
         )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(regenerateAndReplaceCoreDataManager),
-            name: .iCloudSyncStateChangeNotification,
-            object: nil
-        )
     }
     
     @objc private func refetchRetrospects() {
         fetchInitialRetrospect()
     }
-    
-    @objc private func regenerateAndReplaceCoreDataManager() {
-        let userData = userSettingManager.userData
-        let isCloudSyncOn = userData.isCloudSyncOn
-        let newCoreDataManager = CoreDataManager(
-            isiCloudSynced: isCloudSyncOn,
-            name: Constants.Texts.CoreDataContainerName) { _ in }
-        Task {
-            await retrospectManager.replaceRetrospectStorage(newCoreDataManager)
-        }
-    }
-    
+
     // MARK: Retrospect handling
     
     private func updateTotalRetrospectCount() {
         Task {
-            guard let fetchedRetrospectsCount = await retrospectManager.fetchRetrospectsCount() else { return }
+            guard let fetchedCount = await retrospectManager.fetchRetrospectsCount() else { return }
             
             retrospectListView.updateHeaderContent(
                 totalCount: fetchedCount.totalCount,
@@ -221,13 +205,7 @@ final class RetrospectListViewController: BaseViewController {
     // MARK: Action controls
     
     @objc private func didTapSettings() {
-        let notificationManager = NotificationManager()
-        let userSettingViewController = UserSettingViewController(
-            userSettingManager: UserSettingManager(
-                userDataStorage: UserDefaultsManager()
-            ),
-            notificationManager: NotificationManager()
-        )
+        let userSettingViewController = UserSettingViewController(userSettingManager: userSettingManager)
         navigationController?.pushViewController(userSettingViewController, animated: true)
     }
     
@@ -266,7 +244,7 @@ private extension RetrospectListViewController {
             cell.backgroundColor = .clear
             cell.contentConfiguration = UIHostingConfiguration {
                 RetrospectCell(
-                    summary: retrospect.summary ?? Texts.defaultSummaryText,
+                    summary: (retrospect.summary ?? retrospect.chat.last?.content) ?? Texts.defaultSummaryText,
                     createdAt: retrospect.createdAt,
                     isPinned: retrospect.isPinned
                 )
@@ -385,6 +363,18 @@ extension RetrospectListViewController: UITableViewDelegate {
         )
         
         return retrospect.isPinned ? unpinAction : pinAction
+    }
+}
+
+// MARK: - UserSettingManageableCloudDelegete conformance
+
+extension RetrospectListViewController: UserSettingManageableCloudDelegate {
+    func didCloudSyncStateChange(_ userSettingManageable: any UserSettingManageable) {
+        Task {
+            let userData = userSettingManager.userData
+            let isCloudSyncOn = userData.isCloudSyncOn
+            await retrospectManager.refreshRetrospectStorage(iCloudEnabled: isCloudSyncOn)
+        }
     }
 }
 

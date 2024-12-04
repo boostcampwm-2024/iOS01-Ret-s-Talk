@@ -8,14 +8,14 @@
 import Foundation
 
 extension CLOVAStudioManager: AssistantMessageProvidable {
-    func requestAssistantMessage(for chat: [Message]) async throws -> Message {
+    func requestAssistantMessage(for retrospect: Retrospect) async throws -> Message {
         let assistantMessageComposer = CLOVAStudioAPI(path: .chatbot)
             .configureMethod(.post)
             .configureHeader(CLOVAStudioManager.assistantMessageHeader)
-            .configureData(ChatParameter(chat: chat))
+            .configureData(ChatParameter(chat: retrospect.chat))
         let data = try await request(with: assistantMessageComposer)
         let assistantMessageDTO = try JSONDecoder().decode(AssistantMessageDTO.self, from: data)
-        return assistantMessageDTO.message
+        return assistantMessageDTO.message(for: retrospect)
     }
     
     // MARK: Header
@@ -52,8 +52,13 @@ extension CLOVAStudioManager: AssistantMessageProvidable {
             let message: MessageDTO?
         }
         
-        var message: Message {
-            Message(retrospectID: UUID(), role: .assistant, content: result?.message?.content ?? "", createdAt: Date())
+        func message(for retrospect: Retrospect) -> Message {
+            Message(
+                retrospectID: retrospect.id,
+                role: .assistant,
+                content: result?.message?.content ?? "",
+                createdAt: Date()
+            )
         }
     }
     
