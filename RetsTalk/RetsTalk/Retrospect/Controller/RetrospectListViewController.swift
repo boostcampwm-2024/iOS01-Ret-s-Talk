@@ -19,6 +19,7 @@ final class RetrospectListViewController: BaseViewController {
     private let userSettingManager: UserSettingManager
 
     private var retrospectsSubject: CurrentValueSubject<SortedRetrospects, Never>
+    private var fetchingDebounceSubject = PassthroughSubject<Void, Never>()
     private let errorSubject: CurrentValueSubject<Error?, Never>
     
     private var dataSource: RetrospectDataSource?
@@ -129,8 +130,15 @@ final class RetrospectListViewController: BaseViewController {
                 self.updateTotalRetrospectCount()
             }
             .store(in: &subscriptionSet)
+        
+        fetchingDebounceSubject
+            .debounce(for: .seconds(Numerics.fetchingDebounceInterval), scheduler: RunLoop.main)
+            .sink { [weak self] in
+                self?.fetchPreviousRetrospects()
+            }
+            .store(in: &subscriptionSet)
     }
-
+    
     // MARK: Regarding iCloud
     
     private func addObserver() {
@@ -282,11 +290,13 @@ extension RetrospectListViewController: UITableViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
+        guard offsetY > contentHeight - scrollView.frame.height - Metrics.fetchingOffsetThreshold,
+              !isRetrospectFetching,
+              isRetrospectAppendable
+        else { return }
         
-        if offsetY > contentHeight - scrollView.frame.height, !isRetrospectFetching, isRetrospectAppendable {
-            isRetrospectFetching = true
-            fetchPreviousRetrospects()
-        }
+        isRetrospectFetching = true
+        fetchingDebounceSubject.send()
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -431,6 +441,11 @@ private extension RetrospectListViewController {
     enum Metrics {
         static let cellVerticalMargin = 6.0
         static let tableViewHeaderHeight = 36.0
+        static let fetchingOffsetThreshold = 150.0
+    }
+    
+    enum Numerics {
+        static let fetchingDebounceInterval = 0.5
     }
     
     enum Texts {

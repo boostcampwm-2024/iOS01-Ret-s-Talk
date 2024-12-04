@@ -15,6 +15,7 @@ final class RetrospectListView: UIView {
         let tableView = UITableView()
         tableView.separatorStyle = .none
         tableView.backgroundColor = .backgroundMain
+        tableView.contentInset.bottom = Metrics.tableViewBottonPadding
         tableView.rowHeight = UITableView.automaticDimension
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: Constants.Texts.retrospectCellIdentifier)
         return tableView
@@ -156,6 +157,7 @@ final class RetrospectListView: UIView {
 
 private extension RetrospectListView {
     enum Metrics {
+        static let tableViewBottonPadding = 60.0
         static let diameter = 80.0
         static let buttonBottomAnchorConstant = -10.0
         static let fixedButtonAreaHeight = 40.0
