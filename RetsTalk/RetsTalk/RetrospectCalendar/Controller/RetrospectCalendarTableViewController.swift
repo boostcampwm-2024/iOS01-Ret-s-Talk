@@ -51,7 +51,7 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     override func setupDelegation() {
         super.setupDelegation()
         
-        retrospectCalendarTableView.setupretrospectListTableViewDelegate(self)
+        retrospectCalendarTableView.setupRetrospectListTableViewDelegate(self)
     }
     
     override func setupDataSource() {

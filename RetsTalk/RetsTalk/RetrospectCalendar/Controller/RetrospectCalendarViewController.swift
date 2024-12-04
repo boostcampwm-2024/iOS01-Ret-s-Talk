@@ -91,13 +91,12 @@ final class RetrospectCalendarViewController: BaseViewController {
               let nextMonth = Date.startOfMonth(year: year, month: month + 1)
         else { return }
         
-        Task { [weak self] in
-            await self?.retrospectManager.fetchRetrospects(of: [.monthly(from: currentMonth, to: nextMonth)])
-            if let fetchRetrospects = await self?.retrospectManager.retrospects {
-                let newRetrospects = self?.filterNewRetrospects(fetchRetrospects) ?? []
-                self?.retrospectsSubject.send(newRetrospects)
-                self?.loadedMonths.append((year, month))
-            }
+        Task {
+            await retrospectManager.fetchRetrospects(of: [.monthly(from: currentMonth, to: nextMonth)])
+            let fetchRetrospects = await retrospectManager.retrospects
+            let newRetrospects = filterNewRetrospects(fetchRetrospects)
+            retrospectsSubject.send(newRetrospects)
+            loadedMonths.append((year, month))
         }
     }
     
