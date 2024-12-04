@@ -27,11 +27,11 @@ final class UserSettingViewController<T: UserSettingManageable>:
     // MARK: RetsTalk lifecycle method
 
     override func setupNavigationBar() {
+        super.setupNavigationBar()
+
         title = UserSettingViewTexts.navigationBarTitle
 
         navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.leftBarButtonItem?.tintColor = .blazingOrange
-        navigationItem.rightBarButtonItem?.tintColor = .blazingOrange
     }
 
     override func setupDelegation() {

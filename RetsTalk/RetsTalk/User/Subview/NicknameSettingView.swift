@@ -46,7 +46,7 @@ extension UserSettingView {
                     Image(systemName: UserSettingViewTexts.editButtonImageName)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .foregroundColor(.blueBerry)
+                        .foregroundColor(.blazingOrange)
                         .frame(width: UserSettingViewMetrics.editButtonSize)
                 })
             .buttonStyle(PlainButtonStyle())
