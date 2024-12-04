@@ -86,6 +86,8 @@ final class RetrospectCalendarViewController: BaseViewController {
     // MARK: Retrospect manager action
     
     private func loadRetrospects(year: Int, month: Int) {
+        guard !loadedMonths.contains(where: { $0 == (year, month) }) else { return }
+        
         Task { [weak self] in
             await self?.retrospectManager.fetchMonthRetrospect(year: year, month: month)
             if let fetchRetrospects = await self?.retrospectManager.retrospects {
@@ -108,10 +110,9 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     private func retrospectsUpdateData(_ retrospects: [Retrospect]) {
         var dateComponents: Set<DateComponents> = []
-        
-        retrospects.forEach {
-            addRetrospectToCache($0)
-            let components = normalizedDateComponents(from: $0.createdAt)
+        retrospects.forEach { retrospect in
+            addRetrospectToCache(retrospect)
+            let components = normalizedDateComponents(from: retrospect.createdAt)
             dateComponents.insert(components)
         }
         
@@ -153,7 +154,6 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelega
         guard let currentYear = currentDateComponents.year,
               let currentMonth = currentDateComponents.month else { return }
         
-        if loadedMonths.contains(where: { $0 == (currentYear, currentMonth) }) { return }
         loadRetrospects(year: currentYear, month: currentMonth)
     }
 }
@@ -208,11 +208,17 @@ extension RetrospectCalendarViewController: UIAdaptivePresentationControllerDele
     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
         if presentationController.presentedViewController === retrospectTableViewController {
             retrospectTableViewController = nil
+            retrospectCalendarView.clearSelection()
         }
     }
 }
 
 // MARK: - DateComponents helper
+/// from DateComponents
+/// - DateComponents로 된 날짜를 년, 월, 일만 가져올때
+/// - Date로 변환해서 바꾸는 이유는 DateComponents는 년,월 등이 없을 수도 있어서
+/// from Date
+/// - Date로 된 날짜를 년, 월, 일만 가져올때
 
 extension RetrospectCalendarViewController {
     private func normalizedDateComponents(from dateComponents: DateComponents) -> DateComponents {
