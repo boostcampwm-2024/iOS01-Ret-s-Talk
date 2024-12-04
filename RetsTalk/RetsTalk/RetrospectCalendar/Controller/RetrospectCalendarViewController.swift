@@ -212,7 +212,6 @@ extension RetrospectCalendarViewController: UIAdaptivePresentationControllerDele
     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
         if presentationController.presentedViewController === retrospectTableViewController {
             retrospectTableViewController = nil
-            retrospectCalendarView.clearSelection()
         }
     }
 }

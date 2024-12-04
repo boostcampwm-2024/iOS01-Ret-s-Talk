@@ -157,9 +157,9 @@ final class RetrospectManager: RetrospectManageable {
     
     func fetchMonthRetrospect(year: Int, month: Int) {
         do {
-            guard let startDate = startOfMonth(year: year, month: month),
-                  let endDate = startOfMonth(year: year, month: month + 1) else { return }
-            let request = retrospectFetchRequest(for: .currentMonth(startDate: startDate, endDate: endDate))
+            guard let currentMonth = startOfMonth(year: year, month: month),
+                  let nextMonth = startOfMonth(year: year, month: month + 1) else { return }
+            let request = retrospectFetchRequest(for: .monthly(from: currentMonth, to: nextMonth))
             let fetchedRetrospects = try retrospectStorage.fetch(by: request)
             for retrospect in fetchedRetrospects where !retrospects.contains(retrospect) {
                 retrospects.append(retrospect)
