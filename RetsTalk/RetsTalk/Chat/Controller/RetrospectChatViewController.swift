@@ -36,7 +36,7 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
         
         previousRetrospect = retrospect
         scrollToBottomNeeded = true
-        isChatPrependable = true
+        isChatPrependable = false
         isChatViewDragging = false
         
         super.init(nibName: nil, bundle: nil)
@@ -62,6 +62,12 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
         super.viewDidLoad()
         
         addTapGestureOfDismissingKeyboard()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        isChatPrependable = true
     }
     
     // MARK: RetsTalk lifecycle
@@ -126,12 +132,12 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
         retrospectSubject
             .dropFirst()
             .sink(receiveValue: { [weak self] retrospect in
-                if retrospect.chat.isEmpty {
+                if retrospect.status == .inProgress(.waitingForUserInput), retrospect.chat.isEmpty {
                     self?.requestAssistantMessage()
                 }
                 self?.updateDataSourceDifference(to: retrospect.chat)
                 self?.previousRetrospect = retrospect
-                self?.updateUI()
+                self?.updateChatView()
             })
             .store(in: &subscriptionSet)
     }
@@ -157,6 +163,7 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
     
     private func requestAssistantMessage() {
         Task {
+            scrollToBottomNeeded = true
             await retrospectChatManager.requestAssistantMessage()
         }
     }
@@ -203,27 +210,26 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
     
     // MARK: UI action
     
-    private func updateUI() {
+    private func updateChatView() {
         if scrollToBottomNeeded {
             chatView.scrollToBottom()
         }
-        switch retrospect.status {
-        case .inProgress(.waitingForUserInput):
-            chatView.updateRequestInProgressState(false)
-        default:
-            chatView.updateRequestInProgressState(true)
-        }
+        chatView.updateChatView(by: retrospect.status)
     }
 }
 
 // MARK: - ChatViewDelegate conformance
 
 extension RetrospectChatViewController: ChatViewDelegate {
-    func sendMessage(_ chatView: ChatView, with text: String) {
+    func willSendMessage(from chatView: ChatView, with content: String) {
         Task {
             scrollToBottomNeeded = true
-            await retrospectChatManager.sendMessage(text)
+            await retrospectChatManager.sendMessage(content)
         }
+    }
+    
+    func didTapRetryButton(_ retryButton: UIButton) {
+        requestAssistantMessage()
     }
 }
 

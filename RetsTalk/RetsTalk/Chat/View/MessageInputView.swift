@@ -10,7 +10,7 @@ import UIKit
 @MainActor
 protocol MessageInputViewDelegate: AnyObject {
     func updateMessageInputViewHeight(_ messageInputView: MessageInputView, to height: CGFloat)
-    func sendMessage(_ messageInputView: MessageInputView, with text: String)
+    func willSendMessage(_ messageInputView: MessageInputView, with content: String)
 }
 
 final class MessageInputView: BaseView {
@@ -28,7 +28,6 @@ final class MessageInputView: BaseView {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
     private var textInputView: UITextView = {
         let textView = UITextView()
         textView.font = .appFont(.body)
@@ -40,7 +39,6 @@ final class MessageInputView: BaseView {
         textView.translatesAutoresizingMaskIntoConstraints = false
         return textView
     }()
-    
     private var sendButton: UIButton = {
         let button = UIButton()
         let icon = UIImage(
@@ -88,7 +86,7 @@ final class MessageInputView: BaseView {
                 handler: { [weak self] _ in
                     guard let self else { return }
                     
-                    self.delegate?.sendMessage(self, with: self.textInputView.text)
+                    self.delegate?.willSendMessage(self, with: self.textInputView.text)
                     self.textInputView.text = nil
                     self.sendButton.isEnabled = false
                     self.updateRequestInProgressState(true)

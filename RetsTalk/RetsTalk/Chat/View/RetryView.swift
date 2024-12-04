@@ -7,84 +7,78 @@
 
 import UIKit
 
-final class RetryView: UIView {
+final class RetryView: BaseView {
     
-    // MARK: UI Components
+    // MARK: Subviews
 
     private let backgroundLabel: UILabel = {
         let label = UILabel()
         label.text = Texts.backgroundLabelText
         label.textColor = .blazingOrange
         label.font = UIFont.appFont(.body)
+        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    private let retryButton: UIButton = {
+    let retryButton: UIButton = {
         let button = UIButton()
         button.setTitle(Texts.buttonLabelText, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .blazingOrange
         button.layer.cornerRadius = Metrics.cornerRadius
+        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    // MARK: init method
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        
-        configureAppearance()
-        setUpSubViewLayout()
-    }
+    // MARK: RetsTalk lifecycle
     
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
+    override func setupStyles() {
+        super.setupStyles()
         
-        configureAppearance()
-        setUpSubViewLayout()
-    }
-    
-    // MARK: custom method
-
-    private func configureAppearance() {
         backgroundColor = .backgroundRetrospect
         layer.borderWidth = Metrics.backgroundBorderWidth
         layer.borderColor = UIColor.blazingOrange.cgColor
         layer.cornerRadius = Metrics.cornerRadius
+        translatesAutoresizingMaskIntoConstraints = false
     }
     
-    private func setUpSubViewLayout() {
+    override func setupSubviews() {
+        super.setupSubviews()
+        
         addSubview(retryButton)
         addSubview(backgroundLabel)
-        
-        retryButton.translatesAutoresizingMaskIntoConstraints = false
-        backgroundLabel.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    override func setupSubviewLayouts() {
+        super.setupSubviewLayouts()
         
         NSLayoutConstraint.activate([
-            retryButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: Metrics.padding),
-            retryButton.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -Metrics.padding),
-            retryButton.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -Metrics.padding),
+            retryButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Metrics.padding),
+            retryButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Metrics.padding),
+            retryButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -Metrics.padding),
             retryButton.heightAnchor.constraint(equalToConstant: Metrics.buttonHeight),
             
-            backgroundLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            backgroundLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: Metrics.padding),
+            backgroundLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            backgroundLabel.topAnchor.constraint(equalTo: topAnchor, constant: Metrics.padding),
             backgroundLabel.bottomAnchor.constraint(equalTo: retryButton.topAnchor, constant: -Metrics.padding),
             
-            self.heightAnchor.constraint(equalToConstant: Metrics.retryViewHeight),
+            heightAnchor.constraint(equalToConstant: Metrics.retryViewHeight),
         ])
     }
     
+    // MARK: Setup action
+    
     func addAction(_ action: @escaping () -> Void) {
-        retryButton.addAction(UIAction(handler: { _ in
-            action()
-        }), for: .touchUpInside)
+        retryButton.addAction(
+            UIAction { _ in action() },
+            for: .touchUpInside
+        )
     }
 }
 
-private extension RetryView {
-    
-    // MARK: constants
+// MARK: - Constants
 
+private extension RetryView {
     enum Metrics {
         static let cornerRadius = 16.0
         static let backgroundBorderWidth = 0.5

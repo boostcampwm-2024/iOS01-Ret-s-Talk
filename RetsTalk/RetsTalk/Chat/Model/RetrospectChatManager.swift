@@ -59,6 +59,7 @@ final class RetrospectChatManager: RetrospectChatManageable {
             let userMessage = Message(retrospectID: retrospect.id, role: .user, content: content)
             let addedUserMessage = try messageStorage.add(contentsOf: [userMessage])
             retrospect.append(contentsOf: addedUserMessage)
+            retrospect.summary = addedUserMessage.last?.content
         } catch {
             errorSubject.send(error)
         }
@@ -69,10 +70,12 @@ final class RetrospectChatManager: RetrospectChatManageable {
     
     func requestAssistantMessage() async {
         do {
+            retrospect.status = .inProgress(.waitingForResponse)
             let assistantMessage = try await assistantMessageProvider.requestAssistantMessage(for: retrospect)
             let addedAssistantMessage = try messageStorage.add(contentsOf: [assistantMessage])
             retrospect.append(contentsOf: addedAssistantMessage)
             retrospect.status = .inProgress(.waitingForUserInput)
+            retrospect.summary = addedAssistantMessage.last?.content
         } catch {
             retrospect.status = .inProgress(.responseErrorOccurred)
             errorSubject.send(error)

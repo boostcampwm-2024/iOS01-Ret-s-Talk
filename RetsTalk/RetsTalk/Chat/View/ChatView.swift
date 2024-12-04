@@ -9,7 +9,8 @@ import UIKit
 
 @MainActor
 protocol ChatViewDelegate: AnyObject {
-    func sendMessage(_ chatView: ChatView, with text: String)
+    func willSendMessage(from chatView: ChatView, with content: String)
+    func didTapRetryButton(_ retryButton: UIButton)
 }
 
 final class ChatView: BaseView {
@@ -25,6 +26,17 @@ final class ChatView: BaseView {
         tableView.allowsSelection = false
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: Texts.messageCellIdentifier)
         return tableView
+    }()
+    private let activityIndicatorView: UIActivityIndicatorView = {
+        let activityIndicatorView = UIActivityIndicatorView(style: .medium)
+        activityIndicatorView.color = .blazingOrange
+        activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        return activityIndicatorView
+    }()
+    private let retryView: RetryView = {
+        let retryView = RetryView()
+        retryView.isHidden = true
+        return retryView
     }()
     private let messageInputView = MessageInputView()
     
@@ -44,8 +56,10 @@ final class ChatView: BaseView {
     override func setupSubviews() {
         super.setupSubviews()
         
-        addSubview(messageInputView)
         addSubview(chatTableView)
+        addSubview(activityIndicatorView)
+        addSubview(retryView)
+        addSubview(messageInputView)
         
         messageInputView.delegate = self
     }
@@ -54,7 +68,19 @@ final class ChatView: BaseView {
         super.setupSubviewLayouts()
         
         setupChatTableViewLayouts()
+        setupActivityIndicatorViewLayouts()
+        setupRetryViewLayouts()
         setupMessageInputViewLayouts()
+    }
+    
+    override func setupActions() {
+        super.setupActions()
+        
+        retryView.addAction { [weak self] in
+            guard let self else { return }
+            
+            self.delegate?.didTapRetryButton(self.retryView.retryButton)
+        }
     }
     
     // MARK: Delegation
@@ -76,11 +102,7 @@ final class ChatView: BaseView {
         guard 0 < rows else { return }
         
         let indexPath = IndexPath(row: rows - 1, section: 0)
-        chatTableView.scrollToRow(
-            at: indexPath,
-            at: .bottom,
-            animated: false
-        )
+        chatTableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
     }
     
     func insertMessages(at indexPaths: [IndexPath]) {
@@ -99,24 +121,50 @@ final class ChatView: BaseView {
         }
     }
     
-    // MARK: Input state handling
+    // MARK: Retrospect Status handling
     
-    func updateRequestInProgressState(_ state: Bool) {
-        messageInputView.updateRequestInProgressState(state)
+    func updateChatView(by status: Retrospect.Status) {
+        switch status {
+        case .finished:
+            messageInputView.isHidden = true
+        case .inProgress(.waitingForUserInput):
+            setViewAsWaitingForUserInput()
+        case .inProgress(.waitingForResponse):
+            setViewAsWaitingForResponse()
+        case .inProgress(.responseErrorOccurred):
+            setViewAsResponseErrorOccurred()
+        }
+    }
+    
+    private func setViewAsWaitingForUserInput() {
+        activityIndicatorView.stopAnimating()
+        messageInputView.updateRequestInProgressState(false)
+    }
+    
+    private func setViewAsWaitingForResponse() {
+        retryView.isHidden = true
+        activityIndicatorView.startAnimating()
+        messageInputView.updateRequestInProgressState(true)
+    }
+    
+    private func setViewAsResponseErrorOccurred() {
+        activityIndicatorView.stopAnimating()
+        retryView.isHidden = false
+        messageInputView.updateRequestInProgressState(true)
     }
 }
 
 // MARK: - MessageInputViewDelegate
 
 extension ChatView: MessageInputViewDelegate {
-    func sendMessage(_ messageInputView: MessageInputView, with text: String) {
-        delegate?.sendMessage(self, with: text)
+    func willSendMessage(_ messageInputView: MessageInputView, with content: String) {
+        delegate?.willSendMessage(from: self, with: content)
     }
     
     func updateMessageInputViewHeight(_ messageInputView: MessageInputView, to height: CGFloat) {
         messageInputViewHeightConstraint?.constant = height
         UIView.performWithoutAnimation {
-            self.layoutIfNeeded()
+            layoutIfNeeded()
         }
     }
 }
@@ -128,8 +176,8 @@ fileprivate extension ChatView {
         NSLayoutConstraint.activate([
             chatTableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             chatTableView.bottomAnchor.constraint(equalTo: messageInputView.topAnchor),
-            chatTableView.leftAnchor.constraint(equalTo: leftAnchor),
-            chatTableView.rightAnchor.constraint(equalTo: rightAnchor),
+            chatTableView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
+            chatTableView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
         ])
     }
     
@@ -143,12 +191,42 @@ fileprivate extension ChatView {
         NSLayoutConstraint.activate([
             messageInputViewHeightConstraint,
             messageInputViewBottomConstraint,
-            messageInputView.leftAnchor.constraint(equalTo: leftAnchor),
-            messageInputView.rightAnchor.constraint(equalTo: rightAnchor),
+            messageInputView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
+            messageInputView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
         ])
         
         self.messageInputViewHeightConstraint = messageInputViewHeightConstraint
         chatViewBottomConstraint = messageInputViewBottomConstraint
+    }
+    
+    func setupActivityIndicatorViewLayouts() {
+        NSLayoutConstraint.activate([
+            activityIndicatorView.bottomAnchor.constraint(
+                equalTo: messageInputView.topAnchor,
+                constant: -Metrics.defaultPadding
+            ),
+            activityIndicatorView.leadingAnchor.constraint(
+                equalTo: safeAreaLayoutGuide.leadingAnchor,
+                constant: Metrics.defaultPadding
+            ),
+        ])
+    }
+    
+    func setupRetryViewLayouts() {
+        NSLayoutConstraint.activate([
+            retryView.bottomAnchor.constraint(
+                equalTo: messageInputView.topAnchor,
+                constant: -Metrics.defaultPadding
+            ),
+            retryView.leadingAnchor.constraint(
+                equalTo: safeAreaLayoutGuide.leadingAnchor,
+                constant: Metrics.defaultPadding
+            ),
+            retryView.trailingAnchor.constraint(
+                equalTo: safeAreaLayoutGuide.trailingAnchor,
+                constant: -Metrics.defaultPadding
+            ),
+        ])
     }
 }
 
@@ -158,6 +236,7 @@ private extension ChatView {
     enum Metrics {
         static let messageInputViewHeight = 54.0
         static let chatViewBottomFromBottom = -40.0
+        static let defaultPadding = 16.0
     }
     
     enum Texts {
