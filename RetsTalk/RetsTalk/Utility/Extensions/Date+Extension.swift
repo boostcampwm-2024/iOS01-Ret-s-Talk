@@ -33,4 +33,13 @@ extension Date {
         let components = DateComponents(year: year, month: month, day: day, hour: hour, minute: minute, second: second)
         return Calendar.current.date(from: components) ?? Date()
     }
+    
+    static func startOfMonth(year: Int, month: Int) -> Date? {
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        components.day = 1
+        
+        return Calendar.current.date(from: components)
+    }
 }
