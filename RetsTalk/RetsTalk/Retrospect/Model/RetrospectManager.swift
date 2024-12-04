@@ -33,9 +33,9 @@ final class RetrospectManager: RetrospectManageable {
     
     // MARK: RetrospectManageable conformance
     
-    func createRetrospect() async -> RetrospectChatManageable? {
+    func createRetrospect() -> RetrospectChatManageable? {
         do {
-            let newRetrospect = try await createNewRetrospect()
+            let newRetrospect = try createNewRetrospect()
             retrospects.append(newRetrospect)
             let retrospectChatManager = RetrospectChatManager(
                 retrospect: newRetrospect,
@@ -83,10 +83,10 @@ final class RetrospectManager: RetrospectManageable {
         }
     }
     
-    func fetchPreviousRetrospects() async {
+    func fetchPreviousRetrospects() {
         do {
             let request = previousRetrospectFetchRequest(amount: Numerics.retrospectFetchAmount)
-            let fetchedRetrospects = try await retrospectStorage.fetch(by: request)
+            let fetchedRetrospects = try retrospectStorage.fetch(by: request)
             retrospects.append(contentsOf: fetchedRetrospects)
             errorOccurred = nil
         } catch {
@@ -94,12 +94,16 @@ final class RetrospectManager: RetrospectManageable {
         }
     }
     
-    func fetchRetrospectsCount() async -> Int? {
+    func fetchRetrospectsCount() -> (totalCount: Int, monthlyCount: Int)? {
         do {
-            let request = PersistFetchRequest<Retrospect>(fetchLimit: Numerics.fetchTotalDataCountLimit)
-            let fetchedCount = try retrospectStorage.fetchDataCount(by: request)
+            let totalFetchRequest = PersistFetchRequest<Retrospect>(fetchLimit: Numerics.fetchTotalDataCountLimit)
+            let monthlyFetchRequest = monthlyRetrospectCountFetchRequest()
+            
+            let totalCount = try retrospectStorage.fetchDataCount(by: totalFetchRequest)
+            let monthlyCount = try retrospectStorage.fetchDataCount(by: monthlyFetchRequest)
+            
             errorOccurred = nil
-            return fetchedCount
+            return (totalCount, monthlyCount)
         } catch {
             errorOccurred = error
             return nil
@@ -142,31 +146,25 @@ final class RetrospectManager: RetrospectManageable {
             errorOccurred = error
         }
     }
-    
-    func replaceRetrospectStorage(_ newRetrospectStorage: Persistable) {
+
+    func refreshRetrospectStorage(iCloudEnabled: Bool) {
+        let newRetrospectStorage = CoreDataManager(
+            isiCloudSynced: iCloudEnabled,
+            name: Constants.Texts.coreDataContainerName
+        ) { _ in }
         retrospectStorage = newRetrospectStorage
     }
     
     // MARK: Support retrospect creation
     
-    private func createNewRetrospect() async throws -> Retrospect {
+    private func createNewRetrospect() throws -> Retrospect {
         guard isCreationAvailable else { throw Error.reachInProgressLimit }
         
-        var newRetrospect = Retrospect(userID: userID)
-        let initialAssistentMessage = try await requestInitialAssistentMessage(for: newRetrospect)
-        newRetrospect.append(contentsOf: [initialAssistentMessage])
+        let newRetrospect = Retrospect(userID: userID)
         guard let addedRetrospect = try retrospectStorage.add(contentsOf: [newRetrospect]).first
         else { throw Error.creationFailed }
         
         return addedRetrospect
-    }
-    
-    private func requestInitialAssistentMessage(for retrospect: Retrospect) async throws -> Message {
-        let emptyUserMessage = Message(retrospectID: retrospect.id, role: .user, content: "")
-        let initialAssistentMessage = try await retrospectAssistantProvider.requestAssistantMessage(
-            for: [emptyUserMessage]
-        )
-        return initialAssistentMessage
     }
     
     // MARK: Support retrospect fetching
@@ -183,12 +181,26 @@ final class RetrospectManager: RetrospectManageable {
         let recentDateSorting = CustomSortDescriptor(key: Texts.retrospectSortKey, ascending: false)
         let lastRetrospectCreatedDate = retrospects.last?.createdAt ?? Date()
         let predicate = Retrospect.Kind.predicate(.previous(lastRetrospectCreatedDate))(for: userID)
-        let request = PersistFetchRequest<Retrospect>(
+        return PersistFetchRequest<Retrospect>(
             predicate: predicate,
             sortDescriptors: [recentDateSorting],
             fetchLimit: Retrospect.Kind.previous(lastRetrospectCreatedDate).fetchLimit
         )
-        return request
+    }
+    
+    private func monthlyRetrospectCountFetchRequest() -> PersistFetchRequest<Retrospect> {
+        let calendar = Calendar.current
+        guard let currentMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: Date())),
+              let nextMonth = calendar.date(byAdding: DateComponents(month: 1), to: currentMonth)
+        else {
+            return PersistFetchRequest<Retrospect>(fetchLimit: 0)
+        }
+        
+        let predicate = Retrospect.Kind.predicate(.monthly(from: currentMonth, to: nextMonth))(for: userID)
+        return PersistFetchRequest(
+            predicate: predicate,
+            fetchLimit: Retrospect.Kind.monthly(from: currentMonth, to: nextMonth).fetchLimit
+        )
     }
     
     // MARK: Manage retrospects
@@ -215,9 +227,10 @@ extension RetrospectManager: RetrospectChatManagerListener {
         guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id })
         else { return }
         
-        let updatedRetrospect = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
-        
-        retrospects[matchingIndex] = updatedRetrospect
+        if !retrospects[matchingIndex].isEqualInStorage(retrospect) {
+            _ = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+        }
+        retrospects[matchingIndex] = retrospect
     }
     
     func shouldTogglePin(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) -> Bool {

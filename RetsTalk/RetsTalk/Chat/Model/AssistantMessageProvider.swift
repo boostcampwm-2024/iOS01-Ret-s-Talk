@@ -6,5 +6,5 @@
 //
 
 protocol AssistantMessageProvidable: Sendable {
-    func requestAssistantMessage(for chat: [Message]) async throws -> Message
+    func requestAssistantMessage(for retrospect: Retrospect) async throws -> Message
 }

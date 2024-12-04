@@ -41,12 +41,20 @@ struct Retrospect {
     mutating func append(contentsOf messages: [Message]) {
         chat.append(contentsOf: messages)
     }
+    
+    func isEqualInStorage(_ other: Retrospect) -> Bool {
+        id == other.id
+        && userID == other.userID
+        && status == other.status
+        && summary == other.summary
+        && isPinned == other.isPinned
+    }
 }
 
 // MARK: - Retrospect State
 
 extension Retrospect {
-    enum Status: Equatable {
+    enum Status: Hashable {
         case finished
         case inProgress(ProgressState)
     }
@@ -63,10 +71,20 @@ extension Retrospect {
 extension Retrospect: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+        hasher.combine(userID)
+        hasher.combine(chat.last)
+        hasher.combine(status)
+        hasher.combine(summary)
+        hasher.combine(isPinned)
     }
     
     static func == (lhs: Retrospect, rhs: Retrospect) -> Bool {
         lhs.id == rhs.id
+        && lhs.userID == rhs.userID
+        && lhs.chat.last == rhs.chat.last
+        && lhs.status == rhs.status
+        && lhs.summary == rhs.summary
+        && lhs.isPinned == rhs.isPinned
     }
 }
 
@@ -146,6 +164,7 @@ extension Retrospect {
         case inProgress
         case finished
         case previous(_ lastRetrospectCreatedDate: Date)
+        case monthly(from: Date, to: Date)
         
         func predicate(for userID: UUID) -> CustomPredicate {
             switch self {
@@ -166,6 +185,11 @@ extension Retrospect {
                     format: "userID = %@ AND status = %@ AND isPinned = %@ AND createdAt < %@",
                     argumentArray: [userID, Texts.retrospectFinished, false, lastRetrospectCreatedDate]
                 )
+            case .monthly(let currentMonth, let nextMonth):
+                CustomPredicate(
+                    format: "userID == %@ AND createdAt >= %@ AND createdAt < %@",
+                    argumentArray: [userID, currentMonth, nextMonth]
+                )
             }
         }
         
@@ -175,6 +199,8 @@ extension Retrospect {
                 2
             case .finished, .previous:
                 30
+            case .monthly:
+                0
             }
         }
     }

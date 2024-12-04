@@ -148,8 +148,9 @@ final class RetrospectListView: BaseView {
         calendarButton.addAction(action, for: .touchUpInside)
     }
     
-    func updateButtonSubtitle(_ totalRetrospectCount: Int) {
-        totalCountView.setSubtitle("\(totalRetrospectCount)개")
+    func updateHeaderContent(totalCount: Int, monthlyCount: Int) {
+        totalCountView.setSubtitle("\(totalCount)개")
+        calendarButton.setSubtitle("\(monthlyCount)개")
     }
 
 }
@@ -172,7 +173,7 @@ private extension RetrospectListView {
         static let foregroundImageName = "plus"
         
         static let calendarButtonImageName = "calendar"
-        static let calendarButtonTitle = "회고 쓴 일수"
+        static let calendarButtonTitle = "이달의 회고"
         
         static let totalCountButtonImageName = "tray.full.fill"
         static let totalCountButtonTitle = "총 회고 수"

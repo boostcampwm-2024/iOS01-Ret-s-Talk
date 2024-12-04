@@ -25,7 +25,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let coreDataManager = CoreDataManager(
             inMemory: false,
             isiCloudSynced: isiCloudSynced,
-            name: Constants.Texts.CoreDataContainerName
+            name: Constants.Texts.coreDataContainerName
         ) { _ in }
         let retrospectAssistantProvider = CLOVAStudioManager(urlSession: .shared)
         let retrospectManager = RetrospectManager(
