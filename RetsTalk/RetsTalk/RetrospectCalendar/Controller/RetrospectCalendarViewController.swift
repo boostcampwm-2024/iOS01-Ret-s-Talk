@@ -88,7 +88,8 @@ final class RetrospectCalendarViewController: BaseViewController {
     private func loadRetrospects(year: Int, month: Int) {
         guard !loadedMonths.contains(where: { $0 == (year, month) }),
               let currentMonth = Date.startOfMonth(year: year, month: month),
-              let nextMonth = Date.startOfMonth(year: year, month: month + 1) else { return }
+              let nextMonth = Date.startOfMonth(year: year, month: month + 1)
+        else { return }
         
         Task { [weak self] in
             await self?.retrospectManager.fetchRetrospects(of: [.monthly(from: currentMonth, to: nextMonth)])
@@ -130,7 +131,8 @@ final class RetrospectCalendarViewController: BaseViewController {
     private func setupInitialData() {
         let currentDataComponents = retrospectCalendarView.currentDataComponents()
         guard let year = currentDataComponents.year,
-              let month = currentDataComponents.month else { return }
+              let month = currentDataComponents.month
+        else { return }
         
         loadRetrospects(year: year, month: month)
     }
@@ -144,7 +146,8 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelega
         decorationFor dateComponents: DateComponents
     ) -> UICalendarView.Decoration? {
         guard let resultRetrospects = retrospectsCache[dateComponents.normalized],
-              !resultRetrospects.isEmpty else { return nil }
+              !resultRetrospects.isEmpty
+        else { return nil }
         
         return .default(color: .blazingOrange)
     }
@@ -155,7 +158,8 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelega
     ) {
         let currentDateComponents = retrospectCalendarView.currentDataComponents()
         guard let currentYear = currentDateComponents.year,
-              let currentMonth = currentDateComponents.month else { return }
+              let currentMonth = currentDateComponents.month
+        else { return }
         
         loadRetrospects(year: currentYear, month: currentMonth)
     }
