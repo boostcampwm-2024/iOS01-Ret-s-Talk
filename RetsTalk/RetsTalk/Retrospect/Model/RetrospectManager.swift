@@ -129,8 +129,11 @@ final class RetrospectManager: RetrospectManageable {
     func finishRetrospect(_ retrospect: Retrospect) async {
         do {
             var updatingRetrospect = retrospect
-            updatingRetrospect.summary = try await retrospectAssistantProvider.requestSummary(for: retrospect.chat)
-            updatingRetrospect.status = .finished
+
+            if updatingRetrospect.status == .finished {
+                updatingRetrospect.summary = try await retrospectAssistantProvider.requestSummary(for: retrospect.chat)
+            }
+
             let updatedRetrospect = try retrospectStorage.update(from: retrospect, to: updatingRetrospect)
             updateRetrospects(by: updatedRetrospect)
             errorOccurred = nil
@@ -230,7 +233,15 @@ extension RetrospectManager: RetrospectChatManagerListener {
         else { return }
         
         if !retrospects[matchingIndex].isEqualInStorage(retrospect) {
-            _ = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+            Task {
+                _ = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+                switch retrospect.status {
+                case .finished:
+                    await finishRetrospect(retrospect)
+                default:
+                    break
+                }
+            }
         }
         retrospects[matchingIndex] = retrospect
     }
