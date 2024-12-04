@@ -5,6 +5,7 @@
 //  Created by KimMinSeok on 11/19/24.
 //
 
+import Combine
 import Foundation
 
 typealias RetrospectAssistantProvidable = AssistantMessageProvidable & SummaryProvider
@@ -13,10 +14,22 @@ final class RetrospectManager: RetrospectManageable {
     private let userID: UUID
     private var retrospectStorage: Persistable
     private let retrospectAssistantProvider: RetrospectAssistantProvidable
+    private(set) var retrospects: [Retrospect] {
+        didSet {
+            retrospectsSubject.send(RetrospectSortingHelper.execute(retrospects))
+        }
+    }
     
-    private(set) var retrospects: [Retrospect]
-    private(set) var errorOccurred: Swift.Error?
-    
+    private var retrospectsSubject: CurrentValueSubject<SortedRetrospects, Never> = .init(SortedRetrospects())
+    private(set) var errorSubject: PassthroughSubject<Swift.Error?, Never> = .init()
+
+    var retrospectsPublisher: AnyPublisher<SortedRetrospects, Never> {
+        retrospectsSubject.eraseToAnyPublisher()
+    }
+    var errorPublisher: AnyPublisher<Swift.Error?, Never> {
+        errorSubject.eraseToAnyPublisher()
+    }
+
     // MARK: Initialization
     
     nonisolated init(
@@ -43,10 +56,10 @@ final class RetrospectManager: RetrospectManageable {
                 assistantMessageProvider: retrospectAssistantProvider,
                 retrospectChatManagerListener: self
             )
-            errorOccurred = nil
+            errorSubject.send(nil)
             return retrospectChatManager
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
             return nil
         }
     }
@@ -54,7 +67,7 @@ final class RetrospectManager: RetrospectManageable {
     func retrospectChatManager(of retrospect: Retrospect) -> (any RetrospectChatManageable)? {
         guard let retrospect = retrospects.first(where: { $0.id == retrospect.id })
         else {
-            errorOccurred = Error.invalidRetrospect
+            errorSubject.send(Error.invalidRetrospect)
             return nil
         }
         
@@ -64,7 +77,7 @@ final class RetrospectManager: RetrospectManageable {
             assistantMessageProvider: retrospectAssistantProvider,
             retrospectChatManagerListener: self
         )
-        errorOccurred = nil
+        errorSubject.send(nil)
         return retrospectChatManager
     }
     
@@ -77,9 +90,9 @@ final class RetrospectManager: RetrospectManageable {
                     retrospects.append(retrospect)
                 }
             }
-            errorOccurred = nil
+            errorSubject.send(nil)
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
         }
     }
     
@@ -88,10 +101,10 @@ final class RetrospectManager: RetrospectManageable {
             let request = previousRetrospectFetchRequest(amount: Numerics.retrospectFetchAmount)
             let fetchedRetrospects = try retrospectStorage.fetch(by: request)
             retrospects.append(contentsOf: fetchedRetrospects)
-            errorOccurred = nil
+            errorSubject.send(nil)
             return fetchedRetrospects.count
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
             return 0
         }
     }
@@ -104,10 +117,10 @@ final class RetrospectManager: RetrospectManageable {
             let totalCount = try retrospectStorage.fetchDataCount(by: totalFetchRequest)
             let monthlyCount = try retrospectStorage.fetchDataCount(by: monthlyFetchRequest)
             
-            errorOccurred = nil
+            errorSubject.send(nil)
             return (totalCount, monthlyCount)
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
             return nil
         }
     }
@@ -120,9 +133,9 @@ final class RetrospectManager: RetrospectManageable {
             updatingRetrospect.isPinned.toggle()
             let updatedRetrospect = try retrospectStorage.update(from: retrospect, to: updatingRetrospect)
             updateRetrospects(by: updatedRetrospect)
-            errorOccurred = nil
+            errorSubject.send(nil)
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
         }
     }
     
@@ -133,9 +146,9 @@ final class RetrospectManager: RetrospectManageable {
             updatingRetrospect.status = .finished
             let updatedRetrospect = try retrospectStorage.update(from: retrospect, to: updatingRetrospect)
             updateRetrospects(by: updatedRetrospect)
-            errorOccurred = nil
+            errorSubject.send(nil)
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
         }
     }
     
@@ -143,9 +156,9 @@ final class RetrospectManager: RetrospectManageable {
         do {
             try retrospectStorage.delete(contentsOf: [retrospect])
             retrospects.removeAll(where: { $0.id == retrospect.id })
-            errorOccurred = nil
+            errorSubject.send(nil)
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
         }
     }
 

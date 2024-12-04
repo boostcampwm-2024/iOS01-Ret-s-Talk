@@ -5,10 +5,13 @@
 //  Created by KimMinSeok on 11/18/24.
 //
 
+import Combine
+
 @RetrospectActor
 protocol RetrospectManageable: Sendable {
     var retrospects: [Retrospect] { get }
-    var errorOccurred: Error? { get }
+    var retrospectsPublisher: AnyPublisher<SortedRetrospects, Never> { get }
+    var errorSubject: PassthroughSubject<Swift.Error?, Never> { get }
     
     func createRetrospect() -> RetrospectChatManageable?
     func retrospectChatManager(of retrospect: Retrospect) -> RetrospectChatManageable?
