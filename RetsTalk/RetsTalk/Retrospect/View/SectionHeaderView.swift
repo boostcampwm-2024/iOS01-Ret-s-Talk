@@ -35,10 +35,14 @@ final class SectionHeaderView: BaseView {
     // MARK: RetsTalk lifecycle
     
     override func setupStyles() {
+        super.setupStyles()
+        
         backgroundColor = .backgroundMain
     }
     
     override func setupSubviews() {
+        super.setupSubviews()
+        
         addSubview(titleLabel)
     }
 }
