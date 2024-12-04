@@ -163,7 +163,7 @@ final class RetrospectListViewController: BaseViewController {
     
     private func updateTotalRetrospectCount() {
         Task {
-            guard let fetchedCount = await retrospectManager.fetchRetrospectsCount() else { return }
+            guard let fetchedRetrospectsCount = await retrospectManager.fetchRetrospectsCount() else { return }
             
             retrospectListView.updateHeaderContent(
                 totalCount: fetchedCount.totalCount,
