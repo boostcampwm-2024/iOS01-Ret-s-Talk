@@ -140,7 +140,7 @@ fileprivate extension RetrospectChatManager {
         var errorDescription: String? {
             switch self {
             case .pinUnavailable:
-                "회고를 고정할 수 없습니다. 최대 고정 개수는 2개입니다."
+                "회고를 고정할 수 없습니다.\n최대 고정 개수는 2개입니다."
             }
         }
     }

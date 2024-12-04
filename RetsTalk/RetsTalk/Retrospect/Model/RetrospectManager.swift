@@ -236,7 +236,7 @@ extension RetrospectManager: RetrospectChatManagerListener {
     }
     
     func shouldTogglePin(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) -> Bool {
-        isPinAvailable
+        retrospect.isPinned || isPinAvailable
     }
 }
 

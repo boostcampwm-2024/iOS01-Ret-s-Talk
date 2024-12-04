@@ -90,12 +90,7 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
         
         title = retrospect.createdAt.formattedToKoreanStyle
         navigationItem.largeTitleDisplayMode = .never
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            title: Texts.endChattingButtonTitle,
-            style: .plain,
-            target: self,
-            action: #selector(endRetrospectChat)
-        )
+        navigationItem.rightBarButtonItem = rightBarButtonItem(for: retrospect)
     }
     
     override func setupSubscription() {
@@ -195,6 +190,14 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
         presentAlert(for: .finish, actions: [.close(), conformAction])
     }
     
+    @objc
+    private func toggleRetrospectPin() {
+        Task {
+            await retrospectChatManager.toggleRetrospectPin()
+            navigationItem.rightBarButtonItem = rightBarButtonItem(for: retrospect)
+        }
+    }
+    
     // MARK: Keyboard control
     
     override func handleKeyboardWillShowEvent(using keyboardInfo: KeyboardInfo) {
@@ -226,6 +229,25 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
             chatView.scrollToBottom()
         }
         chatView.updateChatView(by: retrospect.status)
+    }
+    
+    private func rightBarButtonItem(for retrospect: Retrospect) -> UIBarButtonItem {
+        switch retrospect.status {
+        case .finished:
+            UIBarButtonItem(
+                title: nil,
+                image: retrospect.isPinned ? .pinned : .unpinned,
+                target: self,
+                action: #selector(toggleRetrospectPin)
+            )
+        case .inProgress:
+            UIBarButtonItem(
+                title: Texts.endChattingButtonTitle,
+                style: .plain,
+                target: self,
+                action: #selector(endRetrospectChat)
+            )
+        }
     }
 }
 
