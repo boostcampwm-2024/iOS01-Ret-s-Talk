@@ -5,16 +5,23 @@
 //  Created by KimMinSeok on 11/19/24.
 //
 
+import Combine
 import Foundation
 
 final class RetrospectChatManager: RetrospectChatManageable {
-    private(set) var retrospect: Retrospect
-    private(set) var errorOccurred: Swift.Error?
-    
     private let messageStorage: Persistable
     private let assistantMessageProvider: AssistantMessageProvidable
-    
     private let retrospectChatManagerListener: RetrospectChatManagerListener
+    
+    private let retrospectSubject: CurrentValueSubject<Retrospect, Never>
+    
+    private(set) var retrospect: Retrospect {
+        didSet {
+            syncRetrospect()
+            retrospectSubject.send(retrospect)
+        }
+    }
+    private(set) var errorSubject: PassthroughSubject<Swift.Error, Never>
     
     // MARK: Initialization
 
@@ -28,76 +35,85 @@ final class RetrospectChatManager: RetrospectChatManageable {
         self.messageStorage = messageStorage
         self.assistantMessageProvider = assistantMessageProvider
         self.retrospectChatManagerListener = retrospectChatManagerListener
+        
+        retrospectSubject = CurrentValueSubject(retrospect)
+        errorSubject = PassthroughSubject()
+        
+        if retrospect.chat.isEmpty {
+            fetchPreviousMessages()
+        }
     }
     
     // MARK: RetrospectChatManageable conformance
     
-    func sendMessage(_ text: String) async {
+    var retrospectPublisher: AnyPublisher<Retrospect, Never> {
+        retrospectSubject.eraseToAnyPublisher()
+    }
+    
+    var errorPublisher: AnyPublisher<Swift.Error, Never> {
+        errorSubject.eraseToAnyPublisher()
+    }
+    
+    func sendMessage(_ content: String) async {
         do {
-            let userMessage = Message(retrospectID: retrospect.id, role: .user, content: text)
+            let userMessage = Message(retrospectID: retrospect.id, role: .user, content: content)
             let addedUserMessage = try messageStorage.add(contentsOf: [userMessage])
             retrospect.append(contentsOf: addedUserMessage)
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
         }
         retrospect.status = .inProgress(.waitingForResponse)
         
-        await requestAssistentMessage()
+        await requestAssistantMessage()
     }
     
-    func resendLastMessage() async {
-        await requestAssistentMessage()
+    func requestAssistantMessage() async {
+        do {
+            let assistantMessage = try await assistantMessageProvider.requestAssistantMessage(for: retrospect)
+            let addedAssistantMessage = try messageStorage.add(contentsOf: [assistantMessage])
+            retrospect.append(contentsOf: addedAssistantMessage)
+            retrospect.status = .inProgress(.waitingForUserInput)
+        } catch {
+            retrospect.status = .inProgress(.responseErrorOccurred)
+            errorSubject.send(error)
+        }
     }
     
     func fetchPreviousMessages() {
         do {
             let request = recentMessageFetchRequest(offset: retrospect.chat.count, amount: Numeric.messageFetchAmount)
             let fetchedMessages = try messageStorage.fetch(by: request)
-            retrospect.prepend(contentsOf: fetchedMessages)
+            retrospect.prepend(contentsOf: fetchedMessages.reversed())
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
         }
     }
     
     func endRetrospect() {
-        do {
-            retrospect.status = .finished
-            try retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect)
-            errorOccurred = nil
-        } catch {
-            errorOccurred = error
-        }
+        retrospect.status = .finished
     }
     
     func toggleRetrospectPin() {
         guard retrospectChatManagerListener.shouldTogglePin(self, retrospect: retrospect)
         else {
-            errorOccurred = Error.pinUnavailable
+            errorSubject.send(Error.pinUnavailable)
             return
         }
         
+        retrospect.isPinned.toggle()
+    }
+    
+    // MARK: Retrospect sync
+    
+    private func syncRetrospect() {
         do {
-            retrospect.isPinned.toggle()
             try retrospectChatManagerListener.didUpdateRetrospect(self, retrospect: retrospect)
-            errorOccurred = nil
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
         }
     }
     
-    // MARK: Supporting methods
-    
-    private func requestAssistentMessage() async {
-        do {
-            let assistantMessage = try await assistantMessageProvider.requestAssistantMessage(for: retrospect.chat)
-            let addedAssistantMessage = try messageStorage.add(contentsOf: [assistantMessage])
-            retrospect.append(contentsOf: addedAssistantMessage)
-            retrospect.status = .inProgress(.waitingForUserInput)
-        } catch {
-            retrospect.status = .inProgress(.responseErrorOccurred)
-            errorOccurred = error
-        }
-    }
+    // MARK: FetchRequest setup
     
     private func recentMessageFetchRequest(offset: Int, amount: Int) -> PersistFetchRequest<Message> {
         let matchingRetorspect = CustomPredicate(format: Texts.matchingRetorspect, argumentArray: [retrospect.id])

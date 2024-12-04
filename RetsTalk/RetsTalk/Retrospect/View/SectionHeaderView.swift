@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class SectionHeaderView: UIView {
+final class SectionHeaderView: BaseView {
     private var titleLabel: UILabel = {
         let label = UILabel()
         label.font = .appFont(.title)
@@ -20,24 +20,30 @@ final class SectionHeaderView: UIView {
         return label
     }()
     
-    convenience init(title: String?) {
-        self.init(frame: .zero)
+    // MARK: Initialization
+
+    init(title: String?) {
+        super.init(frame: .zero)
+        
         titleLabel.text = title
-        setupView()
-    }
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupView()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setupView() {
+    // MARK: RetsTalk lifecycle
+    
+    override func setupStyles() {
+        super.setupStyles()
+        
+        backgroundColor = .backgroundMain
+    }
+    
+    override func setupSubviews() {
+        super.setupSubviews()
+        
         addSubview(titleLabel)
-        backgroundColor = .clear
     }
 }
 

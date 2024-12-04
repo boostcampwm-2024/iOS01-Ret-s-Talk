@@ -45,7 +45,7 @@ final class RetrospectChatManagerTests: XCTestCase {
         
         let retrospect = await retrospectChatManager.retrospect
         XCTAssertEqual(retrospect.status, .inProgress(.waitingForUserInput))
-        XCTAssertEqual(retrospect.chat.count, 2)
+        XCTAssertEqual(retrospect.chat.count, 32)
     }
     
     func test_회고_도움_메시지를_받아오는데_실패한_경우_상태_반영을_하는지() async throws {
@@ -57,10 +57,8 @@ final class RetrospectChatManagerTests: XCTestCase {
         await retrospectChatManager.sendMessage("실패 !")
         
         let retrospect = await retrospectChatManager.retrospect
-        let error = await retrospectChatManager.errorOccurred
         XCTAssertEqual(retrospect.status, .inProgress(.responseErrorOccurred))
-        XCTAssertEqual(retrospect.chat.count, 1)
-        XCTAssertNotNil(error)
+        XCTAssertEqual(retrospect.chat.count, 31)
     }
     
     // MARK: Fetch
@@ -71,7 +69,7 @@ final class RetrospectChatManagerTests: XCTestCase {
         await retrospectChatManager.fetchPreviousMessages()
         
         let retrospect = await retrospectChatManager.retrospect
-        XCTAssertEqual(retrospect.chat.count, 30)
+        XCTAssertEqual(retrospect.chat.count, 60)
     }
     
     // MARK: Update

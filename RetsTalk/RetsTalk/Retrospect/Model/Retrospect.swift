@@ -41,6 +41,14 @@ struct Retrospect {
     mutating func append(contentsOf messages: [Message]) {
         chat.append(contentsOf: messages)
     }
+    
+    func isEqualInStorage(_ other: Retrospect) -> Bool {
+        id == other.id
+        && userID == other.userID
+        && status == other.status
+        && summary == other.summary
+        && isPinned == other.isPinned
+    }
 }
 
 // MARK: - Retrospect State
@@ -63,6 +71,7 @@ extension Retrospect {
 extension Retrospect: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+        hasher.combine(userID)
         hasher.combine(chat.last)
         hasher.combine(status)
         hasher.combine(summary)
@@ -71,6 +80,7 @@ extension Retrospect: Hashable {
     
     static func == (lhs: Retrospect, rhs: Retrospect) -> Bool {
         lhs.id == rhs.id
+        && lhs.userID == rhs.userID
         && lhs.chat.last == rhs.chat.last
         && lhs.status == rhs.status
         && lhs.summary == rhs.summary
@@ -153,8 +163,8 @@ extension Retrospect {
         case pinned
         case inProgress
         case finished
-        case currentMonth(startDate: Date, endDate: Date)
         case previous(_ lastRetrospectCreatedDate: Date)
+        case monthly(from: Date, to: Date)
         
         func predicate(for userID: UUID) -> CustomPredicate {
             switch self {
@@ -170,15 +180,15 @@ extension Retrospect {
                     format: "userID = %@ AND status = %@ AND isPinned = %@",
                     argumentArray: [userID, Texts.retrospectFinished, false]
                 )
-            case .currentMonth(let startDate, let endDate):
-                CustomPredicate(
-                    format: "createdAt >= %@ AND createdAt < %@",
-                    argumentArray: [startDate, endDate]
-                )
             case .previous(let lastRetrospectCreatedDate):
                 CustomPredicate(
                     format: "userID = %@ AND status = %@ AND isPinned = %@ AND createdAt < %@",
                     argumentArray: [userID, Texts.retrospectFinished, false, lastRetrospectCreatedDate]
+                )
+            case .monthly(let currentMonth, let nextMonth):
+                CustomPredicate(
+                    format: "userID == %@ AND createdAt >= %@ AND createdAt < %@",
+                    argumentArray: [userID, currentMonth, nextMonth]
                 )
             }
         }
@@ -189,19 +199,8 @@ extension Retrospect {
                 2
             case .finished, .previous:
                 30
-            case .currentMonth:
+            case .monthly:
                 0
-            }
-        }
-        
-        func hash(into hasher: inout Hasher) {
-            switch self {
-            case .currentMonth(let startDate, let endDate):
-                hasher.combine(self)
-                hasher.combine(startDate)
-                hasher.combine(endDate)
-            default:
-                hasher.combine(self)
             }
         }
     }
