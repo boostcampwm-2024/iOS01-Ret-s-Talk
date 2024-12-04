@@ -19,7 +19,7 @@ protocol AlertPresentable {
     func presentAlert(for situation: Situation, actions: [UIAlertAction])
 }
 
-extension AlertPresentable where Self: BaseViewController {
+extension AlertPresentable where Self: UIViewController {
     func presentAlert(for situation: Situation, actions: [UIAlertAction]) {
         let alert = UIAlertController(title: situation.title, message: situation.message, preferredStyle: .alert)
         actions.forEach { alert.addAction($0) }

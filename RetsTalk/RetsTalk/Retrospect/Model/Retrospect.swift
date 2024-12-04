@@ -41,6 +41,14 @@ struct Retrospect {
     mutating func append(contentsOf messages: [Message]) {
         chat.append(contentsOf: messages)
     }
+    
+    func isEqualInStorage(_ other: Retrospect) -> Bool {
+        id == other.id
+        && userID == other.userID
+        && status == other.status
+        && summary == other.summary
+        && isPinned == other.isPinned
+    }
 }
 
 // MARK: - Retrospect State
@@ -64,15 +72,19 @@ extension Retrospect: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
         hasher.combine(userID)
-        hasher.combine(summary)
-        hasher.combine(status)
-        hasher.combine(isPinned)
         hasher.combine(chat.last)
+        hasher.combine(status)
+        hasher.combine(summary)
+        hasher.combine(isPinned)
     }
     
     static func == (lhs: Retrospect, rhs: Retrospect) -> Bool {
-        lhs.id == rhs.id && lhs.userID == rhs.userID && lhs.summary == rhs.summary &&
-        lhs.status == rhs.status && lhs.isPinned == rhs.isPinned
+        lhs.id == rhs.id
+        && lhs.userID == rhs.userID
+        && lhs.chat.last == rhs.chat.last
+        && lhs.status == rhs.status
+        && lhs.summary == rhs.summary
+        && lhs.isPinned == rhs.isPinned
     }
 }
 
@@ -147,10 +159,11 @@ extension Retrospect: EntityRepresentable {
 // MARK: - Retrospect kind
 
 extension Retrospect {
-    enum Kind {
+    enum Kind: Hashable {
         case pinned
         case inProgress
         case finished
+        case previous(_ lastRetrospectCreatedDate: Date)
         
         func predicate(for userID: UUID) -> CustomPredicate {
             switch self {
@@ -166,6 +179,11 @@ extension Retrospect {
                     format: "userID = %@ AND status = %@ AND isPinned = %@",
                     argumentArray: [userID, Texts.retrospectFinished, false]
                 )
+            case .previous(let lastRetrospectCreatedDate):
+                CustomPredicate(
+                    format: "userID = %@ AND status = %@ AND isPinned = %@ AND createdAt < %@",
+                    argumentArray: [userID, Texts.retrospectFinished, false, lastRetrospectCreatedDate]
+                )
             }
         }
         
@@ -173,7 +191,7 @@ extension Retrospect {
             switch self {
             case .pinned, .inProgress:
                 2
-            case .finished:
+            case .finished, .previous:
                 30
             }
         }

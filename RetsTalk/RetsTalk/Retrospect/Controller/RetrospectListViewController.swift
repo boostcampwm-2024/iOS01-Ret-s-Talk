@@ -21,7 +21,8 @@ final class RetrospectListViewController: BaseViewController {
     private let errorSubject: CurrentValueSubject<Error?, Never>
     
     private var dataSource: RetrospectDataSource?
-
+    private var isRetrospectFetching = false
+    
     // MARK: UI Components
     
     private let retrospectListView: RetrospectListView
@@ -44,7 +45,7 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     required init?(coder: NSCoder) {
-        let coreDataManager = CoreDataManager(name: Constants.Texts.CoreDataContainerName, completion: { _ in })
+        let coreDataManager = CoreDataManager(name: Constants.Texts.coreDataContainerName, completion: { _ in })
         let clovaStudioManager = CLOVAStudioManager(urlSession: .shared)
         retrospectManager = RetrospectManager(
             userID: UUID(),
@@ -69,7 +70,7 @@ final class RetrospectListViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         addObserver()
         addCreateButtondidTapAction()
         fetchInitialRetrospect()
@@ -104,6 +105,7 @@ final class RetrospectListViewController: BaseViewController {
         super.setupDelegation()
         
         retrospectListView.setTableViewDelegate(self)
+        userSettingManager.cloudDelegate = self
     }
     
     override func setupDataSource() {
@@ -121,12 +123,13 @@ final class RetrospectListViewController: BaseViewController {
                 guard let self = self else { return }
                 
                 self.updateSnapshot()
+                self.updateTotalRetrospectCount()
             }
             .store(in: &subscriptionSet)
     }
 
     // MARK: Regarding iCloud
-
+    
     private func addObserver() {
         NotificationCenter.default.addObserver(
             self,
@@ -134,35 +137,34 @@ final class RetrospectListViewController: BaseViewController {
             name: .coreDataImportedNotification,
             object: nil
         )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(regenerateAndReplaceCoreDataManager),
-            name: .iCloudSyncStateChangeNotification,
-            object: nil
-        )
     }
-
+    
     @objc private func refetchRetrospects() {
         fetchInitialRetrospect()
     }
 
-    @objc private func regenerateAndReplaceCoreDataManager() {
-        let userData = userSettingManager.userData
-        let isCloudSyncOn = userData.isCloudSyncOn
-        let newCoreDataManager = CoreDataManager(
-            isiCloudSynced: isCloudSyncOn,
-            name: Constants.Texts.CoreDataContainerName) { _ in }
+    // MARK: Retrospect handling
+    
+    private func updateTotalRetrospectCount() {
         Task {
-            await retrospectManager.replaceRetrospectStorage(newCoreDataManager)
+            guard let count = await retrospectManager.fetchRetrospectsCount() else { return }
+            
+            retrospectListView.updateButtonSubtitle(count)
         }
     }
 
-    // MARK: Retrospect handling
-    
     private func fetchInitialRetrospect() {
         Task {
             await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
             sortAndSendRetrospects()
+        }
+    }
+    
+    private func fetchPreviousRetrospects() {
+        Task {
+            await retrospectManager.fetchPreviousRetrospects()
+            sortAndSendRetrospects()
+            self.isRetrospectFetching = false
         }
     }
     
@@ -198,14 +200,9 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     // MARK: Action controls
-
+    
     @objc private func didTapSettings() {
-        let userSettingViewController = UserSettingViewController(
-            userSettingManager: UserSettingManager(
-                userDataStorage: UserDefaultsManager()
-            ),
-            notificationManager: NotificationManager()
-        )
+        let userSettingViewController = UserSettingViewController(userSettingManager: userSettingManager)
         navigationController?.pushViewController(userSettingViewController, animated: true)
     }
     
@@ -244,7 +241,7 @@ private extension RetrospectListViewController {
             cell.backgroundColor = .clear
             cell.contentConfiguration = UIHostingConfiguration {
                 RetrospectCell(
-                    summary: retrospect.summary ?? Texts.defaultSummaryText,
+                    summary: (retrospect.summary ?? retrospect.chat.last?.content) ?? Texts.defaultSummaryText,
                     createdAt: retrospect.createdAt,
                     isPinned: retrospect.isPinned
                 )
@@ -271,6 +268,16 @@ private extension RetrospectListViewController {
 // MARK: - UITableViewDelegate conformance
 
 extension RetrospectListViewController: UITableViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        
+        if offsetY > contentHeight - scrollView.frame.height, !isRetrospectFetching {
+            isRetrospectFetching = true
+            fetchPreviousRetrospects()
+        }
+    }
+    
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let sections = dataSource?.snapshot().sectionIdentifiers
         let headerView = SectionHeaderView(title: sections?[section].title)
@@ -353,6 +360,18 @@ extension RetrospectListViewController: UITableViewDelegate {
         )
         
         return retrospect.isPinned ? unpinAction : pinAction
+    }
+}
+
+// MARK: - UserSettingManageableCloudDelegete conformance
+
+extension RetrospectListViewController: UserSettingManageableCloudDelegate {
+    func didCloudSyncStateChange(_ userSettingManageable: any UserSettingManageable) {
+        Task {
+            let userData = userSettingManager.userData
+            let isCloudSyncOn = userData.isCloudSyncOn
+            await retrospectManager.refreshRetrospectStorage(iCloudEnabled: isCloudSyncOn)
+        }
     }
 }
 

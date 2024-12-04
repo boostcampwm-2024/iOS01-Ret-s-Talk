@@ -33,6 +33,12 @@ final class MockMessageStore: Persistable, @unchecked Sendable {
         return result
     }
     
+    func fetchDataCount<Entity>(
+        by request: any PersistFetchRequestable<Entity>
+    ) throws -> Int where Entity: EntityRepresentable {
+        0
+    }
+    
     func update<Entity>(from sourceEntity: Entity, to updatingEntity: Entity) throws -> Entity {
         updatingEntity
     }

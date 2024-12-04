@@ -24,6 +24,12 @@ final class MockRetrospectStore: Persistable {
         return (fetchHadler(request) as? [Entity]) ?? []
     }
     
+    func fetchDataCount<Entity>(
+        by request: any PersistFetchRequestable<Entity>
+    ) throws -> Int where Entity: EntityRepresentable {
+        0
+    }
+    
     func update<Entity>(from sourceEntity: Entity, to updatingEntity: Entity) throws -> Entity {
         updatingEntity
     }

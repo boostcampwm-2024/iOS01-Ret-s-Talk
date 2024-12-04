@@ -83,9 +83,32 @@ final class RetrospectManager: RetrospectManageable {
         }
     }
     
+    func fetchPreviousRetrospects() {
+        do {
+            let request = previousRetrospectFetchRequest(amount: Numerics.retrospectFetchAmount)
+            let fetchedRetrospects = try retrospectStorage.fetch(by: request)
+            retrospects.append(contentsOf: fetchedRetrospects)
+            errorOccurred = nil
+        } catch {
+            errorOccurred = error
+        }
+    }
+    
+    func fetchRetrospectsCount() -> Int? {
+        do {
+            let request = PersistFetchRequest<Retrospect>(fetchLimit: Numerics.fetchTotalDataCountLimit)
+            let fetchedCount = try retrospectStorage.fetchDataCount(by: request)
+            errorOccurred = nil
+            return fetchedCount
+        } catch {
+            errorOccurred = error
+            return nil
+        }
+    }
+    
     func togglePinRetrospect(_ retrospect: Retrospect) {
         do {
-            guard retrospect.isPinned || isPinAvailable else { throw Error.reachInProgressLimit }
+            guard retrospect.isPinned || isPinAvailable else { throw Error.reachPinLimit }
             
             var updatingRetrospect = retrospect
             updatingRetrospect.isPinned.toggle()
@@ -120,10 +143,14 @@ final class RetrospectManager: RetrospectManageable {
         }
     }
 
-    func replaceRetrospectStorage(_ newRetrospectStorage: Persistable) {
+    func refreshRetrospectStorage(iCloudEnabled: Bool) {
+        let newRetrospectStorage = CoreDataManager(
+            isiCloudSynced: iCloudEnabled,
+            name: Constants.Texts.coreDataContainerName
+        ) { _ in }
         retrospectStorage = newRetrospectStorage
     }
-
+    
     // MARK: Support retrospect creation
     
     private func createNewRetrospect() throws -> Retrospect {
@@ -144,6 +171,18 @@ final class RetrospectManager: RetrospectManageable {
             sortDescriptors: [CustomSortDescriptor(key: "createdAt", ascending: false)],
             fetchLimit: kind.fetchLimit
         )
+    }
+    
+    private func previousRetrospectFetchRequest(amount: Int) -> PersistFetchRequest<Retrospect> {
+        let recentDateSorting = CustomSortDescriptor(key: Texts.retrospectSortKey, ascending: false)
+        let lastRetrospectCreatedDate = retrospects.last?.createdAt ?? Date()
+        let predicate = Retrospect.Kind.predicate(.previous(lastRetrospectCreatedDate))(for: userID)
+        let request = PersistFetchRequest<Retrospect>(
+            predicate: predicate,
+            sortDescriptors: [recentDateSorting],
+            fetchLimit: Retrospect.Kind.previous(lastRetrospectCreatedDate).fetchLimit
+        )
+        return request
     }
     
     // MARK: Manage retrospects
@@ -170,7 +209,7 @@ extension RetrospectManager: RetrospectChatManagerListener {
         guard let matchingIndex = retrospects.firstIndex(where: { $0.id == retrospect.id })
         else { return }
         
-        if retrospects[matchingIndex] != retrospect {
+        if !retrospects[matchingIndex].isEqualInStorage(retrospect) {
             _ = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
         }
         retrospects[matchingIndex] = retrospect
@@ -209,7 +248,14 @@ fileprivate extension RetrospectManager {
 
 fileprivate extension RetrospectManager {
     enum Numerics {
+        static let fetchTotalDataCountLimit = 0
         static let pinLimit = 2
         static let inProgressLimit = 2
+        static let retrospectFetchAmount = 2
+    }
+    
+    enum Texts {
+        static let retrospectFinished = "retrospectFinished"
+        static let retrospectSortKey = "createdAt"
     }
 }

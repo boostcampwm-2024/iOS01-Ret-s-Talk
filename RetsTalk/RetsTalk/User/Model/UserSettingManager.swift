@@ -8,14 +8,28 @@
 import Combine
 import Foundation
 
-final class UserSettingManager: UserSettingManageable, @unchecked Sendable, ObservableObject {
+@MainActor
+protocol UserSettingManageableDelegate: AnyObject {
+    func alertNeedNotificationPermission(_ userSettingManageable: any UserSettingManageable)
+}
+
+@MainActor
+protocol UserSettingManageableCloudDelegate: AnyObject {
+    func didCloudSyncStateChange(_ userSettingManageable: any UserSettingManageable)
+}
+
+final class UserSettingManager: UserSettingManageable, ObservableObject {
     @Published var userData: UserData = .init(dictionary: [:])
     private let userDataStorage: Persistable
-    
+    private let notificationManager: NotificationManageable
+    weak var permissionAlertDelegate: UserSettingManageableDelegate?
+    weak var cloudDelegate: UserSettingManageableCloudDelegate?
+
     // MARK: Init method
     
     init(userDataStorage: Persistable) {
         self.userDataStorage = userDataStorage
+        notificationManager = NotificationManager()
     }
     
     // MARK: UserSettingManageable conformance
@@ -49,35 +63,36 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
     }
     
     func updateNickname(_ nickname: String) {
-        var updatingUserData = userData
-        updatingUserData.nickname = nickname
-        update(to: updatingUserData)
+        updateUserData { $0.nickname = nickname }
     }
     
     func updateCloudSyncState(state isOn: Bool) {
-        var updatingUserData = userData
-        updatingUserData.isCloudSyncOn = isOn
-        update(to: updatingUserData)
+        updateUserData { $0.isCloudSyncOn = isOn }
+        cloudDelegate?.didCloudSyncStateChange(self)
     }
     
     func updateNotificationStatus(_ isOn: Bool, at date: Date) {
-        var updatingUserData = userData
-        updatingUserData.isNotificationOn = isOn
-        updatingUserData.notificationTime = date
-        update(to: updatingUserData)
-    }
-    
-    // MARK: UserData Handling Method
-    
-    private func update(to updatingData: UserData) {
         Task {
-            let updatedData = try userDataStorage.update(from: updatingData, to: updatingData)
-            await MainActor.run {
-                userData = updatedData
+            let isNotificationAllowed = await notificationManager.requestNotification(isOn, date: date)
+            updateUserData { userData in
+                userData.isNotificationOn = isNotificationAllowed ? isOn : false
+                userData.notificationTime = date
             }
+            if !isNotificationAllowed { permissionAlertDelegate?.alertNeedNotificationPermission(self) }
         }
     }
     
+    // MARK: UserData Handling Method
+
+    private func updateUserData(_ updateBlock: @escaping (inout UserData) -> Void) {
+        Task { @MainActor in
+            var latestUserData = userData
+            updateBlock(&latestUserData)
+            let updatedData = try userDataStorage.update(from: userData, to: latestUserData)
+            userData = updatedData
+        }
+    }
+
     private func initializeUserData() -> UUID {
         let newUserID = UUID()
         let newNickname = randomNickname()
@@ -109,7 +124,6 @@ final class UserSettingManager: UserSettingManageable, @unchecked Sendable, Obse
         let noun = Texts.nicknameComposingNoun
         return adjective + " " + noun
     }
-    
 }
 
 // MARK: - Constants
