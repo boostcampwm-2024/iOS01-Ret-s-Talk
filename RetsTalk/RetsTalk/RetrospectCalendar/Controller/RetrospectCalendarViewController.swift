@@ -49,12 +49,7 @@ final class RetrospectCalendarViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let currentDate = Date()
-        let calendar = Calendar.current
-        let year = calendar.component(.year, from: currentDate)
-        let month = calendar.component(.month, from: currentDate)
-        
-       loadRetrospects(year: year, month: month)
+        setupInitialData()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -126,6 +121,14 @@ final class RetrospectCalendarViewController: BaseViewController {
     private func addRetrospectToCache(_ retrospect: Retrospect) {
         let dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: retrospect.createdAt)
         retrospectsCache[dateComponents, default: []].append(retrospect)
+    }
+    
+    private func setupInitialData() {
+        let currentDataComponents = retrospectCalendarView.currentDataComponents()
+        guard let year = currentDataComponents.year,
+              let month = currentDataComponents.month else { return }
+        
+        loadRetrospects(year: year, month: month)
     }
 }
 
