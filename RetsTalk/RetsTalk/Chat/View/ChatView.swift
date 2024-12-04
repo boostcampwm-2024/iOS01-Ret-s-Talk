@@ -113,9 +113,14 @@ final class ChatView: BaseView {
     // MARK: Keyboard action
     
     func updateLayoutForKeyboard(using keyboardInfo: KeyboardInfo) {
-        chatViewBottomConstraint?.constant = min(-(keyboardInfo.frame.height - safeAreaInsets.bottom), 0)
+        let willKeyboardShow = 0 < keyboardInfo.frame.height
+        let updatedChatViewBottomConstant = -(keyboardInfo.frame.height - safeAreaInsets.bottom)
+        chatViewBottomConstraint?.constant = min(updatedChatViewBottomConstant, 0)
         UIView.animate(withDuration: keyboardInfo.animationDuration) { [self] in
             layoutIfNeeded()
+            if willKeyboardShow {
+                scrollToBottom()
+            }
         }
     }
     

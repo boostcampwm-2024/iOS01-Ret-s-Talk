@@ -33,3 +33,13 @@ protocol AlertSituation {
     /// 알림의 내용을 담고 있는 문자열입니다.
     var message: String { get }
 }
+
+extension UIAlertAction {
+    static func close(handler: ((UIAlertAction) -> Void)? = nil) -> UIAlertAction {
+        UIAlertAction(title: "닫기", style: .cancel, handler: handler)
+    }
+    
+    static func conform(handler: ((UIAlertAction) -> Void)? = nil) -> UIAlertAction {
+        UIAlertAction(title: "확인", style: .default, handler: handler)
+    }
+}

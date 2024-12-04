@@ -144,8 +144,8 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
     
     private func subscribeRetrospectErrorHandling() {
         errorSubject
-            .sink(receiveValue: { error in
-                print(error)
+            .sink(receiveValue: { [weak self] error in
+                self?.presentAlert(for: .error(error), actions: [.close()])
             })
             .store(in: &subscriptionSet)
     }
@@ -160,6 +160,13 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
     }
     
     // MARK: Retrospect chat manager action
+    
+    private func sendUserMessage(with content: String) {
+        Task {
+            scrollToBottomNeeded = true
+            await retrospectChatManager.sendMessage(content)
+        }
+    }
     
     private func requestAssistantMessage() {
         Task {
@@ -179,10 +186,13 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
 
     @objc
     private func endRetrospectChat() {
-        Task {
-            await retrospectChatManager.endRetrospect()
-            navigationController?.popViewController(animated: true)
+        let conformAction = UIAlertAction.conform { [weak self] _ in
+            Task {
+                await self?.retrospectChatManager.endRetrospect()
+                self?.navigationController?.popViewController(animated: true)
+            }
         }
+        presentAlert(for: .finish, actions: [.close(), conformAction])
     }
     
     // MARK: Keyboard control
@@ -204,7 +214,8 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
         view.addGestureRecognizer(tapGestureRecognizer)
     }
     
-    @objc private func dismissKeyboard() {
+    @objc
+    private func dismissKeyboard() {
         view.endEditing(true)
     }
     
@@ -222,10 +233,7 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
 
 extension RetrospectChatViewController: ChatViewDelegate {
     func willSendMessage(from chatView: ChatView, with content: String) {
-        Task {
-            scrollToBottomNeeded = true
-            await retrospectChatManager.sendMessage(content)
-        }
+        sendUserMessage(with: content)
     }
     
     func didTapRetryButton(_ retryButton: UIButton) {
@@ -305,6 +313,36 @@ fileprivate extension RetrospectChatViewController {
             let isContentHeightDiffInsignificant = abs(lhs.contentHeight - rhs.contentHeight) / 100 < 0
             let isTimeDiffInsignificant = abs(lhs.time.timeIntervalSince(rhs.time)) < 0.1
             return isDragging || isContentHeightDiffInsignificant || isTimeDiffInsignificant
+        }
+    }
+}
+
+// MARK: - AlertPresentable conformance
+
+extension RetrospectChatViewController: AlertPresentable {
+    enum Situation: AlertSituation {
+        case error(Error)
+        case finish
+        
+        var title: String {
+            switch self {
+            case .error:
+                "오류 발생"
+            case .finish:
+                "회고 종료"
+            }
+        }
+        
+        var message: String {
+            switch self {
+            case let .error(error as LocalizedError):
+                error.errorDescription ?? "설명할 수 없는 문제가 발생했습니다."
+            case let .error(error):
+                error.localizedDescription
+            case .finish:
+                "종료된 회고는 더이상 작성할 수 없습니다.\n정말 종료하시겠습니까?"
+            
+            }
         }
     }
 }
