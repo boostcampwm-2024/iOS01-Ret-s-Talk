@@ -37,6 +37,8 @@ final class RetrospectCalendarTableView: BaseView {
         setupRetrospectCalendarTableViewLayouts()
     }
     
+    // MARK: Delegation
+    
     func setupretrospectListTableViewDelegate(_ delegate: UITableViewDelegate) {
         retrospectListTableView.delegate = delegate
     }
