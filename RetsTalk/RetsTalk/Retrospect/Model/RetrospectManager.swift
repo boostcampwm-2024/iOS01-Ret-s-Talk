@@ -102,6 +102,7 @@ final class RetrospectManager: RetrospectManageable {
             let fetchedRetrospects = try retrospectStorage.fetch(by: request)
             retrospects.append(contentsOf: fetchedRetrospects)
             errorSubject.send(nil)
+            print(fetchedRetrospects.count)
             return fetchedRetrospects.count
         } catch {
             errorSubject.send(error)
@@ -143,7 +144,6 @@ final class RetrospectManager: RetrospectManageable {
         do {
             var updatingRetrospect = retrospect
             updatingRetrospect.summary = try await retrospectAssistantProvider.requestSummary(for: retrospect.chat)
-            updatingRetrospect.status = .finished
             let updatedRetrospect = try retrospectStorage.update(from: retrospect, to: updatingRetrospect)
             updateRetrospects(by: updatedRetrospect)
             errorSubject.send(nil)
@@ -194,7 +194,7 @@ final class RetrospectManager: RetrospectManageable {
     
     private func previousRetrospectFetchRequest(amount: Int) -> PersistFetchRequest<Retrospect> {
         let recentDateSorting = CustomSortDescriptor(key: Texts.retrospectSortKey, ascending: false)
-        let lastRetrospectCreatedDate = retrospects.last?.createdAt ?? Date()
+        let lastRetrospectCreatedDate = retrospectsSubject.value[2].last?.createdAt ?? Date()
         let predicate = Retrospect.Kind.predicate(.previous(lastRetrospectCreatedDate))(for: userID)
         return PersistFetchRequest<Retrospect>(
             predicate: predicate,
@@ -244,6 +244,14 @@ extension RetrospectManager: RetrospectChatManagerListener {
         
         if !retrospects[matchingIndex].isEqualInStorage(retrospect) {
             _ = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+            switch retrospect.status {
+            case .finished:
+                Task {
+                    await finishRetrospect(retrospect)
+                }
+            default:
+                break
+            }
         }
         retrospects[matchingIndex] = retrospect
     }
