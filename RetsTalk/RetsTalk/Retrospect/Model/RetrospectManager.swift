@@ -234,10 +234,10 @@ extension RetrospectManager: RetrospectChatManagerListener {
         
         if !retrospects[matchingIndex].isEqualInStorage(retrospect) {
             Task {
-                _ = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
-                switch retrospect.status {
+                let updatedRetrospect = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+                switch updatedRetrospect.status {
                 case .finished:
-                    await finishRetrospect(retrospect)
+                    await finishRetrospect(updatedRetrospect)
                 default:
                     break
                 }
