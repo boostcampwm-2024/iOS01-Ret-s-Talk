@@ -5,6 +5,7 @@
 //  Created by KimMinSeok on 12/1/24.
 //
 
+@preconcurrency import Combine
 import SwiftUI
 import UIKit
 
@@ -17,7 +18,9 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     private var dataSource: DataSource?
     private var snapshot: Snapshot?
     
-    private var retrospects: [Retrospect]
+    private var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
+    private let errorSubject: PassthroughSubject<Error, Never>
+    private var currentDateComponents: DateComponents
     
     // MARK: View
     
@@ -25,9 +28,15 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     
     // MARK: Initalization
     
-    init(retrospects: [Retrospect], retrospectCalendarManager: RetrospectCalendarManageable) {
-        self.retrospects = retrospects
+    init(
+        retrospectCalendarManager: RetrospectCalendarManageable,
+        currentDateComponents: DateComponents
+    ) {
         self.retrospectCalendarManager = retrospectCalendarManager
+        
+        retrospectsSubject = CurrentValueSubject([])
+        errorSubject = PassthroughSubject()
+        self.currentDateComponents = currentDateComponents
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -57,16 +66,16 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     override func setupDataSource() {
         super.setupDataSource()
         
-        dataSource = DataSource(
-            tableView: retrospectCalendarTableView.retrospectListTableView
-        ) { tableView, indexPath, retrospect in
-            let cell = tableView.dequeueReusableCell(
-                withIdentifier: Constants.Texts.retrospectCellIdentifier,
-                for: indexPath
-            )
-            self.configureCell(cell: cell, retrospect: retrospect)
-            return cell
-        }
+        setupDiffableDataSource()
+    }
+    
+    override func setupSubscription() {
+        super.setupSubscription()
+        
+        subscribeToRetrospectsPublisher()
+        subscribeToRetrospects()
+        subscribeToErrorPublisher()
+        subscribeToError()
     }
     
     private func configureCell(cell: UITableViewCell, retrospect: Retrospect) {
@@ -82,18 +91,80 @@ final class RetrospectCalendarTableViewController: BaseViewController {
         .margins(.vertical, Metrics.cellVerticalPadding)
     }
     
+    // MARK: Subscription method
+    
+    private func subscribeToRetrospectsPublisher() {
+        Task {
+            await retrospectCalendarManager.retrospectsPublisher
+                .receive(on: RunLoop.main)
+                .subscribe(retrospectsSubject)
+                .store(in: &subscriptionSet)
+        }
+    }
+    
+    func retrospects(for dateComponents: DateComponents) -> [Retrospect] {
+        return retrospectsSubject.value.filter {
+            $0.createdAt.toDateComponents == dateComponents
+        }
+    }
+    
+    private func subscribeToRetrospects() {
+        retrospectsSubject
+            .sink { [weak self] _ in
+                guard let self else { return }
+                
+                self.updateTableView()
+            }
+            .store(in: &subscriptionSet)
+    }
+    
+    private func subscribeToErrorPublisher() {
+        Task {
+            await retrospectCalendarManager.errorPublisher
+                .receive(on: RunLoop.main)
+                .subscribe(errorSubject)
+                .store(in: &subscriptionSet)
+        }
+    }
+    
+    private func subscribeToError() {
+        errorSubject
+            .sink { _ in
+                
+            }
+            .store(in: &subscriptionSet)
+    }
+    
     // MARK: Update data
+    
+    func updateRetrospect(currentDateComponents: DateComponents) {
+        self.currentDateComponents = currentDateComponents
+        updateTableView()
+    }
+}
+
+private extension RetrospectCalendarTableViewController {
+    func setupDiffableDataSource() {
+        dataSource = DataSource(
+            tableView: retrospectCalendarTableView.retrospectListTableView
+        ) { tableView, indexPath, retrospect in
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: Constants.Texts.retrospectCellIdentifier,
+                for: indexPath
+            )
+            self.configureCell(cell: cell, retrospect: retrospect)
+            return cell
+        }
+    }
     
     private func updateTableView() {
         var snapshot = Snapshot()
         snapshot.appendSections([.retrospect])
-        snapshot.appendItems(retrospects, toSection: .retrospect)
+        let retrospectData = retrospectsSubject.value.filter {
+            $0.createdAt.toDateComponents == self.currentDateComponents
+        }
+        snapshot.appendItems(retrospectData, toSection: .retrospect)
         dataSource?.apply(snapshot, animatingDifferences: true)
-    }
-    
-    func updateRetrospect(with currentRetrospects: [Retrospect]) {
-        retrospects = currentRetrospects
-        updateTableView()
     }
 }
 

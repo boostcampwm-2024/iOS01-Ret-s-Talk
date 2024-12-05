@@ -185,6 +185,7 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
             Task {
                 await self?.retrospectChatManager.endRetrospect()
                 self?.navigationController?.popViewController(animated: true)
+                self?.dismiss(animated: true)
             }
         }
         presentAlert(for: .finish, actions: [.close(), confirmAction])

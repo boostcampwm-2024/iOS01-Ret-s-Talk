@@ -91,6 +91,7 @@ final class RetrospectManager: RetrospectManageable {
 
     func fetchRetrospects(of kindList: [Retrospect.Kind]) {
         do {
+            retrospects = []
             for kind in kindList {
                 let request = retrospectFetchRequest(for: kind)
                 let fetchedRetrospects = try retrospectStorage.fetch(by: request)

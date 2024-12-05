@@ -14,7 +14,7 @@ nesting:
         warning: 2
         
 file_length:
-    warning: 500
+    warning: 550
 
 line_length:
     warning: 120

@@ -69,10 +69,15 @@ final class RetrospectListViewController: BaseViewController {
         
         addCreateButtondidTapAction()
         addCalendarButtonDidTapAction()
-        fetchInitialRetrospect()
         onBoarding()
     }
-
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        fetchInitialRetrospect()
+    }
+    
     // MARK: RetsTalk lifecycle method
     
     override func setupNavigationBar() {
