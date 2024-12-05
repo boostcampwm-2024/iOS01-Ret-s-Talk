@@ -36,7 +36,7 @@ final class RetrospectCalendarManager: RetrospectCalendarManageable {
         retrospects = []
     }
     
-    // MARK: RetrospectCalenarManageable conformance
+    // MARK: RetrospectCalendarManageable conformance
     
     var retrospectsPublisher: AnyPublisher<[Retrospect], Never> {
         retrospectsSubject.eraseToAnyPublisher()
