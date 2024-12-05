@@ -97,9 +97,6 @@ final class RetrospectCalendarTableViewController: BaseViewController {
         Task {
             await retrospectCalendarManager.retrospectsPublisher
                 .receive(on: RunLoop.main)
-                .map { retrospects in
-                    retrospects.filter { $0.createdAt.toDateComponents == self.currentDateComponents }
-                }
                 .subscribe(retrospectsSubject)
                 .store(in: &subscriptionSet)
         }
@@ -163,7 +160,8 @@ private extension RetrospectCalendarTableViewController {
     private func updateTableView() {
         var snapshot = Snapshot()
         snapshot.appendSections([.retrospect])
-        snapshot.appendItems(retrospectsSubject.value, toSection: .retrospect)
+        let retrospectData = retrospectsSubject.value.filter { $0.createdAt.toDateComponents == self.currentDateComponents }
+        snapshot.appendItems(retrospectData, toSection: .retrospect)
         dataSource?.apply(snapshot, animatingDifferences: true)
     }
 }
