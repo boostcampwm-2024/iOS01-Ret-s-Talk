@@ -70,7 +70,7 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     func updateCloudSyncState(state isOn: Bool) {
         Task {
             guard let recordID = await cloudKitManager.fetchRecordIDIfIcloudEnabled()
-                else {
+            else {
                 updateUserData {
                     $0.isCloudSyncOn = false
                     $0.cloudAddress = ""

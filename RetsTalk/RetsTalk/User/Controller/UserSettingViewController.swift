@@ -73,17 +73,17 @@ extension UserSettingViewController: UserSettingManageableAlertable {
         var title: String {
             switch self {
             case .needNotifactionPermission:
-                return Texts.needNotificationPermissonTitle
+                Texts.needNotificationPermissonTitle
             case .checkICloudState:
-                return Texts.checkICloudStateTitle
+                Texts.checkICloudStateTitle
             }
         }
         var message: String {
             switch self {
             case .needNotifactionPermission:
-                return Texts.needNotificationPermissonMessage
+                Texts.needNotificationPermissonMessage
             case .checkICloudState:
-                return Texts.checkICloudStateMessage
+                Texts.checkICloudStateMessage
             }
         }
     }
