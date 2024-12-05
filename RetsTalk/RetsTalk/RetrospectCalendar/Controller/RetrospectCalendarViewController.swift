@@ -170,8 +170,8 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
     func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
         guard let dateComponents = dateComponents?.normalized else { return }
         
-        if let currentDateRetrospects = retrospectsCache[dateComponents.normalized] {
-            presentRetrospectsList(retrospects: currentDateRetrospects)
+        if retrospectsCache[dateComponents.normalized] != nil {
+            presentRetrospectsList(dateComponents: dateComponents)
         } else {
             retrospectTableViewController?.dismiss(animated: true) {
                 self.retrospectTableViewController = nil
@@ -181,9 +181,11 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
     
     // MARK: Present retrospect TableView
     
-    private func presentRetrospectsList(retrospects: [Retrospect]) {
-        let controller = retrospectTableViewController ?? createRetrospectTableViewController(retrospects: retrospects)
-        controller.updateRetrospect(with: retrospects)
+    private func presentRetrospectsList(dateComponents: DateComponents) {
+        let controller = retrospectTableViewController ?? createRetrospectTableViewController(
+            dateComponents: dateComponents
+        )
+        controller.updateRetrospect(currentDateComponents: dateComponents)
         
         if retrospectTableViewController == nil {
             retrospectTableViewController = controller
@@ -191,11 +193,11 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
         }
     }
     
-    private func createRetrospectTableViewController(retrospects: [Retrospect])
+    private func createRetrospectTableViewController(dateComponents: DateComponents)
     -> RetrospectCalendarTableViewController {
         let controller = RetrospectCalendarTableViewController(
-            retrospects: retrospects,
-            retrospectCalendarManager: retrospectCalendarManager
+            retrospectCalendarManager: retrospectCalendarManager,
+            currentDateComponents: dateComponents
         )
         if let sheet = controller.sheetPresentationController {
             sheet.detents = [.medium(), .large()]

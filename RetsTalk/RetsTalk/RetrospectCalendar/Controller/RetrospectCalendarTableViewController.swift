@@ -20,6 +20,7 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     
     private var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
     private let errorSubject: PassthroughSubject<Error, Never>
+    private var currentDateComponents: DateComponents 
     
     // MARK: View
     
@@ -27,11 +28,15 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     
     // MARK: Initalization
     
-    init(retrospects: [Retrospect], retrospectCalendarManager: RetrospectCalendarManageable) {
+    init(
+        retrospectCalendarManager: RetrospectCalendarManageable,
+        currentDateComponents: DateComponents
+    ) {
         self.retrospectCalendarManager = retrospectCalendarManager
         
-        retrospectsSubject = CurrentValueSubject(retrospects)
+        retrospectsSubject = CurrentValueSubject([])
         errorSubject = PassthroughSubject()
+        self.currentDateComponents = currentDateComponents
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -92,15 +97,24 @@ final class RetrospectCalendarTableViewController: BaseViewController {
         Task {
             await retrospectCalendarManager.retrospectsPublisher
                 .receive(on: RunLoop.main)
+                .map { retrospects in
+                    retrospects.filter { $0.createdAt.toDateComponents == self.currentDateComponents }
+                }
                 .subscribe(retrospectsSubject)
                 .store(in: &subscriptionSet)
+        }
+    }
+    
+    func retrospects(for dateComponents: DateComponents) -> [Retrospect] {
+        return retrospectsSubject.value.filter {
+            $0.createdAt.toDateComponents == dateComponents
         }
     }
     
     private func subscribeToRetrospects() {
         retrospectsSubject
             .sink { [weak self] _ in
-                guard let self = self else { return }
+                guard let self else { return }
                 
                 self.updateTableView()
             }
@@ -126,8 +140,8 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     
     // MARK: Update data
     
-    func updateRetrospect(with currentRetrospects: [Retrospect]) {
-        retrospectsSubject.value = currentRetrospects
+    func updateRetrospect(currentDateComponents: DateComponents) {
+        self.currentDateComponents = currentDateComponents
         updateTableView()
     }
 }
