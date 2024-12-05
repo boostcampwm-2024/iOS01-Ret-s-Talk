@@ -129,8 +129,11 @@ final class RetrospectManager: RetrospectManageable {
     func finishRetrospect(_ retrospect: Retrospect) async {
         do {
             var updatingRetrospect = retrospect
-            updatingRetrospect.summary = try await retrospectAssistantProvider.requestSummary(for: retrospect.chat)
-            updatingRetrospect.status = .finished
+
+            if updatingRetrospect.status == .finished {
+                updatingRetrospect.summary = try await retrospectAssistantProvider.requestSummary(for: retrospect.chat)
+            }
+
             let updatedRetrospect = try retrospectStorage.update(from: retrospect, to: updatingRetrospect)
             updateRetrospects(by: updatedRetrospect)
             errorOccurred = nil
@@ -230,13 +233,21 @@ extension RetrospectManager: RetrospectChatManagerListener {
         else { return }
         
         if !retrospects[matchingIndex].isEqualInStorage(retrospect) {
-            _ = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+            Task {
+                let updatedRetrospect = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+                switch updatedRetrospect.status {
+                case .finished:
+                    await finishRetrospect(updatedRetrospect)
+                default:
+                    break
+                }
+            }
         }
         retrospects[matchingIndex] = retrospect
     }
     
     func shouldTogglePin(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) -> Bool {
-        isPinAvailable
+        retrospect.isPinned || isPinAvailable
     }
 }
 

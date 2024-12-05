@@ -9,7 +9,7 @@ import UIKit
 
 @MainActor
 protocol ChatViewDelegate: AnyObject {
-    func willSendMessage(from chatView: ChatView, with content: String)
+    func willSendMessage(from chatView: ChatView, with content: String) -> Bool
     func didTapRetryButton(_ retryButton: UIButton)
 }
 
@@ -113,10 +113,19 @@ final class ChatView: BaseView {
     // MARK: Keyboard action
     
     func updateLayoutForKeyboard(using keyboardInfo: KeyboardInfo) {
-        chatViewBottomConstraint?.constant = min(-(keyboardInfo.frame.height - safeAreaInsets.bottom), 0)
+        let willKeyboardShow = 0 < keyboardInfo.frame.height
+        let updatedChatViewBottomConstant = -(keyboardInfo.frame.height - safeAreaInsets.bottom)
+        chatViewBottomConstraint?.constant = min(updatedChatViewBottomConstant, 0)
         UIView.animate(withDuration: keyboardInfo.animationDuration) { [self] in
             layoutIfNeeded()
+            if willKeyboardShow {
+                scrollToBottom()
+            }
         }
+    }
+    
+    func addTapGestureToDismissKeyboard(_ gestureRecognizer: UIGestureRecognizer) {
+        chatTableView.addGestureRecognizer(gestureRecognizer)
     }
     
     // MARK: Retrospect Status handling
@@ -155,8 +164,8 @@ final class ChatView: BaseView {
 // MARK: - MessageInputViewDelegate
 
 extension ChatView: MessageInputViewDelegate {
-    func willSendMessage(_ messageInputView: MessageInputView, with content: String) {
-        delegate?.willSendMessage(from: self, with: content)
+    func willSendMessage(_ messageInputView: MessageInputView, with content: String) -> Bool {
+        delegate?.willSendMessage(from: self, with: content) ?? false
     }
     
     func updateMessageInputViewHeight(_ messageInputView: MessageInputView, to height: CGFloat) {

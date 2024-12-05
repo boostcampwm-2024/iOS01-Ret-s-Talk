@@ -10,21 +10,28 @@ import UIKit
 extension UIImage {
     enum SystemImage {
         case leftChevron
+        case pinned
+        case unpinned
         
         var name: String {
             switch self {
             case .leftChevron:
-                return "chevron.left"
+                "chevron.left"
+            case .pinned:
+                "pin.fill"
+            case .unpinned:
+                "pin"
             }
         }
     }
 
     convenience init?(systemImage: SystemImage) {
-        switch systemImage {
-        case .leftChevron:
-            self.init(systemName: systemImage.name)
-        }
+        self.init(systemName: systemImage.name)
     }
+    
+    static let leftChevron = UIImage(systemImage: .leftChevron)
+    static let pinned = UIImage(systemImage: .pinned)
+    static let unpinned = UIImage(systemImage: .unpinned)
     
     /// 시스템 아이콘 이름으로 tintColor를 적용한 후 주어진 비율로 크기 조정합니다.
     static func systemImage(named name: String, tintColor: UIColor, scaleFactor: CGFloat) -> UIImage? {
