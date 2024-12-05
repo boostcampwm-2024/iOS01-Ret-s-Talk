@@ -11,8 +11,8 @@ import Combine
 protocol RetrospectManageable: Sendable {
     var retrospects: [Retrospect] { get }
     var retrospectsPublisher: AnyPublisher<SortedRetrospects, Never> { get }
-    var errorSubject: PassthroughSubject<Swift.Error?, Never> { get }
-    
+    var errorPublisher: AnyPublisher<Swift.Error?, Never> { get }
+
     func createRetrospect() -> RetrospectChatManageable?
     func retrospectChatManager(of retrospect: Retrospect) -> RetrospectChatManageable?
     func fetchRetrospects(of kindList: [Retrospect.Kind])

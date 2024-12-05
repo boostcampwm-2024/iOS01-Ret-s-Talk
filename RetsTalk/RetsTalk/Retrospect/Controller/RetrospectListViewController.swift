@@ -120,7 +120,9 @@ final class RetrospectListViewController: BaseViewController {
         super.setupSubscription()
         
         addNotificationObserver()
+        subscribeToRetrospectsPublisher()
         subscribeToRetrospects()
+        subscribeToErrorPublisher()
         subscribeToError()
         subscribeToDebounce()
     }
@@ -142,16 +144,18 @@ final class RetrospectListViewController: BaseViewController {
     
     // MARK: Subscription method
 
-    private func subscribeToRetrospects() {
+    private func subscribeToRetrospectsPublisher() {
         Task {
             await retrospectManager.retrospectsPublisher
                 .receive(on: RunLoop.main)
                 .subscribe(retrospectsSubject)
                 .store(in: &subscriptionSet)
         }
+    }
+    
+    private func subscribeToRetrospects() {
         retrospectsSubject
             .dropFirst()
-            .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
                 
@@ -161,15 +165,17 @@ final class RetrospectListViewController: BaseViewController {
             .store(in: &subscriptionSet)
     }
     
-    private func subscribeToError() {
+    private func subscribeToErrorPublisher() {
         Task {
-            await retrospectManager.errorSubject
+            await retrospectManager.errorPublisher
                 .receive(on: RunLoop.main)
                 .subscribe(errorSubject)
                 .store(in: &subscriptionSet)
         }
+    }
+    
+    private func subscribeToError() {
         errorSubject
-            .receive(on: RunLoop.main)
             .sink { [weak self] error in
                 guard let self, let error else { return }
                 
