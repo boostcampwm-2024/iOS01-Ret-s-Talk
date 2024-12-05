@@ -143,7 +143,9 @@ final class RetrospectManager: RetrospectManageable {
     func finishRetrospect(_ retrospect: Retrospect) async {
         do {
             var updatingRetrospect = retrospect
-            updatingRetrospect.summary = try await retrospectAssistantProvider.requestSummary(for: retrospect.chat)
+            if updatingRetrospect.status == .finished {
+                updatingRetrospect.summary = try await retrospectAssistantProvider.requestSummary(for: retrospect.chat)
+            }
             let updatedRetrospect = try retrospectStorage.update(from: retrospect, to: updatingRetrospect)
             updateRetrospects(by: updatedRetrospect)
             errorSubject.send(nil)
@@ -169,7 +171,7 @@ final class RetrospectManager: RetrospectManageable {
         ) { _ in }
         retrospectStorage = newRetrospectStorage
     }
-    
+
     // MARK: Support retrospect creation
     
     private func createNewRetrospect() throws -> Retrospect {
@@ -243,21 +245,21 @@ extension RetrospectManager: RetrospectChatManagerListener {
         else { return }
         
         if !retrospects[matchingIndex].isEqualInStorage(retrospect) {
-            _ = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
-            switch retrospect.status {
-            case .finished:
-                Task {
-                    await finishRetrospect(retrospect)
+            Task {
+                let updatedRetrospect = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+                switch updatedRetrospect.status {
+                case .finished:
+                    await finishRetrospect(updatedRetrospect)
+                default:
+                    break
                 }
-            default:
-                break
             }
         }
         retrospects[matchingIndex] = retrospect
     }
     
     func shouldTogglePin(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) -> Bool {
-        isPinAvailable
+        retrospect.isPinned || isPinAvailable
     }
 }
 

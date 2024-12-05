@@ -14,6 +14,7 @@ final class RetrospectCalendarView: BaseView {
         calendarView.wantsDateDecorations = true
         calendarView.fontDesign = .rounded
         calendarView.tintColor = .blazingOrange
+        calendarView.locale = Locale(identifier: "ko_KR")
         return calendarView
     }()
     
@@ -46,10 +47,14 @@ final class RetrospectCalendarView: BaseView {
         retrospectCalendarView.selectionBehavior = dateSelection
     }
     
-    // MARK: Reload decorations
+    // MARK: CalendarView action
     
     func reloadDecorations(forDateComponents dateCompoenents: [DateComponents]) {
         retrospectCalendarView.reloadDecorations(forDateComponents: dateCompoenents, animated: true)
+    }
+    
+    func currentDataComponents() -> DateComponents {
+        retrospectCalendarView.visibleDateComponents
     }
 }
 

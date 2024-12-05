@@ -25,8 +25,21 @@ extension Date {
         }
     }
     
+    var toDateComponents: DateComponents {
+        Calendar.current.dateComponents([.year, .month, .day], from: self)
+    }
+    
     static func from(year: Int, month: Int, day: Int, hour: Int = 0, minute: Int = 0, second: Int = 0) -> Date {
         let components = DateComponents(year: year, month: month, day: day, hour: hour, minute: minute, second: second)
         return Calendar.current.date(from: components) ?? Date()
+    }
+    
+    static func startOfMonth(year: Int, month: Int) -> Date? {
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        components.day = 1
+        
+        return Calendar.current.date(from: components)
     }
 }

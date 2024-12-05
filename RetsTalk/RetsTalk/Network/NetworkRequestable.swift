@@ -35,6 +35,7 @@ extension NetworkRequestable {
             request.url?.append(queryItems: [URLQueryItem(name: $0.key, value: $0.value)])
         }
         request.httpBody = try urlRequestComposer.data?.encodeJSON()
+        request.timeoutInterval = 7
         return request
     }
     

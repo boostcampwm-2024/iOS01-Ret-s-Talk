@@ -13,7 +13,9 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     private let retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
-    private var retrospectsCache: [DateComponents: [Retrospect]] = [:]
+    private var retrospectsCache: [DateComponents: [Retrospect]]
+    
+    private var loadedMonths: [(Int, Int)]
     
     private var retrospectTableViewController: RetrospectCalendarTableViewController?
     
@@ -28,6 +30,8 @@ final class RetrospectCalendarViewController: BaseViewController {
         
         retrospectsSubject = CurrentValueSubject([])
         errorSubject = CurrentValueSubject(nil)
+        retrospectsCache = [:]
+        loadedMonths = []
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -45,7 +49,14 @@ final class RetrospectCalendarViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        loadRetrospects()
+        setupInitialData()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        retrospectsCache = [:]
+        loadedMonths = []
     }
     
     // MARK: RetsTalk lifecycle
@@ -74,12 +85,27 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     // MARK: Retrospect manager action
     
-    private func loadRetrospects() {
-        Task { [weak self] in
-            await self?.retrospectManager.fetchRetrospects(of: [.finished])
-            if let fetchRetrospects = await self?.retrospectManager.retrospects {
-                self?.retrospectsSubject.send(fetchRetrospects)
-            }
+    private func loadRetrospects(year: Int, month: Int) {
+        guard !loadedMonths.contains(where: { $0 == (year, month) }),
+              let currentMonth = Date.startOfMonth(year: year, month: month),
+              let nextMonth = Date.startOfMonth(year: year, month: month + 1)
+        else { return }
+        
+        Task {
+            await retrospectManager.fetchRetrospects(of: [.monthly(from: currentMonth, to: nextMonth)])
+            let fetchRetrospects = await retrospectManager.retrospects
+            let newRetrospects = filterNewRetrospects(fetchRetrospects)
+            retrospectsSubject.send(newRetrospects)
+            loadedMonths.append((year, month))
+        }
+    }
+    
+    private func filterNewRetrospects(_ fetchedRetrospects: [Retrospect]) -> [Retrospect] {
+        fetchedRetrospects.filter { fetchedretrospects in
+            let dateComponents = fetchedretrospects.createdAt.toDateComponents
+            guard let cachedRetrospects = retrospectsCache[dateComponents] else { return true }
+            
+            return !cachedRetrospects.contains(where: { $0.id == fetchedretrospects.id })
         }
     }
     
@@ -87,10 +113,9 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     private func retrospectsUpdateData(_ retrospects: [Retrospect]) {
         var dateComponents: Set<DateComponents> = []
-        
-        retrospects.forEach {
-            addRetrospectToCache($0)
-            let components = normalizedDateComponents(from: $0.createdAt)
+        retrospects.forEach { retrospect in
+            addRetrospectToCache(retrospect)
+            let components = retrospect.createdAt.toDateComponents
             dateComponents.insert(components)
         }
         
@@ -98,8 +123,17 @@ final class RetrospectCalendarViewController: BaseViewController {
     }
     
     private func addRetrospectToCache(_ retrospect: Retrospect) {
-        let dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: retrospect.createdAt)
+        let dateComponents = retrospect.createdAt.toDateComponents
         retrospectsCache[dateComponents, default: []].append(retrospect)
+    }
+    
+    private func setupInitialData() {
+        let currentDataComponents = retrospectCalendarView.currentDataComponents()
+        guard let year = currentDataComponents.year,
+              let month = currentDataComponents.month
+        else { return }
+        
+        loadRetrospects(year: year, month: month)
     }
 }
 
@@ -110,10 +144,23 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelega
         _ calendarView: UICalendarView,
         decorationFor dateComponents: DateComponents
     ) -> UICalendarView.Decoration? {
-        let normalizedDate = normalizedDateComponents(from: dateComponents)
-        guard let resultRetrospects = retrospectsCache[normalizedDate], !resultRetrospects.isEmpty else { return nil }
+        guard let resultRetrospects = retrospectsCache[dateComponents.normalized],
+              !resultRetrospects.isEmpty
+        else { return nil }
         
         return .default(color: .blazingOrange)
+    }
+    
+    func calendarView(
+        _ calendarView: UICalendarView,
+        didChangeVisibleDateComponentsFrom previousDateComponents: DateComponents
+    ) {
+        let currentDateComponents = retrospectCalendarView.currentDataComponents()
+        guard let currentYear = currentDateComponents.year,
+              let currentMonth = currentDateComponents.month
+        else { return }
+        
+        loadRetrospects(year: currentYear, month: currentMonth)
     }
 }
 
@@ -121,10 +168,9 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarViewDelega
 
 extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionSingleDateDelegate {
     func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
-        guard let dateComponents else { return }
+        guard let dateComponents = dateComponents?.normalized else { return }
         
-        let selectedDate = normalizedDateComponents(from: dateComponents)
-        if let currentDateRetrospects = retrospectsCache[selectedDate] {
+        if let currentDateRetrospects = retrospectsCache[dateComponents.normalized] {
             presentRetrospectsList(retrospects: currentDateRetrospects)
         } else {
             retrospectTableViewController?.dismiss(animated: true) {
@@ -147,7 +193,10 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
     
     private func createRetrospectTableViewController(retrospects: [Retrospect])
     -> RetrospectCalendarTableViewController {
-        let controller = RetrospectCalendarTableViewController(retrospects: retrospects)
+        let controller = RetrospectCalendarTableViewController(
+            retrospects: retrospects,
+            retrospectManager: retrospectManager
+        )
         if let sheet = controller.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
             sheet.largestUndimmedDetentIdentifier = .medium
@@ -165,20 +214,6 @@ extension RetrospectCalendarViewController: UIAdaptivePresentationControllerDele
         if presentationController.presentedViewController === retrospectTableViewController {
             retrospectTableViewController = nil
         }
-    }
-}
-
-// MARK: - DateComponents helper
-
-extension RetrospectCalendarViewController {
-    private func normalizedDateComponents(from dateComponents: DateComponents) -> DateComponents {
-        guard let date = Calendar.current.date(from: dateComponents) else { return DateComponents() }
-        
-        return normalizedDateComponents(from: date)
-    }
-    
-    private func normalizedDateComponents(from date: Date) -> DateComponents {
-        Calendar.current.dateComponents([.year, .month, .day], from: date)
     }
 }
 
