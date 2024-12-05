@@ -18,7 +18,6 @@ final class RetrospectCalendarManager: RetrospectCalendarManageable {
     
     private(set) var retrospects: [Retrospect] {
         didSet {
-            print(retrospects)
             retrospectsSubject.send(retrospects)
         }
     }
