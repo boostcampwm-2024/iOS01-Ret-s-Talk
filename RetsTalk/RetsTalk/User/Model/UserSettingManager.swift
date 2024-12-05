@@ -111,7 +111,7 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     }
 
     private func initializeUserData() -> UUID? {
-        let newUserID = UUID()
+        let newUserID = Constants.defaultUUID
         let newNickname = randomNickname()
         let newUserData = UserData(dictionary: ["userID": newUserID.uuidString, "nickname": newNickname])
 
