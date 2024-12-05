@@ -81,6 +81,14 @@ final class RetrospectManager: RetrospectManageable {
         return retrospectChatManager
     }
     
+    func retrospectCalendarManager() -> RetrospectCalendarManageable {
+        return RetrospectCalendarManager(
+            userID: userID,
+            retrospectStorage: retrospectStorage,
+            retrospectAssistantProvider: retrospectAssistantProvider
+        )
+    }
+
     func fetchRetrospects(of kindList: [Retrospect.Kind]) {
         do {
             for kind in kindList {
@@ -102,7 +110,6 @@ final class RetrospectManager: RetrospectManageable {
             let fetchedRetrospects = try retrospectStorage.fetch(by: request)
             retrospects.append(contentsOf: fetchedRetrospects)
             errorSubject.send(nil)
-            print(fetchedRetrospects.count)
             return fetchedRetrospects.count
         } catch {
             errorSubject.send(error)

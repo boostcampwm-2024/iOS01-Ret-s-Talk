@@ -14,6 +14,7 @@ final class RetrospectListViewController: BaseViewController {
     private typealias Snapshot = NSDiffableDataSourceSnapshot<RetrospectSection, Retrospect>
     private typealias RetrospectDataSource = UITableViewDiffableDataSource<RetrospectSection, Retrospect>
     
+    
     private let retrospectManager: RetrospectManageable
     private let userDefaultsManager: Persistable
     private let userSettingManager: UserSettingManager
@@ -68,16 +69,15 @@ final class RetrospectListViewController: BaseViewController {
         super.viewDidLoad()
         
         addCreateButtondidTapAction()
+        addCalendarButtonDidTapAction()
         fetchInitialRetrospect()
         onBoarding()
     }
-    
+
     // MARK: RetsTalk lifecycle method
     
     override func setupNavigationBar() {
         title = Texts.navigationTitle
-        navigationController?.navigationBar.prefersLargeTitles = true
-        
         let settingsButton = UIBarButtonItem(
             image: UIImage(systemName: Texts.settingButtonImageName),
             style: .plain,
@@ -85,8 +85,10 @@ final class RetrospectListViewController: BaseViewController {
             action: #selector(didTapSettings)
         )
         
+        navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .always
         navigationController?.navigationBar.prefersLargeTitles = true
+
         navigationItem.rightBarButtonItem = settingsButton
         navigationItem.rightBarButtonItem?.tintColor = .black
     }
@@ -273,8 +275,13 @@ final class RetrospectListViewController: BaseViewController {
         retrospectListView.addCalendarButtonAction(
             UIAction { [weak self] _ in
                 guard let self else { return }
-                
-                
+                Task {
+                    let retrospectCalendarManager = await retrospectManager.retrospectCalendarManager()
+                    let retrospectCalendarViewController = RetrospectCalendarViewController(
+                        retrospectCalendarManager: retrospectCalendarManager
+                    )
+                    navigationController?.pushViewController(retrospectCalendarViewController, animated: true)
+                }
             }
         )
         

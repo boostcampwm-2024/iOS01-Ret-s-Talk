@@ -24,7 +24,7 @@ final class RetrospectCalendarManager: RetrospectCalendarManageable {
     
     // MARK: Initialization
     
-    nonisolated init(
+    init(
         userID: UUID,
         retrospectStorage: Persistable,
         retrospectAssistantProvider: RetrospectAssistantProvidable

@@ -15,6 +15,7 @@ protocol RetrospectManageable: Sendable {
 
     func createRetrospect() -> RetrospectChatManageable?
     func retrospectChatManager(of retrospect: Retrospect) -> RetrospectChatManageable?
+    func retrospectCalendarManager() -> RetrospectCalendarManageable
     func fetchRetrospects(of kindList: [Retrospect.Kind])
     func fetchPreviousRetrospects() -> Int
     func fetchRetrospectsCount() -> (totalCount: Int, monthlyCount: Int)?

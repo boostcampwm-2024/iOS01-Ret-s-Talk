@@ -26,5 +26,6 @@ class BaseNavigationController: UINavigationController {
         appearance.configureWithOpaqueBackground()
         navigationBar.scrollEdgeAppearance = appearance
         navigationBar.backgroundColor = .systemBackground
+        navigationBar.tintColor = .blazingOrange
     }
 }
