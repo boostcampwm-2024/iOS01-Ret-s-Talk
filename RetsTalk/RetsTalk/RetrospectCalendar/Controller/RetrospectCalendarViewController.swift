@@ -9,7 +9,7 @@ import Combine
 import UIKit
 
 final class RetrospectCalendarViewController: BaseViewController {
-    private let retrospectManager: RetrospectManageable
+    private let retrospectCalendarManager: RetrospectCalendarManageable
     
     private let retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
     private let errorSubject: CurrentValueSubject<Error?, Never>
@@ -25,8 +25,8 @@ final class RetrospectCalendarViewController: BaseViewController {
     
     // MARK: Initalization
     
-    init(retrospectManager: RetrospectManageable) {
-        self.retrospectManager = retrospectManager
+    init(retrospectCalendarManager: RetrospectCalendarManageable) {
+        self.retrospectCalendarManager = retrospectCalendarManager
         
         retrospectsSubject = CurrentValueSubject([])
         errorSubject = CurrentValueSubject(nil)
@@ -92,8 +92,8 @@ final class RetrospectCalendarViewController: BaseViewController {
         else { return }
         
         Task {
-            await retrospectManager.fetchRetrospects(of: [.monthly(from: currentMonth, to: nextMonth)])
-            let fetchRetrospects = await retrospectManager.retrospects
+            await retrospectCalendarManager.fetchRetrospects(of: [.monthly(from: currentMonth, to: nextMonth)])
+            let fetchRetrospects = await retrospectCalendarManager.retrospects
             let newRetrospects = filterNewRetrospects(fetchRetrospects)
             retrospectsSubject.send(newRetrospects)
             loadedMonths.append((year, month))
@@ -195,7 +195,7 @@ extension RetrospectCalendarViewController: @preconcurrency UICalendarSelectionS
     -> RetrospectCalendarTableViewController {
         let controller = RetrospectCalendarTableViewController(
             retrospects: retrospects,
-            retrospectManager: retrospectManager
+            retrospectCalendarManager: retrospectCalendarManager
         )
         if let sheet = controller.sheetPresentationController {
             sheet.detents = [.medium(), .large()]

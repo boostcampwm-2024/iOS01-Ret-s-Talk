@@ -12,7 +12,7 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     private typealias DataSource = UITableViewDiffableDataSource<Section, Retrospect>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Retrospect>
     
-    private var retrospectManager: RetrospectManageable
+    private var retrospectCalendarManager: RetrospectCalendarManageable
     
     private var dataSource: DataSource?
     private var snapshot: Snapshot?
@@ -25,9 +25,9 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     
     // MARK: Initalization
     
-    init(retrospects: [Retrospect], retrospectManager: RetrospectManageable) {
+    init(retrospects: [Retrospect], retrospectCalendarManager: RetrospectCalendarManageable) {
         self.retrospects = retrospects
-        self.retrospectManager = retrospectManager
+        self.retrospectCalendarManager = retrospectCalendarManager
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -104,7 +104,7 @@ extension RetrospectCalendarTableViewController: UITableViewDelegate {
         guard let retrospect = dataSource?.itemIdentifier(for: indexPath) else { return }
         
         Task {
-            guard let retrospectChatManager = await retrospectManager.retrospectChatManager(of: retrospect)
+            guard let retrospectChatManager = await retrospectCalendarManager.retrospectChatManager(of: retrospect)
             else { return }
             
             let chattingViewController = RetrospectChatViewController(
