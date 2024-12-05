@@ -5,6 +5,7 @@
 //  Created by KimMinSeok on 11/19/24.
 //
 
+import Combine
 import Foundation
 
 typealias RetrospectAssistantProvidable = AssistantMessageProvidable & SummaryProvider
@@ -13,10 +14,22 @@ final class RetrospectManager: RetrospectManageable {
     private let userID: UUID
     private var retrospectStorage: Persistable
     private let retrospectAssistantProvider: RetrospectAssistantProvidable
+    private(set) var retrospects: [Retrospect] {
+        didSet {
+            sortedRetrospectsSubject.send(RetrospectSortingHelper.execute(retrospects))
+        }
+    }
     
-    private(set) var retrospects: [Retrospect]
-    private(set) var errorOccurred: Swift.Error?
-    
+    private var sortedRetrospectsSubject: CurrentValueSubject<SortedRetrospects, Never> = .init(SortedRetrospects())
+    private(set) var errorSubject: PassthroughSubject<Swift.Error?, Never> = .init()
+
+    var retrospectsPublisher: AnyPublisher<SortedRetrospects, Never> {
+        sortedRetrospectsSubject.eraseToAnyPublisher()
+    }
+    var errorPublisher: AnyPublisher<Swift.Error?, Never> {
+        errorSubject.eraseToAnyPublisher()
+    }
+
     // MARK: Initialization
     
     nonisolated init(
@@ -43,10 +56,10 @@ final class RetrospectManager: RetrospectManageable {
                 assistantMessageProvider: retrospectAssistantProvider,
                 retrospectChatManagerListener: self
             )
-            errorOccurred = nil
+            errorSubject.send(nil)
             return retrospectChatManager
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
             return nil
         }
     }
@@ -54,7 +67,7 @@ final class RetrospectManager: RetrospectManageable {
     func retrospectChatManager(of retrospect: Retrospect) -> (any RetrospectChatManageable)? {
         guard let retrospect = retrospects.first(where: { $0.id == retrospect.id })
         else {
-            errorOccurred = Error.invalidRetrospect
+            errorSubject.send(Error.invalidRetrospect)
             return nil
         }
         
@@ -64,7 +77,7 @@ final class RetrospectManager: RetrospectManageable {
             assistantMessageProvider: retrospectAssistantProvider,
             retrospectChatManagerListener: self
         )
-        errorOccurred = nil
+        errorSubject.send(nil)
         return retrospectChatManager
     }
     
@@ -77,9 +90,9 @@ final class RetrospectManager: RetrospectManageable {
                     retrospects.append(retrospect)
                 }
             }
-            errorOccurred = nil
+            errorSubject.send(nil)
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
         }
     }
     
@@ -88,10 +101,11 @@ final class RetrospectManager: RetrospectManageable {
             let request = previousRetrospectFetchRequest(amount: Numerics.retrospectFetchAmount)
             let fetchedRetrospects = try retrospectStorage.fetch(by: request)
             retrospects.append(contentsOf: fetchedRetrospects)
-            errorOccurred = nil
+            errorSubject.send(nil)
+            print(fetchedRetrospects.count)
             return fetchedRetrospects.count
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
             return 0
         }
     }
@@ -104,10 +118,10 @@ final class RetrospectManager: RetrospectManageable {
             let totalCount = try retrospectStorage.fetchDataCount(by: totalFetchRequest)
             let monthlyCount = try retrospectStorage.fetchDataCount(by: monthlyFetchRequest)
             
-            errorOccurred = nil
+            errorSubject.send(nil)
             return (totalCount, monthlyCount)
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
             return nil
         }
     }
@@ -120,22 +134,23 @@ final class RetrospectManager: RetrospectManageable {
             updatingRetrospect.isPinned.toggle()
             let updatedRetrospect = try retrospectStorage.update(from: retrospect, to: updatingRetrospect)
             updateRetrospects(by: updatedRetrospect)
-            errorOccurred = nil
+            errorSubject.send(nil)
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
         }
     }
     
     func finishRetrospect(_ retrospect: Retrospect) async {
         do {
             var updatingRetrospect = retrospect
-            updatingRetrospect.summary = try await retrospectAssistantProvider.requestSummary(for: retrospect.chat)
-            updatingRetrospect.status = .finished
+            if updatingRetrospect.status == .finished {
+                updatingRetrospect.summary = try await retrospectAssistantProvider.requestSummary(for: retrospect.chat)
+            }
             let updatedRetrospect = try retrospectStorage.update(from: retrospect, to: updatingRetrospect)
             updateRetrospects(by: updatedRetrospect)
-            errorOccurred = nil
+            errorSubject.send(nil)
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
         }
     }
     
@@ -143,9 +158,9 @@ final class RetrospectManager: RetrospectManageable {
         do {
             try retrospectStorage.delete(contentsOf: [retrospect])
             retrospects.removeAll(where: { $0.id == retrospect.id })
-            errorOccurred = nil
+            errorSubject.send(nil)
         } catch {
-            errorOccurred = error
+            errorSubject.send(error)
         }
     }
 
@@ -156,7 +171,7 @@ final class RetrospectManager: RetrospectManageable {
         ) { _ in }
         retrospectStorage = newRetrospectStorage
     }
-    
+
     // MARK: Support retrospect creation
     
     private func createNewRetrospect() throws -> Retrospect {
@@ -181,7 +196,8 @@ final class RetrospectManager: RetrospectManageable {
     
     private func previousRetrospectFetchRequest(amount: Int) -> PersistFetchRequest<Retrospect> {
         let recentDateSorting = CustomSortDescriptor(key: Texts.retrospectSortKey, ascending: false)
-        let lastRetrospectCreatedDate = retrospects.last?.createdAt ?? Date()
+        let finishedRetrospects = sortedRetrospectsSubject.value[2]
+        let lastRetrospectCreatedDate = finishedRetrospects.last?.createdAt ?? Date()
         let predicate = Retrospect.Kind.predicate(.previous(lastRetrospectCreatedDate))(for: userID)
         return PersistFetchRequest<Retrospect>(
             predicate: predicate,
@@ -230,13 +246,21 @@ extension RetrospectManager: RetrospectChatManagerListener {
         else { return }
         
         if !retrospects[matchingIndex].isEqualInStorage(retrospect) {
-            _ = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+            Task {
+                let updatedRetrospect = try retrospectStorage.update(from: retrospects[matchingIndex], to: retrospect)
+                switch updatedRetrospect.status {
+                case .finished:
+                    await finishRetrospect(updatedRetrospect)
+                default:
+                    break
+                }
+            }
         }
         retrospects[matchingIndex] = retrospect
     }
     
     func shouldTogglePin(_ retrospectChatManageable: RetrospectChatManageable, retrospect: Retrospect) -> Bool {
-        isPinAvailable
+        retrospect.isPinned || isPinAvailable
     }
 }
 
@@ -252,11 +276,24 @@ fileprivate extension RetrospectManager {
         var errorDescription: String? {
             switch self {
             case .creationFailed:
-                "회고를 생성하는데 실패했습니다."
+                "회고를 생성할 수 없습니다."
             case .reachInProgressLimit:
-                "회고는 최대 2개까지 진행할 수 있습니다. 새로 생성하려면 기존의 회고를 끝내주세요."
+                "회고 생성 제한"
             case .reachPinLimit:
-                "회고는 최대 2개까지 고정할 수 있습니다. 다른 회고의 고정을 풀어주세요."
+                "회고 고정 제한"
+            case .invalidRetrospect:
+                "존재하지 않는 회고입니다."
+            }
+        }
+        
+        var failureReason: String? {
+            switch self {
+            case .creationFailed:
+                "회고 생성에 실패했습니다."
+            case .reachInProgressLimit:
+                "최대 2개의 회고만 진행할 수 있습니다.\n새로 생성하려면 기존 회고를 종료해주세요."
+            case .reachPinLimit:
+                "최대 2개의 회고만 고정할 수 있습니다.\n다른 회고의 고정을 해제해주세요."
             case .invalidRetrospect:
                 "존재하지 않는 회고입니다."
             }

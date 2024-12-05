@@ -33,8 +33,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             retrospectStorage: coreDataManager,
             retrospectAssistantProvider: retrospectAssistantProvider
         )
-        let navigationController = customedNavigationController(
-            rootViewController: RetrospectListViewController(
+        let navigationController = BaseNavigationController(
+            rootView: RetrospectListViewController(
                 retrospectManager: retrospectManager,
                 userDefaultsManager: userDefaultsManager
             )
@@ -42,18 +42,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
-    }
-}
-
-// MARK: - Custom method
-
-extension SceneDelegate {
-    private func customedNavigationController(rootViewController: UIViewController) -> UINavigationController {
-        let navigationController = UINavigationController(rootViewController: rootViewController)
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        navigationController.navigationBar.scrollEdgeAppearance = appearance
-        navigationController.navigationBar.backgroundColor = .systemBackground
-        return navigationController
     }
 }

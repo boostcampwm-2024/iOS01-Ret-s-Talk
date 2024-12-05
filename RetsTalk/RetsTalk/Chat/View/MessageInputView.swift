@@ -10,7 +10,7 @@ import UIKit
 @MainActor
 protocol MessageInputViewDelegate: AnyObject {
     func updateMessageInputViewHeight(_ messageInputView: MessageInputView, to height: CGFloat)
-    func sendMessage(_ messageInputView: MessageInputView, with text: String)
+    func willSendMessage(_ messageInputView: MessageInputView, with content: String) -> Bool
 }
 
 final class MessageInputView: BaseView {
@@ -25,10 +25,8 @@ final class MessageInputView: BaseView {
         let view = UIView()
         view.backgroundColor = .systemGray6
         view.layer.cornerRadius = Metrics.backgroundCornerRadius
-        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
     private var textInputView: UITextView = {
         let textView = UITextView()
         textView.font = .appFont(.body)
@@ -37,10 +35,8 @@ final class MessageInputView: BaseView {
         textView.backgroundColor = .clear
         textView.textContainerInset = UIEdgeInsets(top: 1, left: 0, bottom: 0, right: 0)
         textView.isScrollEnabled = false
-        textView.translatesAutoresizingMaskIntoConstraints = false
         return textView
     }()
-    
     private var sendButton: UIButton = {
         let button = UIButton()
         let icon = UIImage(
@@ -50,17 +46,10 @@ final class MessageInputView: BaseView {
         button.setImage(icon, for: .normal)
         button.tintColor = .blazingOrange
         button.isEnabled = false
-        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
     // MARK: RetsTalk lifecycle
-    
-    override func setupStyles() {
-        super.setupStyles()
-        
-        translatesAutoresizingMaskIntoConstraints = false
-    }
     
     override func setupSubviews() {
         super.setupSubviews()
@@ -88,11 +77,13 @@ final class MessageInputView: BaseView {
                 handler: { [weak self] _ in
                     guard let self else { return }
                     
-                    self.delegate?.sendMessage(self, with: self.textInputView.text)
-                    self.textInputView.text = nil
-                    self.sendButton.isEnabled = false
-                    self.updateRequestInProgressState(true)
-                    self.updateHeight(to: self.currentTextViewHeight(textView: textInputView))
+                    let didSend = self.delegate?.willSendMessage(self, with: self.textInputView.text)
+                    if didSend ?? false {
+                        self.textInputView.text = nil
+                        self.sendButton.isEnabled = false
+                        self.updateRequestInProgressState(true)
+                        self.updateHeight(to: self.currentTextViewHeight(textView: textInputView))
+                    }
                 }),
             for: .touchUpInside
         )
@@ -163,6 +154,8 @@ extension MessageInputView: UITextViewDelegate {
 
 fileprivate extension MessageInputView {
     private func setUpBackgroundViewLayout() {
+        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             backgroundView.leftAnchor.constraint(
                 equalTo: leftAnchor,
@@ -183,6 +176,8 @@ fileprivate extension MessageInputView {
     }
     
     private func setUpSendButtonLayout() {
+        sendButton.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             sendButton.heightAnchor.constraint(
                 equalToConstant: Metrics.sendButtonSideLength
@@ -202,6 +197,8 @@ fileprivate extension MessageInputView {
     }
     
     private func setUpTextInputViewLayout() {
+        textInputView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             textInputView.topAnchor.constraint(
                 equalTo: backgroundView.topAnchor,
@@ -242,6 +239,6 @@ private extension MessageInputView {
 
     enum Texts {
         static let sendButtonIconName = "arrow.up.circle"
-        static let textInputPlaceholder = "메시지 입력"
+        static let textInputPlaceholder = "메시지 입력 최대 100자"
     }
 }

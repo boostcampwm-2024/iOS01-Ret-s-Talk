@@ -5,7 +5,7 @@
 //  Created by KimMinSeok on 11/18/24.
 //
 
-import Combine
+@preconcurrency import Combine
 import SwiftUI
 import UIKit
 
@@ -20,7 +20,7 @@ final class RetrospectListViewController: BaseViewController {
 
     private var retrospectsSubject: CurrentValueSubject<SortedRetrospects, Never>
     private var fetchingDebounceSubject = PassthroughSubject<Void, Never>()
-    private let errorSubject: CurrentValueSubject<Error?, Never>
+    private let errorSubject: PassthroughSubject<Error?, Never>
     
     private var dataSource: RetrospectDataSource?
     private var isRetrospectFetching: Bool
@@ -42,7 +42,7 @@ final class RetrospectListViewController: BaseViewController {
 
         retrospectListView = RetrospectListView()
         retrospectsSubject = CurrentValueSubject(SortedRetrospects())
-        errorSubject = CurrentValueSubject(nil)
+        errorSubject = PassthroughSubject()
         
         isRetrospectFetching = false
         isRetrospectAppendable = false
@@ -51,24 +51,7 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     required init?(coder: NSCoder) {
-        let coreDataManager = CoreDataManager(name: Constants.Texts.coreDataContainerName, completion: { _ in })
-        let clovaStudioManager = CLOVAStudioManager(urlSession: .shared)
-        retrospectManager = RetrospectManager(
-            userID: UUID(),
-            retrospectStorage: coreDataManager,
-            retrospectAssistantProvider: clovaStudioManager
-        )
-        userDefaultsManager = UserDefaultsManager()
-        userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
-
-        retrospectListView = RetrospectListView()
-        retrospectsSubject = CurrentValueSubject(SortedRetrospects())
-        errorSubject = CurrentValueSubject(nil)
-
-        isRetrospectFetching = false
-        isRetrospectAppendable = false
-        
-        super.init(coder: coder)
+        fatalError()
     }
     
     // MARK: ViewController lifecycle
@@ -80,15 +63,8 @@ final class RetrospectListViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        addObserver()
         addCreateButtondidTapAction()
         fetchInitialRetrospect()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        sortAndSendRetrospects()
     }
     
     // MARK: RetsTalk lifecycle method
@@ -126,28 +102,17 @@ final class RetrospectListViewController: BaseViewController {
     override func setupSubscription() {
         super.setupSubscription()
         
-        retrospectsSubject
-            .dropFirst()
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                guard let self = self else { return }
-                
-                self.updateSnapshot()
-                self.updateTotalRetrospectCount()
-            }
-            .store(in: &subscriptionSet)
-        
-        fetchingDebounceSubject
-            .debounce(for: .seconds(Numerics.fetchingDebounceInterval), scheduler: RunLoop.main)
-            .sink { [weak self] in
-                self?.fetchPreviousRetrospects()
-            }
-            .store(in: &subscriptionSet)
+        addNotificationObserver()
+        subscribeToRetrospectsPublisher()
+        subscribeToRetrospects()
+        subscribeToErrorPublisher()
+        subscribeToError()
+        subscribeToDebounce()
     }
     
     // MARK: Regarding iCloud
     
-    private func addObserver() {
+    private func addNotificationObserver() {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(refetchRetrospects),
@@ -159,7 +124,58 @@ final class RetrospectListViewController: BaseViewController {
     @objc private func refetchRetrospects() {
         fetchInitialRetrospect()
     }
+    
+    // MARK: Subscription method
 
+    private func subscribeToRetrospectsPublisher() {
+        Task {
+            await retrospectManager.retrospectsPublisher
+                .receive(on: RunLoop.main)
+                .subscribe(retrospectsSubject)
+                .store(in: &subscriptionSet)
+        }
+    }
+    
+    private func subscribeToRetrospects() {
+        retrospectsSubject
+            .dropFirst()
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                
+                self.updateSnapshot()
+                self.updateTotalRetrospectCount()
+            }
+            .store(in: &subscriptionSet)
+    }
+    
+    private func subscribeToErrorPublisher() {
+        Task {
+            await retrospectManager.errorPublisher
+                .receive(on: RunLoop.main)
+                .subscribe(errorSubject)
+                .store(in: &subscriptionSet)
+        }
+    }
+    
+    private func subscribeToError() {
+        errorSubject
+            .sink { [weak self] error in
+                guard let self, let error else { return }
+                
+                self.presentAlert(for: Situation.error(error), actions: [UIAlertAction.confirm()])
+            }
+            .store(in: &subscriptionSet)
+    }
+    
+    private func subscribeToDebounce() {
+        fetchingDebounceSubject
+            .debounce(for: .seconds(Numerics.fetchingDebounceInterval), scheduler: RunLoop.main)
+            .sink { [weak self] in
+                self?.fetchPreviousRetrospects()
+            }
+            .store(in: &subscriptionSet)
+    }
+    
     // MARK: Retrospect handling
     
     private func updateTotalRetrospectCount() {
@@ -176,7 +192,6 @@ final class RetrospectListViewController: BaseViewController {
     private func fetchInitialRetrospect() {
         Task {
             await retrospectManager.fetchRetrospects(of: [.pinned, .inProgress, .finished])
-            sortAndSendRetrospects()
             isRetrospectAppendable = true
         }
     }
@@ -190,15 +205,6 @@ final class RetrospectListViewController: BaseViewController {
                 isRetrospectAppendable = false
                 return
             }
-            
-            sortAndSendRetrospects()
-        }
-    }
-    
-    private func sortAndSendRetrospects() {
-        Task {
-            let sortedRetrospects = RetrospectSortingHelper.execute(await retrospectManager.retrospects)
-            retrospectsSubject.send(sortedRetrospects)
         }
     }
     
@@ -212,7 +218,6 @@ final class RetrospectListViewController: BaseViewController {
 
                     Task {
                         await self.retrospectManager.deleteRetrospect(retrospect)
-                        self.sortAndSendRetrospects()
                     }
                 },
             ]
@@ -222,7 +227,6 @@ final class RetrospectListViewController: BaseViewController {
     private func togglepPinRetrospect(_ retrospect: Retrospect) {
         Task {
             await self.retrospectManager.togglePinRetrospect(retrospect)
-            self.sortAndSendRetrospects()
         }
     }
     
@@ -268,7 +272,10 @@ private extension RetrospectListViewController {
             cell.backgroundColor = .clear
             cell.contentConfiguration = UIHostingConfiguration {
                 RetrospectCell(
-                    summary: (retrospect.summary ?? retrospect.chat.last?.content) ?? Texts.defaultSummaryText,
+                    summary: (retrospect.summary?.isEmpty == false
+                              ? retrospect.summary
+                              : retrospect.chat.last?.content
+                             ) ?? Texts.defaultSummaryText,
                     createdAt: retrospect.createdAt,
                     isPinned: retrospect.isPinned
                 )
@@ -410,11 +417,16 @@ extension RetrospectListViewController: UserSettingManageableCloudDelegate {
 extension RetrospectListViewController: AlertPresentable {
     enum RetrospectListSituation: AlertSituation {
         case delete
+        case error(Error)
         
         var title: String {
             switch self {
             case .delete:
                 "회고를 삭제하시겠습니까?"
+            case .error(let error as LocalizedError):
+                error.errorDescription ?? "오류"
+            default:
+                "오류"
             }
         }
         
@@ -422,6 +434,10 @@ extension RetrospectListViewController: AlertPresentable {
             switch self {
             case .delete:
                 "삭제된 회고는 복구할 수 없습니다."
+            case .error(let error as LocalizedError):
+                error.failureReason ?? ""
+            default:
+                ""
             }
         }
     }
@@ -460,6 +476,7 @@ private extension RetrospectListViewController {
     enum Texts {
         static let cancelAlertTitle = "취소"
         static let deleteAlertTitle = "삭제"
+        static let confirmAlertTitle = "확인"
         
         static let settingButtonImageName = "gearshape"
         static let deleteIconImageName = "trash.fill"
