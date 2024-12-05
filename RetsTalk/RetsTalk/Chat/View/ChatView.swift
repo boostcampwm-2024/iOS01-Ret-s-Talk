@@ -9,7 +9,7 @@ import UIKit
 
 @MainActor
 protocol ChatViewDelegate: AnyObject {
-    func willSendMessage(from chatView: ChatView, with content: String)
+    func willSendMessage(from chatView: ChatView, with content: String) -> Bool
     func didTapRetryButton(_ retryButton: UIButton)
 }
 
@@ -124,6 +124,10 @@ final class ChatView: BaseView {
         }
     }
     
+    func addTapGestureToDismissKeyboard(_ gestureRecognizer: UIGestureRecognizer) {
+        chatTableView.addGestureRecognizer(gestureRecognizer)
+    }
+    
     // MARK: Retrospect Status handling
     
     func updateChatView(by status: Retrospect.Status) {
@@ -160,8 +164,8 @@ final class ChatView: BaseView {
 // MARK: - MessageInputViewDelegate
 
 extension ChatView: MessageInputViewDelegate {
-    func willSendMessage(_ messageInputView: MessageInputView, with content: String) {
-        delegate?.willSendMessage(from: self, with: content)
+    func willSendMessage(_ messageInputView: MessageInputView, with content: String) -> Bool {
+        delegate?.willSendMessage(from: self, with: content) ?? false
     }
     
     func updateMessageInputViewHeight(_ messageInputView: MessageInputView, to height: CGFloat) {

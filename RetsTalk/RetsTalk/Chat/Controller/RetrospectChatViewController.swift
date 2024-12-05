@@ -181,13 +181,13 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
 
     @objc
     private func endRetrospectChat() {
-        let conformAction = UIAlertAction.conform { [weak self] _ in
+        let confirmAction = UIAlertAction.confirm { [weak self] _ in
             Task {
                 await self?.retrospectChatManager.endRetrospect()
                 self?.navigationController?.popViewController(animated: true)
             }
         }
-        presentAlert(for: .finish, actions: [.close(), conformAction])
+        presentAlert(for: .finish, actions: [.close(), confirmAction])
     }
     
     @objc
@@ -214,7 +214,7 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
     
     private func addTapGestureOfDismissingKeyboard() {
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        view.addGestureRecognizer(tapGestureRecognizer)
+        chatView.addTapGestureToDismissKeyboard(tapGestureRecognizer)
     }
     
     @objc
@@ -254,8 +254,9 @@ final class RetrospectChatViewController: BaseKeyBoardViewController {
 // MARK: - ChatViewDelegate conformance
 
 extension RetrospectChatViewController: ChatViewDelegate {
-    func willSendMessage(from chatView: ChatView, with content: String) {
+    func willSendMessage(from chatView: ChatView, with content: String) -> Bool {
         sendUserMessage(with: content)
+        return content.count <= Numerics.messageContentCountLimit
     }
     
     func didTapRetryButton(_ retryButton: UIButton) {
@@ -348,6 +349,8 @@ extension RetrospectChatViewController: AlertPresentable {
         
         var title: String {
             switch self {
+            case let .error(error as LocalizedError):
+                error.errorDescription ?? "오류 발생"
             case .error:
                 "오류 발생"
             case .finish:
@@ -358,12 +361,11 @@ extension RetrospectChatViewController: AlertPresentable {
         var message: String {
             switch self {
             case let .error(error as LocalizedError):
-                error.errorDescription ?? "설명할 수 없는 문제가 발생했습니다."
+                error.failureReason ?? "설명할 수 없는 문제가 발생했습니다."
             case let .error(error):
                 error.localizedDescription
             case .finish:
                 "종료된 회고는 더이상 작성할 수 없습니다.\n정말 종료하시겠습니까?"
-            
             }
         }
     }
@@ -375,6 +377,8 @@ fileprivate extension RetrospectChatViewController {
     enum Numerics {
         static let prependingRatio = 0.2
         static let maxOffsetWhilePrepending = 1.0
+        
+        static let messageContentCountLimit = 100
     }
     
     enum Texts {

@@ -39,7 +39,7 @@ extension UIAlertAction {
         UIAlertAction(title: "닫기", style: .cancel, handler: handler)
     }
     
-    static func conform(handler: ((UIAlertAction) -> Void)? = nil) -> UIAlertAction {
+    static func confirm(handler: ((UIAlertAction) -> Void)? = nil) -> UIAlertAction {
         UIAlertAction(title: "확인", style: .default, handler: handler)
     }
 }

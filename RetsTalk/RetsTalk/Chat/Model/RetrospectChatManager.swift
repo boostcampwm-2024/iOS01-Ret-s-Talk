@@ -56,16 +56,19 @@ final class RetrospectChatManager: RetrospectChatManageable {
     
     func sendMessage(_ content: String) async {
         do {
+            guard content.count <= Numeric.messageContentCountLimit
+            else { throw Error.messageContentCountExceeded(currentCount: content.count) }
+            
             let userMessage = Message(retrospectID: retrospect.id, role: .user, content: content)
             let addedUserMessage = try messageStorage.add(contentsOf: [userMessage])
             retrospect.append(contentsOf: addedUserMessage)
             retrospect.summary = addedUserMessage.last?.content
+            
+            retrospect.status = .inProgress(.waitingForResponse)
+            await requestAssistantMessage()
         } catch {
             errorSubject.send(error)
         }
-        retrospect.status = .inProgress(.waitingForResponse)
-        
-        await requestAssistantMessage()
     }
     
     func requestAssistantMessage() async {
@@ -135,10 +138,22 @@ final class RetrospectChatManager: RetrospectChatManageable {
 
 fileprivate extension RetrospectChatManager {
     enum Error: LocalizedError {
+        case messageContentCountExceeded(currentCount: Int)
         case pinUnavailable
         
         var errorDescription: String? {
             switch self {
+            case .messageContentCountExceeded:
+                "메시지 내용 수 초과"
+            case .pinUnavailable:
+                "회고 고정 실패"
+            }
+        }
+        
+        var failureReason: String? {
+            switch self {
+            case let .messageContentCountExceeded(currentCount):
+                "현재 입력은 \(currentCount)자 입니다. 최대 100자까지 입력 가능합니다."
             case .pinUnavailable:
                 "회고를 고정할 수 없습니다.\n최대 고정 개수는 2개입니다."
             }
@@ -151,6 +166,7 @@ fileprivate extension RetrospectChatManager {
 fileprivate extension RetrospectChatManager {
     enum Numeric {
         static let messageFetchAmount = 30
+        static let messageContentCountLimit = 100
     }
     
     enum Texts {

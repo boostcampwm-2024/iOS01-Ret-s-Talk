@@ -10,7 +10,7 @@ import UIKit
 @MainActor
 protocol MessageInputViewDelegate: AnyObject {
     func updateMessageInputViewHeight(_ messageInputView: MessageInputView, to height: CGFloat)
-    func willSendMessage(_ messageInputView: MessageInputView, with content: String)
+    func willSendMessage(_ messageInputView: MessageInputView, with content: String) -> Bool
 }
 
 final class MessageInputView: BaseView {
@@ -77,11 +77,13 @@ final class MessageInputView: BaseView {
                 handler: { [weak self] _ in
                     guard let self else { return }
                     
-                    self.delegate?.willSendMessage(self, with: self.textInputView.text)
-                    self.textInputView.text = nil
-                    self.sendButton.isEnabled = false
-                    self.updateRequestInProgressState(true)
-                    self.updateHeight(to: self.currentTextViewHeight(textView: textInputView))
+                    let didSend = self.delegate?.willSendMessage(self, with: self.textInputView.text)
+                    if didSend ?? false {
+                        self.textInputView.text = nil
+                        self.sendButton.isEnabled = false
+                        self.updateRequestInProgressState(true)
+                        self.updateHeight(to: self.currentTextViewHeight(textView: textInputView))
+                    }
                 }),
             for: .touchUpInside
         )
@@ -237,6 +239,6 @@ private extension MessageInputView {
 
     enum Texts {
         static let sendButtonIconName = "arrow.up.circle"
-        static let textInputPlaceholder = "메시지 입력"
+        static let textInputPlaceholder = "메시지 입력 최대 100자"
     }
 }
