@@ -51,24 +51,7 @@ final class RetrospectListViewController: BaseViewController {
     }
     
     required init?(coder: NSCoder) {
-        let coreDataManager = CoreDataManager(name: Constants.Texts.coreDataContainerName, completion: { _ in })
-        let clovaStudioManager = CLOVAStudioManager(urlSession: .shared)
-        retrospectManager = RetrospectManager(
-            userID: UUID(),
-            retrospectStorage: coreDataManager,
-            retrospectAssistantProvider: clovaStudioManager
-        )
-        userDefaultsManager = UserDefaultsManager()
-        userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
-
-        retrospectListView = RetrospectListView()
-        retrospectsSubject = CurrentValueSubject(SortedRetrospects())
-        errorSubject = PassthroughSubject()
-
-        isRetrospectFetching = false
-        isRetrospectAppendable = false
-        
-        super.init(coder: coder)
+        fatalError()
     }
     
     // MARK: ViewController lifecycle
@@ -179,9 +162,7 @@ final class RetrospectListViewController: BaseViewController {
             .sink { [weak self] error in
                 guard let self, let error else { return }
                 
-                self.presentAlert(for: Situation.error(error),
-                                  actions: [UIAlertAction(title: Texts.confirmAlertTitle, style: .default)]
-                )
+                self.presentAlert(for: Situation.error(error), actions: [UIAlertAction.confirm()])
             }
             .store(in: &subscriptionSet)
     }

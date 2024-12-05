@@ -16,15 +16,15 @@ final class RetrospectManager: RetrospectManageable {
     private let retrospectAssistantProvider: RetrospectAssistantProvidable
     private(set) var retrospects: [Retrospect] {
         didSet {
-            retrospectsSubject.send(RetrospectSortingHelper.execute(retrospects))
+            sortedRetrospectsSubject.send(RetrospectSortingHelper.execute(retrospects))
         }
     }
     
-    private var retrospectsSubject: CurrentValueSubject<SortedRetrospects, Never> = .init(SortedRetrospects())
+    private var sortedRetrospectsSubject: CurrentValueSubject<SortedRetrospects, Never> = .init(SortedRetrospects())
     private(set) var errorSubject: PassthroughSubject<Swift.Error?, Never> = .init()
 
     var retrospectsPublisher: AnyPublisher<SortedRetrospects, Never> {
-        retrospectsSubject.eraseToAnyPublisher()
+        sortedRetrospectsSubject.eraseToAnyPublisher()
     }
     var errorPublisher: AnyPublisher<Swift.Error?, Never> {
         errorSubject.eraseToAnyPublisher()
@@ -196,7 +196,8 @@ final class RetrospectManager: RetrospectManageable {
     
     private func previousRetrospectFetchRequest(amount: Int) -> PersistFetchRequest<Retrospect> {
         let recentDateSorting = CustomSortDescriptor(key: Texts.retrospectSortKey, ascending: false)
-        let lastRetrospectCreatedDate = retrospectsSubject.value[2].last?.createdAt ?? Date()
+        let finishedRetrospects = sortedRetrospectsSubject.value[2]
+        let lastRetrospectCreatedDate = finishedRetrospects.last?.createdAt ?? Date()
         let predicate = Retrospect.Kind.predicate(.previous(lastRetrospectCreatedDate))(for: userID)
         return PersistFetchRequest<Retrospect>(
             predicate: predicate,
