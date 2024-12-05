@@ -20,9 +20,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let userDefaultsManager = UserDefaultsManager()
         let userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
-    
-        let (userID, isFirstLaunch) = userSettingManager.initialize()
         
+        let (userID, isFirstLaunch) = userSettingManager.initialize()
         let coreDataManager = CoreDataManager(
             inMemory: false,
             isiCloudSynced: userSettingManager.userData.isCloudSyncOn,

@@ -14,7 +14,6 @@ final class RetrospectListViewController: BaseViewController {
     private typealias Snapshot = NSDiffableDataSourceSnapshot<RetrospectSection, Retrospect>
     private typealias RetrospectDataSource = UITableViewDiffableDataSource<RetrospectSection, Retrospect>
     
-    
     private let retrospectManager: RetrospectManageable
     private let userDefaultsManager: Persistable
     private let userSettingManager: UserSettingManager
