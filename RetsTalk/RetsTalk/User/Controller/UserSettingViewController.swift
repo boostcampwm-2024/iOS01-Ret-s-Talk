@@ -37,16 +37,16 @@ final class UserSettingViewController<T: UserSettingManageable>:
     override func setupDelegation() {
         super.setupDelegation()
         
-        userSettingManager.permissionAlertDelegate = self
+        userSettingManager.alertable = self
     }
 }
 
 // MARK: - UserSettingManageableDelegate conformance
 
-extension UserSettingViewController: UserSettingManageableDelegate {
+extension UserSettingViewController: UserSettingManageableAlertable {
     typealias Situation = UserSettingViewSituation
 
-    func alertNeedNotificationPermission(_ userSettingManageable: any UserSettingManageable) {
+    func needNotificationPermission(_ userSettingManageable: any UserSettingManageable) {
         let acceptAction = UIAlertAction(title: Texts.accept, style: .default) { _ in
             if let url = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(url)
@@ -56,11 +56,36 @@ extension UserSettingViewController: UserSettingManageableDelegate {
         presentAlert(for: .needNotifactionPermission, actions: [acceptAction, cancelAction])
     }
 
+    func checkICloudState(_ userSettingManageable: any UserSettingManageable) {
+        let acceptAction = UIAlertAction(title: Texts.accept, style: .default) { _ in
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
+        }
+        let cancelAction = UIAlertAction(title: Texts.cancel, style: .cancel)
+        presentAlert(for: .checkICloudState, actions: [acceptAction, cancelAction])
+    }
+
     enum UserSettingViewSituation: AlertSituation {
         case needNotifactionPermission
+        case checkICloudState
 
-        var title: String { Texts.needNotificationPermissonTitle }
-        var message: String { Texts.needNotificationPermissonMessage }
+        var title: String {
+            switch self {
+            case .needNotifactionPermission:
+                return Texts.needNotificationPermissonTitle
+            case .checkICloudState:
+                return Texts.checkICloudStateTitle
+            }
+        }
+        var message: String {
+            switch self {
+            case .needNotifactionPermission:
+                return Texts.needNotificationPermissonMessage
+            case .checkICloudState:
+                return Texts.checkICloudStateMessage
+            }
+        }
     }
 }
 
@@ -80,4 +105,6 @@ private enum Texts {
     static let cancel = "취소"
     static let needNotificationPermissonTitle = "알림 권한 요청"
     static let needNotificationPermissonMessage = "알림 권한이 꺼져있습니다. \r\n 알림 권한을 허용해주세요."
+    static let checkICloudStateTitle = "애플 계정 확인"
+    static let checkICloudStateMessage = "아이클라우드 상태를 확인해주세요."
 }

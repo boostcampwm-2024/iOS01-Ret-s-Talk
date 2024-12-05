@@ -9,11 +9,9 @@ import SwiftUI
 
 struct UserSettingView<Manageable: UserSettingManageable>: View {
     @ObservedObject var userSettingManager: Manageable
-    private let notificationManager: NotificationManageable
-    
+
     init(userSettingManager: Manageable) {
         self.userSettingManager = userSettingManager
-        notificationManager = NotificationManager()
     }
     
     var body: some View {

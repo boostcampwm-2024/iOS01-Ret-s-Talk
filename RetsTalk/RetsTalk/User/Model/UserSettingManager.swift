@@ -9,8 +9,9 @@ import Combine
 import Foundation
 
 @MainActor
-protocol UserSettingManageableDelegate: AnyObject {
-    func alertNeedNotificationPermission(_ userSettingManageable: any UserSettingManageable)
+protocol UserSettingManageableAlertable: AnyObject {
+    func needNotificationPermission(_ userSettingManageable: any UserSettingManageable)
+    func checkICloudState(_ userSettingManageable: any UserSettingManageable)
 }
 
 @MainActor
@@ -22,7 +23,9 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     @Published var userData: UserData = .init(dictionary: [:])
     private let userDataStorage: Persistable
     private let notificationManager: NotificationManageable
-    weak var permissionAlertDelegate: UserSettingManageableDelegate?
+    private let cloudKitManager: CloudKitManageable
+
+    weak var alertable: UserSettingManageableAlertable?
     weak var cloudDelegate: UserSettingManageableCloudDelegate?
 
     // MARK: Init method
@@ -30,20 +33,18 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     init(userDataStorage: Persistable) {
         self.userDataStorage = userDataStorage
         notificationManager = NotificationManager()
+        cloudKitManager = CloudKitManager()
     }
     
     // MARK: UserSettingManageable conformance
     
-    func initialize() async -> UUID? {
+    func initialize() -> UUID? {
         do {
             let request = PersistFetchRequest<UserData>(fetchLimit: 1)
             let fetchedData = try userDataStorage.fetch(by: request)
-            guard let storedUserData = fetchedData.first
-            else { return initializeUserData() }
-            
-            await MainActor.run {
-                userData = storedUserData
-            }
+            guard let storedUserData = fetchedData.first else { return initializeUserData() }
+
+            userData = storedUserData
             return UUID(uuidString: userData.userID)
         } catch {
             return nil
@@ -67,8 +68,23 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     }
     
     func updateCloudSyncState(state isOn: Bool) {
-        updateUserData { $0.isCloudSyncOn = isOn }
-        cloudDelegate?.didCloudSyncStateChange(self)
+        Task {
+            guard let recordID = await cloudKitManager.fetchRecordIDIfIcloudEnabled()
+                else {
+                updateUserData {
+                    $0.isCloudSyncOn = false
+                    $0.cloudAddress = ""
+                }
+                alertable?.checkICloudState(self)
+                return
+            }
+
+            updateUserData {
+                $0.isCloudSyncOn = isOn
+                $0.cloudAddress = recordID
+            }
+            cloudDelegate?.didCloudSyncStateChange(self)
+        }
     }
     
     func updateNotificationStatus(_ isOn: Bool, at date: Date) {
@@ -78,7 +94,7 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
                 userData.isNotificationOn = isNotificationAllowed ? isOn : false
                 userData.notificationTime = date
             }
-            if !isNotificationAllowed { permissionAlertDelegate?.alertNeedNotificationPermission(self) }
+            if !isNotificationAllowed { alertable?.needNotificationPermission(self) }
         }
     }
     
