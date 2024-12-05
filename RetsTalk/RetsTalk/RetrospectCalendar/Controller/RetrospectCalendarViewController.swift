@@ -92,7 +92,7 @@ final class RetrospectCalendarViewController: BaseViewController {
         else { return }
         
         Task {
-            await retrospectCalendarManager.fetchRetrospects(of: [.monthly(from: currentMonth, to: nextMonth)])
+            await retrospectCalendarManager.fetchRetrospects(of: [.monthly(fromDate: currentMonth, toDate: nextMonth)])
             let fetchRetrospects = await retrospectCalendarManager.retrospects
             let newRetrospects = filterNewRetrospects(fetchRetrospects)
             retrospectsSubject.send(newRetrospects)
