@@ -214,10 +214,10 @@ final class RetrospectManager: RetrospectManageable {
             return PersistFetchRequest<Retrospect>(fetchLimit: 0)
         }
         
-        let predicate = Retrospect.Kind.predicate(.monthly(from: currentMonth, to: nextMonth))(for: userID)
+        let predicate = Retrospect.Kind.predicate(.monthly(fromDate: currentMonth, toDate: nextMonth))(for: userID)
         return PersistFetchRequest(
             predicate: predicate,
-            fetchLimit: Retrospect.Kind.monthly(from: currentMonth, to: nextMonth).fetchLimit
+            fetchLimit: Retrospect.Kind.monthly(fromDate: currentMonth, toDate: nextMonth).fetchLimit
         )
     }
     

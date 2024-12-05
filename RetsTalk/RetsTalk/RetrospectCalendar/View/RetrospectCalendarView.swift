@@ -56,6 +56,12 @@ final class RetrospectCalendarView: BaseView {
     func currentDataComponents() -> DateComponents {
         retrospectCalendarView.visibleDateComponents
     }
+    
+    func deselectDate() {
+        if let dateSelection = retrospectCalendarView.selectionBehavior as? UICalendarSelectionSingleDate {
+            dateSelection.selectedDate = nil
+        }
+    }
 }
 
 // MARK: - Subviews layouts

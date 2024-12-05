@@ -12,6 +12,9 @@ trailing_comma:
 nesting:
     type_level:
         warning: 2
+        
+file_length:
+    warning: 500
 
 line_length:
     warning: 120

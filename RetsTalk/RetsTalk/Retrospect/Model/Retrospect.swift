@@ -164,7 +164,7 @@ extension Retrospect {
         case inProgress
         case finished
         case previous(_ lastRetrospectCreatedDate: Date)
-        case monthly(from: Date, to: Date)
+        case monthly(fromDate: Date, toDate: Date)
         
         func predicate(for userID: UUID) -> CustomPredicate {
             switch self {
