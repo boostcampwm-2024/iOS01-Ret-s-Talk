@@ -63,6 +63,10 @@ class RetrospectCountButton: UIButton {
         buttonSubtitleLabel.text = title
     }
     
+    func setSubtitleLabelColor(_ color: UIColor) {
+        buttonSubtitleLabel.textColor = color
+    }
+    
     // MARK: Setup Method
     
     private func setupStyle(imageSystemName: String, title: String, subtitle: String?) {

@@ -35,7 +35,8 @@ final class RetrospectListView: BaseView {
     private let calendarButton: RetrospectCountButton = {
         let button = RetrospectCountButton(
             imageSystemName: Texts.calendarButtonImageName,
-            title: Texts.calendarButtonTitle
+            title: Texts.calendarButtonTitle,
+            subtitle: ""
         )
         return button
     }()
@@ -43,9 +44,10 @@ final class RetrospectListView: BaseView {
     private let totalCountView: RetrospectCountButton = {
         let button = RetrospectCountButton(
             imageSystemName: Texts.totalCountButtonImageName,
-            title: Texts.totalCountButtonTitle
+            title: Texts.totalCountButtonTitle,
+            subtitle: ""
         )
-        button.setImageColor(.lightGray)
+        button.setImageColor(.systemGray4)
         return button
     }()
     
@@ -57,6 +59,7 @@ final class RetrospectListView: BaseView {
         super.setupStyles()
         
         backgroundColor = .backgroundMain
+        totalCountView.setSubtitleLabelColor(.systemGray4)
     }
     
     override func setupSubviews() {
