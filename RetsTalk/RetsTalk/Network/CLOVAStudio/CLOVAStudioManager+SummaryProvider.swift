@@ -39,7 +39,7 @@ extension CLOVAStudioManager: SummaryProvider {
             var messageContents = chat.map({ $0.content })
             messageContents.removeLast()
             let messageContentsString = messageContents.joined(separator: "\n")
-            messageParameters.append(MessageDTO(role: "assistant", content: messageContentsString))
+            messageParameters.append(MessageDTO(role: "user", content: messageContentsString))
             messages = messageParameters
         }
     }
