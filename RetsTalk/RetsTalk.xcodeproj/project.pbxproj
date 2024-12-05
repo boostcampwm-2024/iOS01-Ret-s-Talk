@@ -51,7 +51,9 @@
 				Chat/Model/RetrospectChatManageable.swift,
 				Chat/Model/RetrospectChatManager.swift,
 				Chat/Model/RetrospectChatManagerListener.swift,
+				Persistent/CloudKitManageable.swift,
 				Persistent/EntityRepresentable.swift,
+				Persistent/Implementation/CloudKitManager.swift,
 				Persistent/Implementation/CoreDataManager.swift,
 				Persistent/Implementation/PersistFetchRequest.swift,
 				Persistent/Persistable.swift,
@@ -94,6 +96,7 @@
 				Network/NetworkError.swift,
 				Network/NetworkRequestable.swift,
 				Network/URLRequestComposable.swift,
+				Persistent/CloudKitManageable.swift,
 				Persistent/EntityRepresentable.swift,
 				Persistent/PersistFetchRequestable.swift,
 				Retrospect/Model/Retrospect.swift,
@@ -105,7 +108,9 @@
 		D5EEA6022CEC32BE00090456 /* Exceptions for "RetsTalk" folder in "PersistTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Persistent/CloudKitManageable.swift,
 				Persistent/EntityRepresentable.swift,
+				Persistent/Implementation/CloudKitManager.swift,
 				Persistent/Implementation/CoreDataManager.swift,
 				Persistent/Implementation/PersistFetchRequest.swift,
 				Persistent/Implementation/UserDefaultsManager.swift,
