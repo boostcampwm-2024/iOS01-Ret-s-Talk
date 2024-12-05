@@ -9,6 +9,7 @@ import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+    var isFirstlLaunch: Bool = false
 
     func scene(
         _ scene: UIScene,
@@ -16,27 +17,31 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         options connectionOptions: UIScene.ConnectionOptions
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-
+        
         let userDefaultsManager = UserDefaultsManager()
         let userSettingManager = UserSettingManager(userDataStorage: userDefaultsManager)
-        let userData = userSettingManager.userData
-        let userID = UUID(uuidString: userData.userID) ?? UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1))
-        let isiCloudSynced = userData.isCloudSyncOn
+    
+        let (userID, isFirstLaunch) = userSettingManager.initialize()
+        
         let coreDataManager = CoreDataManager(
             inMemory: false,
-            isiCloudSynced: isiCloudSynced,
+            isiCloudSynced: userSettingManager.userData.isCloudSyncOn,
             name: Constants.Texts.coreDataContainerName
         ) { _ in }
+        
         let retrospectAssistantProvider = CLOVAStudioManager(urlSession: .shared)
+        
         let retrospectManager = RetrospectManager(
-            userID: userID,
+            userID: userID ?? Constants.defaultUUID,
             retrospectStorage: coreDataManager,
             retrospectAssistantProvider: retrospectAssistantProvider
         )
+        
         let navigationController = BaseNavigationController(
             rootView: RetrospectListViewController(
                 retrospectManager: retrospectManager,
-                userDefaultsManager: userDefaultsManager
+                userDefaultsManager: userDefaultsManager,
+                isFirstLaunch: isFirstLaunch
             )
         )
         window = UIWindow(windowScene: windowScene)

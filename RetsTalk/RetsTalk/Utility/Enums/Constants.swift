@@ -5,6 +5,8 @@
 //  Created by HanSeung on 11/21/24.
 //
 
+import Foundation
+
 enum Constants {
     enum Texts {
         static let coreDataContainerName = "RetsTalk"
@@ -16,4 +18,6 @@ enum Constants {
     static let dateFormat = "M월 d일 EEEE"
     static let dateFormatRecent = "오늘 a h:mm"
     static let dateFormatYesterday = "어제"
+    
+    static let defaultUUID = UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1))
 }

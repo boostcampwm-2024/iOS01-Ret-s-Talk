@@ -100,7 +100,7 @@ enum UserSettingViewTexts {
 
 private enum Texts {
     static let needNotificationPermissonTitle = "알림 권한 요청"
-    static let needNotificationPermissonMessage = "알림 권한이 꺼져있습니다. \r\n 알림 권한을 허용해주세요."
-    static let checkICloudStateTitle = "애플 계정 확인"
-    static let checkICloudStateMessage = "아이클라우드 상태를 확인해주세요."
+    static let needNotificationPermissonMessage = "알림 권한이 비활성화되어 있습니다.\n알림 권한을 허용해주세요."
+    static let checkICloudStateTitle = "iCloud 상태 확인 필요"
+    static let checkICloudStateMessage = "iCloud 설정을 확인해 주세요."
 }

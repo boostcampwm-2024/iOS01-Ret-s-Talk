@@ -361,11 +361,11 @@ extension RetrospectChatViewController: AlertPresentable {
         var message: String {
             switch self {
             case let .error(error as LocalizedError):
-                error.failureReason ?? "설명할 수 없는 문제가 발생했습니다."
+                error.failureReason ?? "알 수 없는 오류가 발생했습니다."
             case let .error(error):
                 error.localizedDescription
             case .finish:
-                "종료된 회고는 더이상 작성할 수 없습니다.\n정말 종료하시겠습니까?"
+                "종료된 회고는 더 이상 작성할 수 없습니다.\n정말 종료하시겠습니까?"
             }
         }
     }

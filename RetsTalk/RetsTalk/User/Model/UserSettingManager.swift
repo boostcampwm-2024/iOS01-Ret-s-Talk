@@ -38,16 +38,17 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
     
     // MARK: UserSettingManageable conformance
     
-    func initialize() -> UUID? {
+    func initialize() -> (userID: UUID?, isFirstLaunch: Bool) {
         do {
             let request = PersistFetchRequest<UserData>(fetchLimit: 1)
             let fetchedData = try userDataStorage.fetch(by: request)
-            guard let storedUserData = fetchedData.first else { return initializeUserData() }
+            guard let storedUserData = fetchedData.first
+            else { return (initializeUserData(), true) }
 
             userData = storedUserData
-            return UUID(uuidString: userData.userID)
+            return (UUID(uuidString: userData.userID), false)
         } catch {
-            return nil
+            return (nil, true)
         }
     }
     
@@ -109,29 +110,19 @@ final class UserSettingManager: UserSettingManageable, ObservableObject {
         }
     }
 
-    private func initializeUserData() -> UUID {
+    private func initializeUserData() -> UUID? {
         let newUserID = UUID()
         let newNickname = randomNickname()
         let newUserData = UserData(dictionary: ["userID": newUserID.uuidString, "nickname": newNickname])
-        Task {
+
+        do {
             let addedData = try userDataStorage.add(contentsOf: [newUserData])
-            guard let addedData = addedData.first else { return }
+            guard let addedData = addedData.first else { return nil }
             
-            await MainActor.run {
-                userData = addedData
-            }
-        }
-        return newUserID
-    }
-    
-    private func initiateUserData() {
-        Task {
-            let addedData = try userDataStorage.add(contentsOf: [UserData(dictionary: [:])])
-            guard let addedData = addedData.first else { return }
-            
-            await MainActor.run {
-                userData = addedData
-            }
+            userData = addedData
+            return UUID(uuidString: addedData.userID)
+        } catch {
+            return nil
         }
     }
     

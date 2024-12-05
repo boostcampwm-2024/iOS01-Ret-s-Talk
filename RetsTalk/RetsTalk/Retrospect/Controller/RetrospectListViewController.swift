@@ -26,6 +26,8 @@ final class RetrospectListViewController: BaseViewController {
     private var isRetrospectFetching: Bool
     private var isRetrospectAppendable: Bool
     
+    private let isFirstLaunch: Bool
+    
     // MARK: UI Components
     
     private let retrospectListView: RetrospectListView
@@ -34,7 +36,8 @@ final class RetrospectListViewController: BaseViewController {
     
     init(
         retrospectManager: RetrospectManageable,
-        userDefaultsManager: Persistable
+        userDefaultsManager: Persistable,
+        isFirstLaunch: Bool
     ) {
         self.retrospectManager = retrospectManager
         self.userDefaultsManager = userDefaultsManager
@@ -44,6 +47,7 @@ final class RetrospectListViewController: BaseViewController {
         retrospectsSubject = CurrentValueSubject(SortedRetrospects())
         errorSubject = PassthroughSubject()
         
+        self.isFirstLaunch = isFirstLaunch
         isRetrospectFetching = false
         isRetrospectAppendable = false
         
@@ -65,6 +69,7 @@ final class RetrospectListViewController: BaseViewController {
         
         addCreateButtondidTapAction()
         fetchInitialRetrospect()
+        onBoarding()
     }
     
     // MARK: RetsTalk lifecycle method
@@ -108,6 +113,15 @@ final class RetrospectListViewController: BaseViewController {
         subscribeToErrorPublisher()
         subscribeToError()
         subscribeToDebounce()
+    }
+    
+    // MARK: OnBoarding handling
+    
+    private func onBoarding() {
+        if isFirstLaunch {
+            let onboarding = UIHostingController(rootView: OnBoardingView())
+            present(onboarding, animated: true)
+        }
     }
     
     // MARK: Regarding iCloud
@@ -239,21 +253,31 @@ final class RetrospectListViewController: BaseViewController {
     
     private func addCreateButtondidTapAction() {
         retrospectListView.addCreateButtonAction(
-            UIAction(
-                handler: { [weak self] _ in
-                    guard let self = self else { return }
+            UIAction { [weak self] _ in
+                guard let self = self else { return }
+                
+                Task {
+                    guard let retrospectChatManager = await retrospectManager.createRetrospect() else { return }
                     
-                    Task {
-                        guard let retrospectChatManager = await retrospectManager.createRetrospect() else { return }
-                        
-                        let retrospectChatViewController = await RetrospectChatViewController(
-                            retrospect: retrospectChatManager.retrospect,
-                            retrospectChatManager: retrospectChatManager
-                        )
-                        navigationController?.pushViewController(retrospectChatViewController, animated: true)
-                    }
-                })
+                    let retrospectChatViewController = await RetrospectChatViewController(
+                        retrospect: retrospectChatManager.retrospect,
+                        retrospectChatManager: retrospectChatManager
+                    )
+                    navigationController?.pushViewController(retrospectChatViewController, animated: true)
+                }
+            }
         )
+    }
+    
+    private func addCalendarButtonDidTapAction() {
+        retrospectListView.addCalendarButtonAction(
+            UIAction { [weak self] _ in
+                guard let self else { return }
+                
+                
+            }
+        )
+        
     }
 }
 

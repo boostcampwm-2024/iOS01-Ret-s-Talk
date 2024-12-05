@@ -114,8 +114,8 @@ private extension OnBoardingView {
         static let pinItemContent = "중요한 회고를 상단에 고정하세요. 인상깊은 회고를 언제든지 돌아볼 수 있습니다."
         
         static let iCloucIconName = "person.icloud.fill"
-        static let iCloucItemTitle = "회고 공유하기"
-        static let iCloucItemContent = "iCloud를 통해 내 기기간 데이터를 동기화하고, 친구와 가족에게 회고를 공유하세요."
+        static let iCloucItemTitle = "iCloud 동기화"
+        static let iCloucItemContent = "iCloud를 통해 내 기기간 데이터를 동기화하고 다른 기기에서도 사용할 수 있습니다."
         
         static let continueButtonTitle = "계속하기"
     }

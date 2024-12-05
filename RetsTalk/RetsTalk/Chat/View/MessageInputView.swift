@@ -239,6 +239,6 @@ private extension MessageInputView {
 
     enum Texts {
         static let sendButtonIconName = "arrow.up.circle"
-        static let textInputPlaceholder = "메시지 입력 최대 100자"
+        static let textInputPlaceholder = "메시지를 입력하세요 (최대 100자)"
     }
 }
