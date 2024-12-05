@@ -47,23 +47,21 @@ extension UserSettingViewController: UserSettingManageableAlertable {
     typealias Situation = UserSettingViewSituation
 
     func needNotificationPermission(_ userSettingManageable: any UserSettingManageable) {
-        let acceptAction = UIAlertAction(title: Texts.accept, style: .default) { _ in
+        let confirmAction = UIAlertAction.confirm { _ in
             if let url = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(url)
             }
         }
-        let cancelAction = UIAlertAction(title: Texts.cancel, style: .cancel)
-        presentAlert(for: .needNotifactionPermission, actions: [acceptAction, cancelAction])
+        presentAlert(for: .needNotifactionPermission, actions: [confirmAction, .close()])
     }
 
     func checkICloudState(_ userSettingManageable: any UserSettingManageable) {
-        let acceptAction = UIAlertAction(title: Texts.accept, style: .default) { _ in
+        let confirmAction = UIAlertAction.confirm { _ in
             if let url = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(url)
             }
         }
-        let cancelAction = UIAlertAction(title: Texts.cancel, style: .cancel)
-        presentAlert(for: .checkICloudState, actions: [acceptAction, cancelAction])
+        presentAlert(for: .checkICloudState, actions: [confirmAction, .close()])
     }
 
     enum UserSettingViewSituation: AlertSituation {
@@ -101,8 +99,6 @@ enum UserSettingViewTexts {
 }
 
 private enum Texts {
-    static let accept = "확인"
-    static let cancel = "취소"
     static let needNotificationPermissonTitle = "알림 권한 요청"
     static let needNotificationPermissonMessage = "알림 권한이 꺼져있습니다. \r\n 알림 권한을 허용해주세요."
     static let checkICloudStateTitle = "애플 계정 확인"
