@@ -13,18 +13,19 @@ final class RetrospectCalendarManager: RetrospectCalendarManageable {
     private var retrospectStorage: Persistable
     private let retrospectAssistantProvider: RetrospectAssistantProvidable
     
-    private var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
-    private(set) var errorSubject: PassthroughSubject<Swift.Error, Never>
+    private var retrospectsSubject: CurrentValueSubject<[Retrospect], Never> = .init([])
+    private(set) var errorSubject: PassthroughSubject<Swift.Error, Never> = .init()
     
     private(set) var retrospects: [Retrospect] {
         didSet {
+            print(retrospects)
             retrospectsSubject.send(retrospects)
         }
     }
     
     // MARK: Initialization
     
-    init(
+    nonisolated init(
         userID: UUID,
         retrospectStorage: Persistable,
         retrospectAssistantProvider: RetrospectAssistantProvidable
@@ -33,8 +34,6 @@ final class RetrospectCalendarManager: RetrospectCalendarManageable {
         self.retrospectStorage = retrospectStorage
         self.retrospectAssistantProvider = retrospectAssistantProvider
         
-        retrospectsSubject = CurrentValueSubject([])
-        errorSubject = PassthroughSubject()
         retrospects = []
     }
     
