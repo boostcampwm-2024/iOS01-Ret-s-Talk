@@ -20,7 +20,7 @@ final class RetrospectCalendarTableViewController: BaseViewController {
     
     private var retrospectsSubject: CurrentValueSubject<[Retrospect], Never>
     private let errorSubject: PassthroughSubject<Error, Never>
-    private var currentDateComponents: DateComponents 
+    private var currentDateComponents: DateComponents
     
     // MARK: View
     
@@ -160,7 +160,9 @@ private extension RetrospectCalendarTableViewController {
     private func updateTableView() {
         var snapshot = Snapshot()
         snapshot.appendSections([.retrospect])
-        let retrospectData = retrospectsSubject.value.filter { $0.createdAt.toDateComponents == self.currentDateComponents }
+        let retrospectData = retrospectsSubject.value.filter {
+            $0.createdAt.toDateComponents == self.currentDateComponents
+        }
         snapshot.appendItems(retrospectData, toSection: .retrospect)
         dataSource?.apply(snapshot, animatingDifferences: true)
     }
